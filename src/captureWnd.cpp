@@ -345,7 +345,8 @@ void CaptureWnd::OnPaint()
 		double r1=(double)rgn1.Width()/rgn2.Width(), r2=(double)rgn1.Height()/rgn2.Height(), r;
 		r=(r1>r2 ? r1:r2);
 		if(r>1) rgn1=CRect(0,0,(int)(rgn1.Width()/r),(int)(rgn1.Height()/r));
-		else rgn1.OffsetRect(rgn2.CenterPoint()-rgn1.CenterPoint());
+		//else rgn1.OffsetRect(rgn2.CenterPoint()-rgn1.CenterPoint());
+		rgn1.OffsetRect(rgn2.CenterPoint()-rgn1.CenterPoint());
 
 		tbuf=&truecolorBuf;
 		if(r>1) { SetStretchBltMode(tbuf->GetDC(),COLORONCOLOR); buf.StretchTo(tbuf,rgn1,buf.Rgn,SRCCOPY); }

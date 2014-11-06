@@ -137,11 +137,11 @@ protected:
 	BMPanvas grayscaleBuf, truecolorBuf;
 	RGBQUAD pal[256], palLevelsScan[256];
 	CaptureRequestStack Stack;
-	CRect CameraOutWnd, LevelsScanWnd;
 public:
 	CtrlsTab Ctrls;
 	CFont font1;
 	int cntr;
+	CRect CameraOutWnd, LevelsScanWnd;
 
 	CaptureWnd();
 	virtual ~CaptureWnd();
