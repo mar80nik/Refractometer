@@ -56,7 +56,7 @@ public:
 	public:
 		enum { IDD = IDD_DIALOGBARTAB1 };
 
-		int stroka, Xmin, Xmax;
+		int stroka, Xmin, Xmax, AvrRange;
 		CEditInterceptor XminCtrl, XmaxCtrl, strokaCtrl, AvrRangeCtrl;
 		CComboBox NofScans;
 

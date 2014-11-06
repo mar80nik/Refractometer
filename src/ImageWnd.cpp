@@ -158,7 +158,7 @@ BOOL ImageWnd::CtrlsTab::OnInitDialog()
 
 ImageWnd::CtrlsTab::CtrlsTab( CWnd* pParent /*= NULL*/ ): BarTemplate(pParent),
 #if defined DEBUG
-	stroka(220), Xmin(100), Xmax(6000)
+	stroka(220), AvrRange(10), Xmin(100), Xmax(6000)
 #else
 	stroka(1224), Xmin(2), Xmax(3263)
 #endif
@@ -171,12 +171,15 @@ void ImageWnd::CtrlsTab::DoDataExchange(CDataExchange* pDX)
 	BarTemplate::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(DialogBarTab1)
 	DDX_Text(pDX, IDC_EDIT1, stroka);
+	DDX_Text(pDX, IDC_EDIT2, AvrRange);
 	DDX_Text(pDX, IDC_EDIT3, Xmin);
 	DDX_Text(pDX, IDC_EDIT4, Xmax);
+	DDV_MinMaxInt(pDX, AvrRange, 0, 127);
 	DDX_Control(pDX, IDC_EDIT3, XminCtrl);
 	DDX_Control(pDX, IDC_EDIT4, XmaxCtrl);
 	DDX_Control(pDX, IDC_EDIT1, strokaCtrl);
 	DDX_Control(pDX, IDC_COMBO1, NofScans);
+	DDX_Control(pDX, IDC_EDIT2, AvrRangeCtrl);
 	//}}AFX_DATA_MAP
 
 }
@@ -406,7 +409,11 @@ void ImageWnd::PicWnd::c_ScanRgn::Draw( BMPanvas* canvas, const AvaPicRgn& rgn, 
 		break;
 	}	
 	lastMode = canvas->SetROP2(R2_NOT);
-	canvas->MoveTo(rgn.left, rgn.bottom); canvas->LineTo(rgn.right, rgn.top); 
+	canvas->MoveTo(rgn.left, rgn.top); canvas->LineTo(rgn.right, rgn.top); 
+	if (rgn.bottom != rgn.top)
+	{
+		canvas->MoveTo(rgn.left, rgn.bottom); canvas->LineTo(rgn.right, rgn.bottom); 	
+	}	
 	canvas->SetROP2(lastMode);
 }
 
@@ -629,9 +636,9 @@ ImageWnd::OrgPicRgn ImageWnd::PicWnd::Convert( const AvaPicRgn& rgn )
 		BMPanvas &org = *accum.bmp;
 		if ( ava.HasImage() )
 		{
-			struct {double cx, cy;} scale = {(double)org.Rgn.Width() / ava.Rgn.Width(), (double)org.Rgn.Height() / ava.Rgn.Height()}; 
-			ret.left = (LONG)(rgn.left * scale.cx); ret.right = (LONG)(rgn.right * scale.cx); 
-			ret.top = (LONG)(rgn.top * scale.cy); ret.bottom = (LONG)(rgn.bottom * scale.cy);
+			CSize s2 = org.Rgn.Size(), s1 = ava.Rgn.Size();
+			ret.left = rgn.left*s2.cx/s1.cx; ret.right = rgn.right*s2.cx/s1.cx; 
+			ret.top = rgn.top*s2.cy/s1.cy; ret.bottom = rgn.bottom*s2.cy/s1.cy;
 		}
 	}	
 	return ret;
@@ -645,9 +652,9 @@ ImageWnd::AvaPicRgn ImageWnd::PicWnd::Convert( const OrgPicRgn& rgn )
 		BMPanvas &org = *accum.bmp;
 		if ( org.HasImage() )
 		{
-			struct {double cx, cy;} scale = {(double)ava.Rgn.Width() / org.Rgn.Width(), (double)ava.Rgn.Height() / org.Rgn.Height()}; 
-			ret.left = (LONG)(rgn.left * scale.cx); ret.right = (LONG)(rgn.right * scale.cx); 
-			ret.top = (LONG)(rgn.top * scale.cy); ret.bottom = (LONG)(rgn.bottom * scale.cy);
+			CSize s2 = ava.Rgn.Size(), s1 = org.Rgn.Size();
+			ret.left = rgn.left*s2.cx/s1.cx; ret.right = rgn.right*s2.cx/s1.cx; 
+			ret.top = rgn.top*s2.cy/s1.cy; ret.bottom = rgn.bottom*s2.cy/s1.cy;
 		}
 	}
 	return ret;
@@ -807,13 +814,13 @@ void ImageWnd::CtrlsTab::OnEnKillfocusEdit1() {}
 ImageWnd::OrgPicRgn ImageWnd::CtrlsTab::GetScanRgnFromCtrls()
 {
 	UpdateData();
-	OrgPicRgn ret; *((CRect*)&ret) = CRect( Xmin, stroka, Xmax, stroka); 
+	OrgPicRgn ret; *((CRect*)&ret) = CRect( Xmin, stroka - AvrRange, Xmax, stroka + AvrRange ); 
 	return ret;
 }
 
 void ImageWnd::CtrlsTab::InitScanRgnCtrlsFields( const OrgPicRgn& rgn)
 {
-	Xmin = rgn.left; Xmax = rgn.right; stroka = rgn.CenterPoint().y;
+	Xmin = rgn.left; Xmax = rgn.right; AvrRange = rgn.Height()/2; stroka = rgn.CenterPoint().y;	
 	UpdateData(FALSE);
 }
 
