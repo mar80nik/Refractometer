@@ -551,15 +551,19 @@ HRESULT ImagesAccumulator::SaveTo( const CString &file )
 
 	if (sums != NULL)
 	{
-		Compressor cmpr(Compressor::ZIP, 9);
-		CFile dst0(file, CFile::modeCreate | CFile::modeWrite| CFile::typeBinary);
+		Compressor cmpr(Compressor::ZIP, 9); CFile dst0;
 		TRY
 		{
+			CFileException Ex;
+			if (dst0.Open(file, CFile::modeCreate | CFile::modeWrite| CFile::typeBinary) == FALSE)
+			{
+				Ex.ReportError(); ret = E_FAIL; return ret;
+			}			
 			CArchive ar(&dst0, CArchive::store); Serialize(ar); ar.Close();
 		}
 		AND_CATCH(CArchiveException, pEx)
 		{
-			pEx->ReportError(); return E_FAIL;
+			pEx->ReportError(); ret = E_FAIL; return ret;
 		}
 		END_CATCH
 
@@ -593,16 +597,24 @@ HRESULT ImagesAccumulator::LoadFrom( const CString &file )
 	bmp->Destroy();
 	
 	ResetSums();
-	ULONGLONG buf_size = 0; 
-	Compressor cmpr(Compressor::UNZIP);		
-	CFile src0(file, CFile::modeRead| CFile::typeBinary); 
+	ULONGLONG buf_size = 0; CFile src0;
+	Compressor cmpr(Compressor::UNZIP);			
 	TRY
 	{
-		CArchive ar(&src0, CArchive::load); Serialize(ar); ar.Close();
+		CFileException Ex;
+		if (src0.Open(file, CFile::modeRead| CFile::typeBinary, &Ex) == FALSE)
+		{
+			Ex.ReportError(); 
+			ret = E_FAIL; return ret;
+		}			
+		CArchive ar(&src0, CArchive::load); 
+		Serialize(ar); 
+		ar.Close();
 	}
 	AND_CATCH(CArchiveException, pEx)
 	{
-		pEx->ReportError(); return E_FAIL;
+		pEx->ReportError(); 
+		ret = E_FAIL; return ret;
 	}
 	END_CATCH
 	CMemFile dst0(GetCompressorBufferSize());	
@@ -614,6 +626,11 @@ HRESULT ImagesAccumulator::LoadFrom( const CString &file )
 			file, ConvTimeToStr(cmpr.LastSession.dt), cmpr.LastSession.ratio); 			
 		log << log.T;
 	}	
+	else
+	{
+		log.T.Format("Failed to UNZIP %s", file); 
+		log << log.T; log.SetPriority(lmprHIGH);	
+	}
 	log.Dispatch();		
 	return ret;
 }
