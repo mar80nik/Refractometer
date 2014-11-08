@@ -419,7 +419,7 @@ void ImageWnd::PicWnd::c_ScanRgn::Draw( BMPanvas* canvas, const AvaPicRgn& rgn, 
 
 void ImageWnd::PicWnd::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	BOOL update = FALSE; AvaPicRgn tmpRgn = ScanRgn; CPoint tmpRgnCntr = tmpRgn.CenterPoint();
+	BOOL update = FALSE; AvaPicRgn tmpRgn((CRect)ScanRgn); CPoint tmpRgnCntr = tmpRgn.CenterPoint();
 	if (accum.bmp == NULL) return;
 	if (accum.bmp->HasImage() == FALSE ) return;
 	switch( nFlags )
@@ -450,7 +450,10 @@ void ImageWnd::PicWnd::OnRButtonUp(UINT nFlags, CPoint point)
 	}
 	if (update)
 	{
-		Parent->SetScanRgn( Convert(tmpRgn) );	
+		if (ValidateAvaPicRgn(tmpRgn) == RSLT_OK)
+		{
+			Parent->SetScanRgn( Convert(tmpRgn) );
+		}	
 	}
 	else
 	{
@@ -576,14 +579,26 @@ void ImageWnd::PicWnd::ConvertOrgToGrayscale()
 
 HRESULT ImageWnd::PicWnd::ValidateOrgPicRgn( OrgPicRgn& rgn )
 {
-	CRect ret;
+	HRESULT ret;
 	if (accum.bmp == NULL) return RSLT_BMP_ERR;
-	return ValidatePicRgn(rgn, *accum.bmp);	
+	ret = ValidatePicRgn(rgn, *accum.bmp);	
+	if (ret == RSLT_OK_RGN_MODIFIED)
+	{
+		ret = RSLT_OK; rgn.ava = rgn.org = CSize();
+	}
+	return ret;	
 }
 
 HRESULT ImageWnd::PicWnd::ValidateAvaPicRgn( AvaPicRgn& rgn )
 {
-	return ValidatePicRgn(rgn, ava);
+	HRESULT ret;
+	if (ava.HasImage() == FALSE) return RSLT_BMP_ERR;
+	ret = ValidatePicRgn(rgn, ava);
+	if (ret == RSLT_OK_RGN_MODIFIED)
+	{
+		ret = RSLT_OK; rgn.ava = rgn.org = CSize();
+	}
+	return ret;	
 }
 
 HRESULT ImageWnd::PicWnd::ValidatePicRgn( CRect& rgn, BMPanvas& ref )
@@ -617,18 +632,18 @@ HRESULT ImageWnd::PicWnd::ValidatePicRgn( CRect& rgn, BMPanvas& ref )
 	if (update)
 	{
 		ret.OffsetRect(offset);
-		rgn = ret;
+		rgn = ret; return RSLT_OK_RGN_MODIFIED;
 	}
 	return RSLT_OK;	
 }
 
-void ImageWnd::PicWnd::SetScanRgn( const OrgPicRgn& rgn )
+void ImageWnd::PicWnd::SetScanRgn( OrgPicRgn& rgn )
 {
 	ScanRgn = Convert(rgn);
 	UpdateNow(); 
 }
 
-ImageWnd::OrgPicRgn ImageWnd::PicWnd::Convert( const AvaPicRgn& rgn )
+ImageWnd::OrgPicRgn ImageWnd::PicWnd::Convert( AvaPicRgn& rgn )
 {
 	OrgPicRgn ret; 
 	if (accum.bmp != NULL)
@@ -637,14 +652,23 @@ ImageWnd::OrgPicRgn ImageWnd::PicWnd::Convert( const AvaPicRgn& rgn )
 		if ( ava.HasImage() )
 		{
 			CSize s2 = org.Rgn.Size(), s1 = ava.Rgn.Size();
-			ret.left = rgn.left*s2.cx/s1.cx; ret.right = rgn.right*s2.cx/s1.cx; 
-			ret.top = rgn.top*s2.cy/s1.cy; ret.bottom = rgn.bottom*s2.cy/s1.cy;
+			if (rgn.Check(s2, s1) == TRUE)
+			{
+				ret = rgn.storedOrgRslt;
+			}
+			else
+			{				
+				ret.left = rgn.left*s2.cx/s1.cx; ret.right = rgn.right*s2.cx/s1.cx; 
+				ret.top = rgn.top*s2.cy/s1.cy; ret.bottom = rgn.bottom*s2.cy/s1.cy;
+				rgn.org = s2; rgn.ava = s1; rgn.storedOrgRslt = ret;				
+			}
+			ret.org = s2; ret.ava = s1; ret.storedAvaRslt = rgn;
 		}
 	}	
 	return ret;
 }
 
-ImageWnd::AvaPicRgn ImageWnd::PicWnd::Convert( const OrgPicRgn& rgn )
+ImageWnd::AvaPicRgn ImageWnd::PicWnd::Convert(  OrgPicRgn& rgn )
 {
 	AvaPicRgn ret; 
 	if (accum.bmp != NULL)
@@ -653,8 +677,17 @@ ImageWnd::AvaPicRgn ImageWnd::PicWnd::Convert( const OrgPicRgn& rgn )
 		if ( org.HasImage() )
 		{
 			CSize s2 = ava.Rgn.Size(), s1 = org.Rgn.Size();
-			ret.left = rgn.left*s2.cx/s1.cx; ret.right = rgn.right*s2.cx/s1.cx; 
-			ret.top = rgn.top*s2.cy/s1.cy; ret.bottom = rgn.bottom*s2.cy/s1.cy;
+			if (rgn.Check(s1, s2) == TRUE)
+			{
+				ret = rgn.storedAvaRslt;				
+			}
+			else
+			{
+				ret.left = rgn.left*s2.cx/s1.cx; ret.right = rgn.right*s2.cx/s1.cx; 
+				ret.top = rgn.top*s2.cy/s1.cy; ret.bottom = rgn.bottom*s2.cy/s1.cy;
+				rgn.org = s1; rgn.ava = s2; rgn.storedAvaRslt = ret;				
+			}
+			ret.org = s1; ret.ava = s2; ret.storedOrgRslt = rgn;
 		}
 	}
 	return ret;

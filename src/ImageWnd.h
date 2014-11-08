@@ -11,7 +11,7 @@ enum CEditInterceptorMessages {UM_BUTTON_ITERCEPTED = 3000};
 
 enum HelperEvent {
 	EvntOnCaptureButton, EvntOnCaptureReady,
-	RSLT_HELPER_COMPLETE, RSLT_OK, RSLT_BMP_ERR, RSLT_ERR
+	RSLT_HELPER_COMPLETE, RSLT_OK, RSLT_OK_RGN_MODIFIED, RSLT_BMP_ERR, RSLT_ERR
 };
 //================================================
 struct BaseForHelper
@@ -38,15 +38,59 @@ public:
 class ImageWnd : public CWnd
 {
 public:
+	struct PicRgn: protected CRect
+	{
+		PicRgn() {}
+		PicRgn(const CRect &rgn): CRect(rgn) {}
+		CRect Get() const
+		{
+			return *this;
+		}
+		void Set(const CRect &r)
+		{
+			*this = r;
+		}
+
+	};
 	struct AvaPicRgn: public CRect 
 	{ 
+		CSize org, ava;
+		CRect storedOrgRslt;
+
 		AvaPicRgn(): CRect() {}
 		AvaPicRgn(const CRect& rgn): CRect(rgn) {}
+		BOOL Check(const CSize _org, const CSize _ava) const
+		{
+			BOOL ret = FALSE;
+			if (org == _org && ava == _ava)
+			{
+				ret = TRUE;
+			}
+			return ret;
+		}
 	};
 	struct OrgPicRgn: public CRect 
 	{
+		CSize org, ava;
+		CRect storedAvaRslt;
+
 		OrgPicRgn(): CRect() {}
 		OrgPicRgn(const CRect& rgn): CRect(rgn) {}	
+		BOOL Check(const CSize _org, const CSize _ava) const
+		{
+			BOOL ret = FALSE;
+			if (org == _org && ava == _ava)
+			{
+				ret = TRUE;
+			}
+			return ret;
+		}
+		//OrgPicRgn& operator=(const OrgPicRgn& r)
+		//{
+		//	*(CRect*)this = r;
+		//	org = r.org; ava = r.ava; storedAvaRslt = r.storedAvaRslt;
+		//	return *this;
+		//}
 	};
 	
 	class CtrlsTab : public BarTemplate
@@ -105,8 +149,8 @@ public:
 		CMenu menu1; c_ScanRgn ScanRgn;		
 		CList<BaseForHelper*> helpers; 
 
-		AvaPicRgn Convert(const OrgPicRgn&);
-		OrgPicRgn Convert(const AvaPicRgn&);
+		AvaPicRgn Convert( OrgPicRgn&);
+		OrgPicRgn Convert( AvaPicRgn&);
 		BOOL IsRgnInAva( const AvaPicRgn& );	
 		HRESULT ValidatePicRgn( CRect& rgn, BMPanvas& ref );
 		void UpdateHelpers(const HelperEvent &event);
@@ -127,7 +171,7 @@ public:
 		void OnPicWndScanLine();
 		void EraseAva();
 		HRESULT MakeAva();
-		void SetScanRgn(const OrgPicRgn& rgn);
+		void SetScanRgn( OrgPicRgn& rgn);
 		HRESULT ValidateOrgPicRgn(OrgPicRgn&);
 		HRESULT ValidateAvaPicRgn(AvaPicRgn&);		
 
@@ -149,7 +193,7 @@ public:
 	public:
 		c_ScanRgn() {}
 		void Draw();
-		c_ScanRgn& operator= (const OrgPicRgn& rgn) { *((CRect*)this) = rgn; return *this;}
+		c_ScanRgn& operator= (const OrgPicRgn& rgn) { *((OrgPicRgn*)this) = rgn; return *this;}
 	};
 	
 	DECLARE_DYNAMIC(ImageWnd)
