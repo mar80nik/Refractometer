@@ -331,36 +331,71 @@ void ImageWnd::PicWnd::UpdateNow(void)
 	RedrawWindow(0,0,RDW_INVALIDATE | RDW_FRAME | RDW_NOERASE | RDW_ALLCHILDREN);					
 }
 
+HRESULT ImageWnd::PicWnd::TryLoadBitmap(CString T, BMPanvas &bmp)
+{
+	HRESULT ret;
+	if (SUCCEEDED(ret = bmp.LoadImage(T)))
+	{
+		Parent->CameraWnd.Ctrls.UpdateData();	
+		CaptureWnd::CtrlsTab::ColorTransformModes ColorTransformModes = 
+														Parent->CameraWnd.Ctrls.ColorTransformSelector;
+		if (bmp.ColorType != BMPanvas::GRAY_PAL)
+		{
+			if (ColorTransformModes == CaptureWnd::CtrlsTab::ColorTransformModes::TrueColor)
+			{
+				ConrtoledLogMessage log(lmprHIGH);
+				log.T.Format("Error: Image you are trying to load which is no GRAYSCALE."); log << log.T;
+				log.T.Format("*****: In order to use bult-in convertor please select"); log << log.T;
+				log.T.Format("*****: convert method: NativeGDI, HSL or HSV."); log << log.T;
+				log.Dispatch(); 
+				return E_FAIL;
+			}
+			BMPanvas temp_replica; 
+			temp_replica.Create(&bmp, bmp.Rgn); bmp.CopyTo(&temp_replica, TOP_LEFT);
+			bmp.Destroy(); bmp.Create(this,temp_replica.w,temp_replica.h,8);
+			bmp.CreateGrayPallete(); 
+			ColorTransform(&temp_replica, &bmp, ColorTransformModes);
+		}
+	}
+	return ret;
+}
+
 HRESULT ImageWnd::PicWnd::LoadPic(CString T)
 {	
-	HRESULT ret;
-	if(SUCCEEDED(ret = accum.LoadFrom(T)))
+	HRESULT ret; ConrtoledLogMessage log;
+	if(FAILED(ret = accum.LoadFrom(T)))
 	{
-		accum.ConvertToBitmap(this); BMPanvas &org = *(accum.bmp);
-
-		//Parent->CameraWnd.Ctrls.UpdateData(); 
-		//if (Parent->CameraWnd.Ctrls.ColorTransformSelector == CaptureWnd::CtrlsTab::TrueColor)
-		//{
-		//	ConrtoledLogMessage log(MessagePriorities::lmprHIGH); 
-		//	log << _T("ERR: Image you are trying to load is no GRAYSCALE.");
-		//	log << _T("ERR: In order to use bult-in convertor please select");			
-		//	log << _T("ERR: convert method: NativeGDI, HSL or HSV.");			
-		//	log.Dispatch();
-		//	return E_FAIL;
-		//}
-
-		//if (accum.bmp->ColorType != BMPanvas::GRAY_PAL) ConvertOrgToGrayscale();
-		FileName=T;
-		EraseAva(); MakeAva();
-        HGDIOBJ tfont=ava.SelectObject(font1); ava.SetBkMode(TRANSPARENT); ava.SetTextColor(clRED);
-		ava.TextOut(0,0,T);
-		T.Format("%dx%d", org.w, org.h); ava.TextOut(0,10,T);
-		ava.SelectObject(tfont); 
-		CaptureButton.ShowWindow(SW_HIDE); DragAcceptFiles(FALSE);
-		UpdateNow();
-		Parent->Ctrls.Xmax=org.w; Parent->Ctrls.UpdateData();
+		BMPanvas org;
+		if (FAILED(ret = TryLoadBitmap(T, org)))
+		{
+			log.T.Format("Failed to Load as BITMAP %s", T); 
+			log << log.T; log.SetPriority(lmprHIGH);	
+			return E_FAIL;
+		}
+		else
+		{
+			if (FAILED(ret = accum.FillAccum(&org)))
+			{
+				log.T.Format("Failed to INIT accumulator from %s", T); 
+				log << log.T; log.SetPriority(lmprHIGH);	
+				return E_FAIL;				
+			}			
+		}
 	}
-	else FileName="";		 
+	
+	accum.ConvertToBitmap(this); BMPanvas &org = *(accum.bmp);
+
+	FileName=T;
+	EraseAva(); MakeAva();
+	HGDIOBJ tfont=ava.SelectObject(font1); ava.SetBkMode(TRANSPARENT); ava.SetTextColor(clRED);
+	ava.TextOut(0,0,T);
+	T.Format("%dx%d", org.w, org.h); ava.TextOut(0,10,T);
+	ava.SelectObject(tfont); 
+	CaptureButton.ShowWindow(SW_HIDE); DragAcceptFiles(FALSE);
+	UpdateNow();
+	Parent->Ctrls.Xmax=org.w; Parent->Ctrls.UpdateData();
+
+	log.Dispatch();
 	return ret;
 }
 

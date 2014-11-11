@@ -382,7 +382,7 @@ HBITMAP BMPanvas::Attach( HBITMAP _hbmp )
 	return hbmp;
 }
 
-BOOL BMPanvas::HasImage()
+BOOL BMPanvas::HasImage() const
 {
 	return ( (hbmp!=NULL && hdc!=NULL) ? 1:0);
 }
