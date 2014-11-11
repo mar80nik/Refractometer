@@ -37,9 +37,10 @@ public:
 };
 
 struct AccumInfo
-{	
-	USHORT w, h, n;
+{		
+	USHORT w, h, n; BYTE HasErrors;
 	virtual void Serialize(CArchive &ar);
+	AccumInfo() {w = h = n = 0; HasErrors = FALSE; }
 	size_t GetSumsSize() const;
 	size_t GetCompressorBufferSize() const;
 };
@@ -47,20 +48,21 @@ struct AccumInfo
 struct ImagesAccumulator: public AccumInfo
 {
 protected:
-	BYTE *sums;
+	BYTE *sums; size_t OldSumsSize;
 public:
 	BMPanvas *bmp; 
-	
+
 	ms fillTime;
 
-	ImagesAccumulator();;
+	ImagesAccumulator();
 	~ImagesAccumulator() {Reset();};
 	void Reset();
 	void ResetSums();	
 	unsigned short *GetSum();
 	unsigned int *GetSums2();
 
-	void Initialize(int _w, int _h);
+	HRESULT Initialize(int _w, int _h, BOOL hasErrors = TRUE);
+	//HRESULT Initialize(BMPanvas& org);
 	HRESULT FillAccum(BMPanvas *src);
 	void ConvertToBitmap(CWnd *ref);
 	HRESULT SaveTo(const CString &file);

@@ -123,7 +123,7 @@ public:
 
 	BOOL TextOut(int nXStart, int nYStart, CString str);
 	CSize GetTextExtent(CString str);
-	BOOL HasImage();
+	BOOL HasImage() const;
 	COLORREF SetTextColor( COLORREF col);
 	int GetPallete(RGBQUAD **pColors, int first=0,int total=256);
 	int SetPallete(RGBQUAD *pColors, int first=0,int total=256);

@@ -186,6 +186,7 @@ public:
 		afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 		afx_msg void OnMove(int x, int y);	
 		void ConvertOrgToGrayscale();
+		HRESULT TryLoadBitmap(CString T, BMPanvas &bmp);
 	};
 	
 	class c_ScanRgn: public OrgPicRgn
