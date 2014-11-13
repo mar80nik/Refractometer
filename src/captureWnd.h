@@ -45,30 +45,7 @@ struct AccumInfo
 	size_t GetCompressorBufferSize() const;
 };
 
-struct ImagesAccumulator: public AccumInfo
-{
-protected:
-	BYTE *sums; size_t OldSumsSize;
-public:
-	BMPanvas *bmp; 
 
-	ms fillTime;
-
-	ImagesAccumulator();
-	~ImagesAccumulator() {Reset();};
-	void Reset();
-	void ResetSums();	
-	unsigned short *GetSum();
-	unsigned int *GetSums2();
-
-	HRESULT Initialize(int _w, int _h, BOOL hasErrors = TRUE);
-	//HRESULT Initialize(BMPanvas& org);
-	HRESULT FillAccum(BMPanvas *src);
-	void ConvertToBitmap(CWnd *ref);
-	HRESULT SaveTo(const CString &file);
-	HRESULT LoadFrom(const CString &file);
-	void ScanLine( void *buf, const int y, const int xmin, const int xmax );
-};
 
 class CaptureWnd : public CWnd, public PerfomanceStaff
 {
@@ -114,19 +91,15 @@ class CaptureWnd : public CWnd, public PerfomanceStaff
 		afx_msg void OnBnClicked_PauseCapture();
 		afx_msg void OnBnClicked_ResumeCapture();
 		afx_msg void OnBnClicked_FilterParams();
-		//	afx_msg void OnBnClickedButton6();
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);
 	public:
 		afx_msg void OnBnClickedChooseCam();
 		CComboBox PreviewSize;
-		afx_msg void OnCbnSelchangeCombo1();
 		eDcm800Size GetPreviewSize();
 		CButton BtnFilterParams;
 	public:
 		BOOL IsProgramBW;
-		afx_msg void OnBnClickedRadio1();
-		afx_msg void OnBnClickedRadio4();
 		ColorTransformModes ColorTransformSelector;
 	};
 

@@ -120,6 +120,7 @@
 #define IDC_BUTTON14                    1018
 #define IDC_BUTTON10                    1019
 #define IDC_COMBO4                      1019
+#define IDC_COMBO2                      1019
 #define IDC_COMBO3                      1020
 #define IDC_COMBO5                      1020
 #define IDC_BUTTON15                    1021
