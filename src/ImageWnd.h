@@ -9,6 +9,8 @@
 enum CaptureWndMSGS {UM_CAPTURE_REQUEST=4000, UM_CAPTURE_READY};
 enum CEditInterceptorMessages {UM_BUTTON_ITERCEPTED = 3000};
 
+
+
 enum HelperEvent {
 	EvntOnCaptureButton, EvntOnCaptureReady,
 	RSLT_HELPER_COMPLETE, RSLT_OK, RSLT_OK_RGN_MODIFIED, RSLT_BMP_ERR, RSLT_ERR
@@ -35,78 +37,63 @@ public:
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 
+class CComboBoxInterceptor : public CComboBox
+{
+	DECLARE_DYNAMIC(CComboBoxInterceptor)
+public:
+	CComboBoxInterceptor() {};
+	virtual ~CComboBoxInterceptor() {};
+protected:
+	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg BOOL OnCbnSelchangeCombo2();
+};
+
+struct ScanRgnData
+{ int stroka, Xmin, Xmax, AvrRange;};
+
+struct ImagesAccumulator: public AccumInfo
+{
+protected:
+	BYTE *sums; size_t OldSumsSize;
+public:
+	BMPanvas *bmp; 
+
+	ms fillTime;
+
+	ImagesAccumulator();
+	~ImagesAccumulator() {Reset();};
+	void Reset();
+	void ResetSums();	
+	unsigned short *GetSum() const;
+	unsigned int *GetSums2() const;
+	HRESULT GetPicRgn(CRect&) const;
+
+	HRESULT Initialize(int _w, int _h, BOOL hasErrors = TRUE);
+	HRESULT FillAccum(BMPanvas *src);
+	void ConvertToBitmap(CWnd *ref);
+	HRESULT SaveTo(const CString &file);
+	HRESULT LoadFrom(const CString &file);
+	void ScanLine( void *buf, const ScanRgnData &data);
+};
+
 class ImageWnd : public CWnd
 {
 public:
-	struct PicRgn: protected CRect
-	{
-		PicRgn() {}
-		PicRgn(const CRect &rgn): CRect(rgn) {}
-		CRect Get() const
-		{
-			return *this;
-		}
-		void Set(const CRect &r)
-		{
-			*this = r;
-		}
-
-	};
-	struct AvaPicRgn: public CRect 
-	{ 
-		CSize org, ava;
-		CRect storedOrgRslt;
-
-		AvaPicRgn(): CRect() {}
-		AvaPicRgn(const CRect& rgn): CRect(rgn) {}
-		BOOL Check(const CSize _org, const CSize _ava) const
-		{
-			BOOL ret = FALSE;
-			if (org == _org && ava == _ava)
-			{
-				ret = TRUE;
-			}
-			return ret;
-		}
-	};
-	struct OrgPicRgn: public CRect 
-	{
-		CSize org, ava;
-		CRect storedAvaRslt;
-
-		OrgPicRgn(): CRect() {}
-		OrgPicRgn(const CRect& rgn): CRect(rgn) {}	
-		BOOL Check(const CSize _org, const CSize _ava) const
-		{
-			BOOL ret = FALSE;
-			if (org == _org && ava == _ava)
-			{
-				ret = TRUE;
-			}
-			return ret;
-		}
-		//OrgPicRgn& operator=(const OrgPicRgn& r)
-		//{
-		//	*(CRect*)this = r;
-		//	org = r.org; ava = r.ava; storedAvaRslt = r.storedAvaRslt;
-		//	return *this;
-		//}
-	};
-	
-	class CtrlsTab : public BarTemplate
+	class CtrlsTab : public BarTemplate, public ScanRgnData
 	{		
 	protected:	
 		CString Name;	
 	public:
 		enum { IDD = IDD_DIALOGBARTAB1 };
 
-		int stroka, Xmin, Xmax, AvrRange;
-		CEditInterceptor XminCtrl, XmaxCtrl, strokaCtrl, AvrRangeCtrl;
+		CEditInterceptor XminCtrl, XmaxCtrl, strokaCtrl;
 		CComboBox NofScans;
+		CComboBoxInterceptor AvrRgnCombo;
 
 		CtrlsTab(CWnd* pParent = NULL);  
-		OrgPicRgn GetScanRgnFromCtrls();
-		void InitScanRgnCtrlsFields(const OrgPicRgn&);
+		CRect GetScanRgnFromCtrls();
+		void InitCtrlsFromScanRgn( const CRect& rgn);
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);   
 	protected:
@@ -122,6 +109,7 @@ public:
 		afx_msg void OnEnKillfocusEdit1();
 		LRESULT OnButtonIntercepted(WPARAM wParam, LPARAM lParam );
 		int GetNofScans();
+		int GetAvrRgn();	
 	};
 
 	class PicWnd: public CWnd
@@ -129,19 +117,18 @@ public:
 		friend struct AccumHelper;
 
 		enum ScanRgnDrawModes { DRAW, ERASE };
-		class c_ScanRgn: public AvaPicRgn
+		class c_ScanRgn
 		{
 		protected:
 			BOOL ToErase; 
-			AvaPicRgn last;
+			CRect last;
 			CPoint curL, curR;
 
-			void Draw(BMPanvas* bmp, const AvaPicRgn& rgn, ScanRgnDrawModes mode );
+			void Draw(BMPanvas* bmp, const CRect& rgn, ScanRgnDrawModes mode );
 		public:
 			c_ScanRgn() { ToErase=FALSE; }
-			virtual void Draw(BMPanvas* Parent);
+			virtual void Draw(BMPanvas* Parent, const CRect& rgn);
 			virtual void Erase(BMPanvas * canvas);		
-			c_ScanRgn& operator= (const AvaPicRgn& rgn) { *((AvaPicRgn*)this) = rgn; return *this; }
 		};
 
 	protected:
@@ -149,10 +136,6 @@ public:
 		CMenu menu1; c_ScanRgn ScanRgn;		
 		CList<BaseForHelper*> helpers; 
 
-		AvaPicRgn Convert( OrgPicRgn&);
-		OrgPicRgn Convert( AvaPicRgn&);
-		BOOL IsRgnInAva( const AvaPicRgn& );	
-		HRESULT ValidatePicRgn( CRect& rgn, BMPanvas& ref );
 		void UpdateHelpers(const HelperEvent &event);
 	public:
 		BMPanvas ava;
@@ -171,9 +154,12 @@ public:
 		void OnPicWndScanLine();
 		void EraseAva();
 		HRESULT MakeAva();
-		void SetScanRgn( OrgPicRgn& rgn);
-		HRESULT ValidateOrgPicRgn(OrgPicRgn&);
-		HRESULT ValidateAvaPicRgn(AvaPicRgn&);		
+		void UpdateScanRgn();
+		HRESULT GetRgnOfScan(CRect&);
+		HRESULT ValidateScanRgn( CRect& rgn ) const;
+		void ConvertOrgToGrayscale();
+		HRESULT TryLoadBitmap(CString T, BMPanvas &bmp);
+		LRESULT OnCaptureReady( WPARAM wParam, LPARAM lParam );
 
 		DECLARE_MESSAGE_MAP()
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -182,39 +168,37 @@ public:
 		afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 		afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 		afx_msg void OnCaptureButton();
-		LRESULT OnCaptureReady( WPARAM wParam, LPARAM lParam );
 		afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 		afx_msg void OnMove(int x, int y);	
-		void ConvertOrgToGrayscale();
-		HRESULT TryLoadBitmap(CString T, BMPanvas &bmp);
-	};
-	
-	class c_ScanRgn: public OrgPicRgn
-	{
-	public:
-		c_ScanRgn() {}
-		void Draw();
-		c_ScanRgn& operator= (const OrgPicRgn& rgn) { *((OrgPicRgn*)this) = rgn; return *this;}
+		HRESULT ConvertAvaToOrg( CPoint& pnt ) const;
+		HRESULT ConvertOrgToAva( CRect& rgn ) const;
 	};
 	
 	DECLARE_DYNAMIC(ImageWnd)
 protected:
 	PicWnd dark, cupol, strips;
-	c_ScanRgn ScanRgn;
+	CRect RgnOfScan;
+	
 public:
 	CtrlsTab Ctrls;
 	CaptureWnd	CameraWnd;
 
 	ImageWnd();
 	virtual ~ImageWnd();
+	CRect GetRgnOfScan() const {return RgnOfScan;};
+	void OnChildMove();
+	void SetScanRgn(const CRect&);
+	void * GetChartFromParent();
+	ScanRgnData GetScanRgnData()
+	{
+		ScanRgnData ret;
+		ret.Xmin = RgnOfScan.left; ret.Xmax = RgnOfScan.right;
+		ret.stroka = RgnOfScan.CenterPoint().y;
+		ret.AvrRange = (RgnOfScan.bottom - RgnOfScan.top)/2;
+		return ret;
+	}
 protected:
 	DECLARE_MESSAGE_MAP()
-public:
-	void OnChildMove();
-	void SetScanRgn(const OrgPicRgn&);
-	void * GetChartFromParent();
-	c_ScanRgn GetScanRgn() const {return ScanRgn;}
-
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);	
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
