@@ -1,25 +1,30 @@
 #include "stdafx.h"
 #include "metricon.h"
 
-int CalibrationSolver::func_call_cntr=0;
-int CalibratorSolver::func_call_cntr=0;
-int DispEqTESolver::func_call_cntr=0;
-int DispEqTMSolver::func_call_cntr=0;
-int FilmMinimizerTE::func_call_cntr=0;
-int FilmMinimizerTM::func_call_cntr=0;
-int Solver1dTemplate<DispEqTEFuncParams>::func_call_cntr=0;
-int Solver1dTemplate<DispEqTMFuncParams>::func_call_cntr=0;
-int Fit_Ax2BxC::func_call_cntr=0;
-int Fit_Knee::func_call_cntr=0;
 //////////////////////////////////////////////////////////////////////////
-double CalibrationSolver::func( double x, void *params )
+//////////////////////////////////////////////////////////////////////////
+void CalibrationParams::Serialize( CArchive& ar )
 {
-	struct CalibrationFuncParams *p = (CalibrationFuncParams *) params;
-	double *A = p->GetA(), *B = p->GetB(), *N = p->N, *teta=p->teta;
-	double &n_p=p->n_p, &n_s=p->n_s, &alfa=p->alfa, &fi=x;
+	if(ar.IsStoring())
+	{
+		val.Serialize(ar);
+		Nexp.Serialize(ar);  teta.Serialize(ar);
+	}
+	else
+	{
+		val.Serialize(ar);
+		Nexp.Serialize(ar);  teta.Serialize(ar);	
+	}
+}
+CalibrationParams& CalibrationParams::operator=(const CalibrationParams& t )
+{
+	val = t.val; Nexp = t.Nexp; teta = t.teta;
+	return *this;
+}
+double CalibrationParams::Calculator::FuncParams::func( double fi)
+{
 	double ret;
-
-	for(int i=0;i<p->size; i++)
+	for(int i = 0; i < size; i++)
 	{
 		double t=(n_p/n_s)*sin(alfa - teta[i]);
 		A[i] = t / (cos(fi)*sqrt(1.-t*t)-sin(fi)*t);
@@ -29,184 +34,142 @@ double CalibrationSolver::func( double x, void *params )
 		((B[0]-B[3])*(A[2]-A[3]) - (B[2]-B[3])*(A[0]-A[3])) - 
 		((N[2]-N[3])*(A[0]-A[3]) - (N[0]-N[3])*(A[2]-A[3])) * 
 		((B[0]-B[3])*(A[1]-A[3]) - (B[1]-B[3])*(A[0]-A[3]));
-	func_call_cntr++;
 	return ret;
 }
-//////////////////////////////////////////////////////////////////////////
-int CreateCalibration( DoubleArray& Nexp, DoubleArray& teta, CalibrationParams& cal )
+int CalibrationParams::CalculateFrom(	DoubleArray& _Nexp, DoubleArray& _teta, 
+										double n_p, double n_i, double n_s, double alfa, double lambda)
 {
-	CalibrationFuncParams in_params(Nexp.GetSize(), Nexp, teta, cal.n_p, cal.n_s, cal.alfa );
-	CalibrationSolver FindFI( in_params );
-	if( (cal.status=FindFI.Run(-45*DEGREE, 45*DEGREE, 1e-12))==GSL_SUCCESS ) 
+	Calculator::FuncParams params(_Nexp, _teta, n_p, n_i, n_s, alfa, lambda);
+	Solver1dTemplate<CalibrationParams::Calculator::FuncParams> FindFI(SINGLE_ROOT);
+	CleanUp();
+	if( FindFI.Run(&params, BoundaryConditions(-45*DEGREE, 45*DEGREE), SolverErrors(1e-12)) == GSL_SUCCESS) 
 	{
-		double *A = FindFI.fparams.GetA(), *B = FindFI.fparams.GetB(), *N = FindFI.fparams.N;
-
-		cal.fi0=FindFI.root;
-		cal.L =	((N[1] - N[3])*(A[0] - A[3]) - (N[0] - N[3])*(A[1] - A[3])) / 
+		double *N = params.N, *A = params.A, *B = params.B;
+		val << params.alfa <<  params.n_p << params.n_i << params.n_s << params.lambda; 
+		Nexp = params.N; teta = params.teta;
+		val << FindFI.Roots[0]; 	
+		val << ((N[1] - N[3])*(A[0] - A[3]) - (N[0] - N[3])*(A[1] - A[3])) / 
 			((B[0] - B[3])*(A[1] - A[3]) - (B[1] - B[3])*(A[0] - A[3])); 
-		cal.d0 = ((N[3] - N[0]) - cal.L*(B[0] - B[3]))/(A[0] - A[3]);
-		cal.N0 = N[0] + cal.d0*A[0] + cal.L*B[0];
-
-		cal.dt=FindFI.dt;
-		cal.func_call_cntr=CalibrationSolver::func_call_cntr;
-		cal.epsabs=FindFI.epsabs; cal.epsrel=FindFI.epsrel;
-		cal.Nexp.RemoveAll(); cal.teta.RemoveAll();
-		for(int i=0;i<Nexp.GetSize();i++) cal.Nexp.Add(N[i]);
-		for(int i=0;i<teta.GetSize();i++) cal.teta.Add(teta[i]);
-	}	
-	return cal.status;
-}
-//////////////////////////////////////////////////////////////////////////
-double CalibratorSolver::func( double x, void *params )
-{
-	struct CalibratorFuncParams *p = (CalibratorFuncParams *) params;
-	double &n_p=p->cal.n_p, &n_s=p->cal.n_s, &alfa=p->cal.alfa, &tetax=x, &Npix=p->Npix;
-	double &fi0=p->cal.fi0, &N0=p->cal.N0, &d0=p->cal.d0, &L=p->cal.L;
-	double par1, par2, ret;
-
-	double t=(n_p/n_s)*sin(alfa - tetax);
-	par1 = t / (cos(fi0)*sqrt(1-t*t)-sin(fi0)*t);
-	par2 = sin(alfa)*tan(alfa - tetax)/cos(fi0)*(sin(fi0)*par1 + 1);
-	ret = Npix - (N0 - d0*par1 - L*par2);
-	func_call_cntr++;
-	return ret;
-}
-//////////////////////////////////////////////////////////////////////////
-int Calibrator( CalibratorParams& params, CalibrationParams& cal )
-{
-	CalibratorSolver FindTETA(CalibratorFuncParams(params.Npix,cal));
-	if( (params.status=FindTETA.Run(35*DEGREE, 68.*DEGREE, 1e-12)) ==GSL_SUCCESS) 
-	{
-		params.teta=FindTETA.root/DEGREE;
-		params.betta=cal.n_p*sin(FindTETA.root);
-		params.dt=FindTETA.dt;
-		params.func_call_cntr=CalibratorSolver::func_call_cntr;
-		params.epsabs=FindTETA.epsabs; params.epsrel=FindTETA.epsrel;
+		val << ((N[3] - N[0]) - val[ind_L]*(B[0] - B[3]))/(A[0] - A[3]);
+		val << N[0] + val[ind_d0]*A[0] + val[ind_L]*B[0];
+		*((SolverData*)(this)) = *((SolverData*)&FindFI);
 	}
-	return params.status;
+	return FindFI.status;
 }
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-double Solver1dTemplate<DispEqTEFuncParams>::func( double x, void *params ) {return 0;}
-double DispEqTESolver::func( double x, void *params )
+double CalibrationParams::PixelToAngleSolver::FuncParams::func( double teta )
 {
-	struct DispEqFuncParams *p = (DispEqFuncParams *) params;
-	double gam2, gam3, gam4; double ret; double &betta=x;
-	double &n1=p->n1, &n2=p->n2, &n3=p->n3, &kHc=p->kHf;
-
-	gam2 = sqrt(betta*betta - n1*n1); gam3 = sqrt(n2*n2 - betta*betta); gam4 = sqrt(betta*betta - n3*n3);
-	ret = (gam3*gam3 - gam2*gam4)*sin(gam3*kHc) - gam3*(gam2 + gam4)*cos(gam3*kHc);
-	func_call_cntr++;
+	double par1, par2, ret;	double t = (cal[ind_n_p]/cal[ind_n_s])*sin(cal[ind_alfa] - teta);	
+	par1 = t / (cos(cal[ind_fi0])*sqrt(1-t*t) - sin(cal[ind_fi0])*t);
+	par2 = sin(cal[ind_alfa])*tan(cal[ind_alfa] - teta)/cos(cal[ind_fi0])*(sin(cal[ind_fi0])*par1 + 1);
+	ret = Npix - (cal[ind_N0] - cal[ind_d0]*par1 - cal[ind_L]*par2);
 	return ret;
 }
-double Solver1dTemplate<DispEqTMFuncParams>::func( double x, void *params ) {return 0;}
-double DispEqTMSolver::func( double x, void *params )
+AngleFromCalibration CalibrationParams::ConvertPixelToAngle(double Npix)
 {
-	struct DispEqFuncParams *p = (DispEqFuncParams *) params;
-	double gam2, gam3, gam4; double ret; double &betta=x;
-	double &n1=p->n1, &n2=p->n2, &n3=p->n3, &kHc=p->kHf; double t1,t2,t3;
-
-	gam2 = sqrt(betta*betta - n1*n1); gam3 = sqrt(n2*n2 - betta*betta); gam4 = sqrt(betta*betta - n3*n3);
-    t1=n1*n1; t2=n2*n2; t3=n3*n3;
-	ret = ( gam3*gam3*t1*t3 - gam2*gam4*t2*t2 )*sin(gam3*kHc) - gam3*t2*(gam2*t3 + gam4*t1)*cos(gam3*kHc);
-	func_call_cntr++;
-	return ret;
-}
-//////////////////////////////////////////////////////////////////////////
-double FilmMinimizerTE::func(const gsl_vector * x, void * params)
-{
-    double ret=100; int status;
-	FilmFuncParams* p=(FilmFuncParams*)params;
-	double &n1=p->n1, &n3=p->n3, &k=p->k, *bettaexp=p->bettaexp;
-	FilmParams film(x);
-
-	DispEqTESolver Solver(DispEqTEFuncParams(n1, film.n, n3, k*film.H));
-	Solver.min_roots=p->bettaexp.GetSize(); Solver.max_roots=Solver.min_roots+2;
-	if( (status=Solver.Run(n3,film.n, 1e-6)) == GSL_SUCCESS) 
+	AngleFromCalibration ret;
+	if (this->IsValidCalibration() == FALSE)
 	{
-		int i,j,roots_n=Solver.roots.GetSize(),betta_n=Solver.min_roots; double cur_ret;
-		for(i=0;i<=roots_n-betta_n;i++)
+		ret.status = E_FAIL;
+		return ret;
+	}
+	PixelToAngleSolver::FuncParams params(Npix, this->val);
+	Solver1dTemplate<PixelToAngleSolver::FuncParams> FindTETA(SINGLE_ROOT);	
+
+	if ((ret.status = FindTETA.Run(&params, BoundaryConditions(35*DEGREE, 68.*DEGREE), 
+		SolverErrors(1e-12))) == GSL_SUCCESS) 
+	{
+		ret.teta = FindTETA.Roots[0];
+		ret.cal = params.cal; ret.Npix = Npix;
+		*((SolverData*)(&ret)) = *((SolverData*)&FindTETA);
+	}
+	return ret;
+}
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+double FilmParams::DispEqSolver::FuncParams::funcTE( double betta )
+{
+	double gam2, gam3, gam4, ret;
+	gam2 = sqrt(betta*betta - n_i*n_i); gam3 = sqrt(n_f*n_f - betta*betta); gam4 = sqrt(betta*betta - n_s*n_s);
+	ret = (gam3*gam3 - gam2*gam4)*sin(gam3*kHf) - gam3*(gam2 + gam4)*cos(gam3*kHf);
+	return ret;
+}
+double FilmParams::DispEqSolver::FuncParams::funcTM( double betta )
+{
+	double gam2, gam3, gam4, t1, t2, t3, ret; 
+	t1 = n_i*n_i; t2 = n_f*n_f; t3=n_s*n_s;
+	gam2 = sqrt(betta*betta - t1); gam3 = sqrt(t2 - betta*betta); gam4 = sqrt(betta*betta - t3);    
+	ret = ( gam3*gam3*t1*t3 - gam2*gam4*t2*t2 )*sin(gam3*kHf) - gam3*t2*(gam2*t3 + gam4*t1)*cos(gam3*kHf);
+	return ret;
+}
+double FilmParams::FuncParams::func(const gsl_vector * x)
+{
+    double ret=100; int status;	DoubleArray film; film = *x;
+
+	Solver1dTemplate<FilmParams::DispEqSolver::FuncParams> FindBettas(MULTI_ROOT);
+	FilmParams::DispEqSolver::FuncParams params(pol, n_i, film[index_n], n_s, k*film[index_H]);
+
+	if ((status = FindBettas.Run(&params, BoundaryConditions(n_s, film[index_n]), SolverErrors(1e-6))) == GSL_SUCCESS) 
+	{
+		ret = 0;
+		int i, j, roots_n = FindBettas.Roots.GetSize(), betta_n = betta_exp.GetSize(); 
+		for (i = 0; i <= roots_n - betta_n; i++)
 		{
-			cur_ret=0;			
-			for(j=0;j<betta_n;j++)
+			for (j = 0; j < betta_n; j++)
 			{
-				cur_ret+=abs(Solver.roots[j+i]-bettaexp[j]);
+				double a = FindBettas.Roots[j + i];
+				double b = betta_exp[j].teta;
+				ret += abs(FindBettas.Roots[j + i] - betta_exp[j].teta);
 			}
-			if(cur_ret<ret) 
+			betta_teor.RemoveAll();
+			for (j = 0; j < betta_n; j++)
 			{
-				ret=cur_ret;
-				p->betta_teor.RemoveAll(); betta_info t;
-				for(j=0;j<betta_n;j++)
-				{
-					t.val=Solver.roots[j+i]; t.n=j+i; p->betta_teor.Add(t);
-				}
+				betta_teor << betta_info(FindBettas.Roots[j + i], j + i);
 			}
 		}
 	}
-	func_call_cntr+=DispEqTESolver::func_call_cntr;
 	return ret;
 }
-
-double FilmMinimizerTM::func(const gsl_vector * x, void * params)
+void FilmParams::FuncParams::CleanUp()
+{	
+	betta_exp.RemoveAll(); betta_teor.RemoveAll(); 
+}
+int FilmParams::Calculator(	const Polarization pol, const CalibrationParams &cal, 
+						   const TypeArray<AngleFromCalibration> &tetaexp,
+						   FilmParams initX, FilmParams initdX)
 {
-	double ret=100; int status;
-	FilmFuncParams* p=(FilmFuncParams*)params;
-	double &n1=p->n1, &n3=p->n3, &k=p->k, *bettaexp=p->bettaexp;
-	FilmParams film(x);
-
-	DispEqTMSolver Solver(DispEqTMFuncParams(n1, film.n, n3, k*film.H));
-	if( (status=Solver.Run(n3,film.n, 1e-6)) ==GSL_SUCCESS) 
+	CleanUp();
+	MultiDimMinimizerTemplate<FuncParams> FindFilmParams(200);
+	FuncParams params(pol, tetaexp, cal);
+	DoubleArray X0, dX0; 
+	switch (pol)
 	{
-		int i,j,roots_n=Solver.roots.GetSize(),betta_n=Solver.min_roots; double cur_ret;
-		for(i=0;i<=roots_n-betta_n;i++)
-		{
-			cur_ret=0;			
-			for(j=0;j<betta_n;j++)
-			{
-				cur_ret+=abs(Solver.roots[j+i]-bettaexp[j]);
-			}
-			if(cur_ret<ret) 
-			{
-				ret=cur_ret;
-				p->betta_teor.RemoveAll(); betta_info t;
-				for(j=0;j<betta_n;j++)
-				{
-					t.val=Solver.roots[j+i]; t.n=j+i; p->betta_teor.Add(t);
-				}
-			}
-		}
+	case TE: 
+//		initX.n = bettaexp[0]; initX.H = 1430; 
+		initX.n = 1.8; initX.H = 1150; 
+		break;
+	case TM:
+//		initX.n = bettaexp[0]; initX.H = 1020; 
+		initX.n = 1.8; initX.H = 1250; 
+		break;
 	}
-	func_call_cntr+=DispEqTMSolver::func_call_cntr;
-	return ret;
+	
+	X0 << initX.n << initX.H; dX0 << initdX.n << initdX.H;
+
+	if (FindFilmParams.Run(&params, X0, dX0, SolverErrors(1e-6)) == GSL_SUCCESS) 
+	{		
+		n = FindFilmParams.Roots[index_n]; H = FindFilmParams.Roots[index_H]; 
+		minimum_value = FindFilmParams.minimum_value;
+		betta_teor = params.betta_teor;
+		for (int i = 0; i < params.betta_exp.GetSize(); i++)
+		{
+			betta_exp << params.betta_exp[i].teta;
+		}		
+		*((SolverData*)(this)) = *((SolverData*)&FindFilmParams);
+	}
+	return FindFilmParams.status;
 }
 //////////////////////////////////////////////////////////////////////////
-
-int CalclFilmParamsTE(FilmFuncTEParams& in, FilmParams& out)
-{
-	FilmMinimizerTE Minimizer(in,200);	
-//	out.status=Minimizer.Run(FilmParams(in.bettaexp[0],1430), FilmParams(1e-4,1e-1), 1e-6);
-	out.status=Minimizer.Run(FilmParams(1.8,1150), FilmParams(1e-4,1e-1), 1e-6);
-	out=Minimizer.roots;
-	out.dt=Minimizer.dt;
-	out.func_call_cntr=FilmMinimizerTE::func_call_cntr;
-	out.epsabs=Minimizer.epsabs; 
-	out.fval=Minimizer.fval; out.size=Minimizer.size;
-	return out.status;
-}
-
-int CalclFilmParamsTM(FilmFuncTMParams& in, FilmParams& out)
-{
-	FilmMinimizerTM Minimizer(in,200);		
-//	out.status=Minimizer.Run(FilmParams(in.bettaexp[0],1020.), FilmParams(1e-4,1e-1), 1e-6);
-	out.status=Minimizer.Run(FilmParams(1.8,1250.), FilmParams(1e-4,1e-1), 1e-6);
-	out=Minimizer.roots;
-	out.dt=Minimizer.dt;
-	out.func_call_cntr=FilmMinimizerTM::func_call_cntr;
-	out.epsabs=Minimizer.epsabs; 
-	out.fval=Minimizer.fval; out.size=Minimizer.size;
-	return out.status;
-}
-
+//////////////////////////////////////////////////////////////////////////
 void CalcR_TE(CalcRParams& params)
 {
 	SimplePoint pnt; pnt.type.Set(GenericPnt);
@@ -232,17 +195,15 @@ void CalcR_TE(CalcRParams& params)
 		B=(gam3 - gam4)/(gam3 + gam4);
 		t=gam2*cJ; C=(t - CT)/(t + CT); C*=-1;
 
-		t=B*exp(gam3*(-2*k*f.H));
-		As=( A + t )/( A*t + 1. );
+		t=B*exp(gam3*(-2*k*f.H)); As=( A + t )/( A*t + 1. );
 
-		t=As*exp(gam2*(-2*k*i.H));
-		Ra=( C + t )/( C*t + 1 );
+		t=As*exp(gam2*(-2*k*i.H)); Ra=( C + t )/( C*t + 1 );
 		
 		if(params.R!=NULL) { pnt.x=teta; pnt.y=Ra.abs2(); params.R->Points.Add(pnt); }
 		if(params.teta!=NULL) { pnt.x=teta; pnt.y=sqrt(ST); params.teta->Points.Add(pnt); }
 	}	
+	
 }
-
 void CalcR_TM(CalcRParams& params)
 {
 	SimplePoint pnt; pnt.type.Set(GenericPnt);
@@ -276,123 +237,85 @@ void CalcR_TM(CalcRParams& params)
 
 		if(params.R!=NULL) { pnt.x=teta; pnt.y=Ra.abs2(); params.R->Points.Add(pnt); }
 		if(params.teta!=NULL) { pnt.x=teta; pnt.y=sqrt(ST); params.teta->Points.Add(pnt); }
-	}	
+	}		
 }
 //////////////////////////////////////////////////////////////////////////
-int Fit_Parabola( MultiFitterFuncParams& in, Fit_Ax2BxCParams& init,Fit_Ax2BxCParams& out )
+//////////////////////////////////////////////////////////////////////////
+double ParabolaFitFunc::FuncParams::func( const double &x, const double *a, const size_t &p )
 {
-    Fit_Ax2BxC fit(in,10);	
-	fit.Run(init, 1e-15, 1e-9); 
-	out=fit.roots;
-	out.dt=fit.dt;
-	out.func_call_cntr=Fit_Ax2BxC::func_call_cntr;
-	out.epsabs=fit.epsabs;  out.epsabs=fit.epsabs; 		
-	out.iter_num=fit.iter;
-	return out.status;
+	return a[ind_a]*x*x + a[ind_b]*x + a[ind_c];
 }
-
-
-void FittingPerfomanceInfo::GetSolverResults( gsl_multifit_fdfsolver *s )
+double ParabolaFitFunc::FuncParams::df_da( const double &x, const double *a, const size_t &p, double *c) { return x*x; }
+double ParabolaFitFunc::FuncParams::df_db( const double &x, const double *a, const size_t &p, double *c) { return x; }
+double ParabolaFitFunc::FuncParams::df_dc( const double &x, const double *a, const size_t &p, double *c) { return 1; }
+double ParabolaFitFunc::GetTop(double &x)
 {
-	double chi, dof, c;	size_t p=s->x->size, n=s->f->size; 
-	gsl_matrix *covar = gsl_matrix_alloc (p, p);
-	if(covar!=NULL)
+	x = (-a[ind_b]/(2*a[ind_a])); 
+	return GetXrelY(x);
+}
+int ParabolaFitFunc::CalculateFrom(	const DoubleArray& x, const DoubleArray& y, 
+									const DoubleArray& sigma, DoubleArray& init_a)
+{
+	FuncParams params(x, y, sigma);	MultiFitterTemplate<FuncParams> solver;
+
+	if (solver.Run(&params, init_a, SolverErrors(1e-6)) == GSL_SUCCESS)
 	{
-		gsl_multifit_covar (s->J, 0.0, covar);
-		chi = gsl_blas_dnrm2(s->f); dof = n - p; c = GSL_MAX_DBL(1, chi / sqrt(dof)); chisq_dof=chi*chi / dof;
-		for(size_t i=0;i<p;i++)
-		{
-			a[i]=gsl_vector_get(s->x, i); 
-			da[i]=fabs(c*sqrt(gsl_matrix_get(covar,i,i)));
-		}
-		gsl_matrix_free(covar);
+		da = solver.da; 		
 	}
+	a = solver.a; InitFrom(params); InitFrom(solver);
+	return solver.status;
+}
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//f = C + (A/(1 + exp(-2*k*(x - B))));
+double KneeFitFunc::FuncParams::func( const double &x, const double *a, const size_t &p )
+{
+	return a[ind_C] + (a[ind_A]/( 1 + exp(-2*a[ind_k]*(x - a[ind_B])) ));	
+}
+double KneeFitFunc::FuncParams::df_dA(const double &x, const double *a, const size_t &p, double *c)
+{
+	double t0 = *c;
+	return 1/(1 + t0);	
+}
+double KneeFitFunc::FuncParams::df_dB(const double &x, const double *a, const size_t &p, double *c)
+{
+	double t0 = *c;
+	return -2*a[ind_k]*a[ind_A]*t0/((1 + t0)*(1 + t0));
+}
+double KneeFitFunc::FuncParams::df_dC(const double &x, const double *a, const size_t &p, double *c)
+{
+	return 1;
+}
+double KneeFitFunc::FuncParams::df_dk(const double &x, const double *a, const size_t &p, double *c)
+{
+	double t0 = *c;
+	return 2*(x - a[ind_B])*a[ind_A]*t0/((1 + t0)*(1 + t0));
+}
+double KneeFitFunc::GetInflection( double &x, const double &level )
+{
+	x = a[ind_B] + log(level/(1-level))/(2*a[ind_k]);
+	return GetXrelY(x);
+}
+int KneeFitFunc::CalculateFrom(	const DoubleArray& x, const DoubleArray& y, 
+	const DoubleArray& sigma, DoubleArray& init_a)
+{
+	FuncParams params(x, y, sigma);	MultiFitterTemplate<FuncParams> solver;
+
+	if (solver.Run(&params, init_a, SolverErrors(1e-6)) == GSL_SUCCESS)
+	{
+		da = solver.da; 		
+	}
+	a = solver.a; InitFrom(params); InitFrom(solver);
+	return solver.status;
 }
 
-FittingPerfomanceInfo::FittingPerfomanceInfo( int _p )
+double * KneeFitFunc::FuncParams::PrepareDerivBuf( const double &x, const double *a, const size_t &p )
 {
-	a=da=NULL; p=_p;
-	a=new double[p];
-	da=new double[p];
-	for(int i=0;i<p;i++) {a[i]=0; da[i]=0;}
-	chisq_dof=leftmostX=rightmostX=0; n=0; dx=0;
-}
-
-FittingPerfomanceInfo::~FittingPerfomanceInfo()
-{
-	if(a!=NULL) delete[] a;	
-	if(da!=NULL) delete[] da;
-}
-
-void FittingPerfomanceInfo::operator=( const FittingPerfomanceInfo& t )
-{
-	PerfomanceInfoMk1::operator=(t);
-	chisq_dof=t.chisq_dof; leftmostX=t.leftmostX; rightmostX=t.rightmostX; dx=t.dx; n=t.n;
-	ASSERT(p==t.p);
-	for(int i=0;i<p;i++) {a[i]=t.a[i]; da[i]=t.da[i];}
-}
-
-
-double Fit_Ax2BxCParams::f( double x, double* a )
-{
-	double ret=a[0],tx=x;
-	for(int j=1;j<3;j++) {ret+=(a[j]*tx); tx*=x;}
-	return ret;
-}
-
-Fit_Ax2BxCParams::Fit_Ax2BxCParams( double _a/*=0*/,double _b/*=0*/,double _c/*=0*/ ) : FittingPerfomanceInfo(GetParamsNum())
-{
-	a[2]=_a; a[1]=_b; a[0]=_c;
-}
-
-SimplePoint Fit_Ax2BxCParams::GetTop()
-{
-	double t=(-a[1]/(2*a[2]));
-	return SimplePoint(leftmostX+t*dx, a[0]-a[1]*a[1]/(a[2]*4));
-}
-
-SimplePoint Fit_Ax2BxCParams::GetXabsY( double x )
-{
-	return SimplePoint(x,f((x-leftmostX)/dx,a));
-}
-
-SimplePoint Fit_Ax2BxCParams::GetXrelY( double x )
-{
-	return SimplePoint(x+leftmostX,f(x,a));
+	buf = exp(-2*a[ind_k]*(x - a[ind_B]));
+	return &buf;
 }
 
 //////////////////////////////////////////////////////////////////////////
-int Fit_Ax2BxC::f (const gsl_vector * x, void *data, gsl_vector * f)
-{
-	MultiFitterFuncParams *params=(MultiFitterFuncParams *)data;
-	size_t& n = params->n, p = x->size, i; double Yi;
-	double *y = params->y, *sigma = params->sigma, *a=x->data;
-
-	for (i = 0; i < n; i++)
-	{
-		Yi=Fit_Ax2BxCParams::f(i,a);
-		gsl_vector_set (f, i, (Yi - y[i])/sigma[i]);
-	}
-	func_call_cntr++;
-	return GSL_SUCCESS;
-}
-int Fit_Ax2BxC::df (const gsl_vector * x, void *data, gsl_matrix * J)
-{
-	MultiFitterFuncParams *params=(MultiFitterFuncParams *)data;
-	size_t& n = params->n, p = x->size, i,j;
-	double *sigma = params->sigma, *a=x->data;
-
-	for (i = 0; i < n; i++)
-	{
-		double tx=i; double s = sigma[i];
-		gsl_matrix_set (J, i, 0, 1/s);		
-		for(j=1;j<p;j++)
-		{
-			gsl_matrix_set (J, i, j, tx/s); tx*=i;
-		}
-	}
-	return GSL_SUCCESS;
-}
 //////////////////////////////////////////////////////////////////////////
 int FourierFilter( FFTRealTransform::Params& in, double spec_width, FFTRealTransform::Params& out) // spec_width=0...100.
 {
@@ -412,112 +335,4 @@ int FourierFilter( FFTRealTransform::Params& in, double spec_width, FFTRealTrans
 	return ret;
 
 }
-
-void CalibrationParams::Serialize( CArchive& ar )
-{
-	if(ar.IsStoring())
-	{
-		ar << alfa << n_p << n_s << N0 << L << d0 << fi0;
-		ar << Nexp.GetSize(); for(int i=0;i<Nexp.GetSize();i++) ar << Nexp[i];
-		ar << teta.GetSize(); for(int i=0;i<teta.GetSize();i++) ar << teta[i];
-	}
-	else
-	{
-		int n; double t;
-		ar >> alfa >> n_p >> n_s >> N0 >> L >> d0 >> fi0;
-		Nexp.RemoveAll(); ar >> n; for(int i=0;i<n;i++) { ar >> t; Nexp.Add(t); }
-		teta.RemoveAll(); ar >> n; for(int i=0;i<n;i++) { ar >> t; teta.Add(t); }
-	}
-}
-
-CalibrationParams& CalibrationParams::operator=( CalibrationParams& t )
-{
-	alfa=t.alfa; n_p=t.n_p; n_s=t.n_s;
-	N0=t.N0; L=t.L; d0=t.d0; fi0=t.fi0;	//	variables
-	Nexp.RemoveAll(); for(int i=0;i<t.Nexp.GetSize();i++) { Nexp.Add(t.Nexp[i]); }
-	teta.RemoveAll(); for(int i=0;i<t.teta.GetSize();i++) { teta.Add(t.teta[i]); }
-	return *this;
-}
 //////////////////////////////////////////////////////////////////////////
-int Fit_StepFunc( MultiFitterFuncParams& in, Fit_KneeParams& init,Fit_KneeParams& out )
-{
-	Fit_Knee fit(in,100);	
-	fit.Run(init, 1e-15, 1e-9); 
-	out=fit.roots;
-	out.dt=fit.dt;
-	out.func_call_cntr=Fit_Knee::func_call_cntr;
-	out.epsabs=fit.epsabs;  out.epsabs=fit.epsabs; 		
-	out.iter_num=fit.iter;
-	return out.status;
-}
-
-void Fit_KneeParams::operator=( const Fit_KneeParams& t )
-{
-	FittingPerfomanceInfo::operator =(t);
-}
-
-double Fit_KneeParams::f( double x, double* a )
-{
-	double &A=a[0], &B=a[1], &C=a[2], &k=a[3];
-	double ret=C+(A/( 1+exp(-2*k*(x-B)) ));	
-	return ret;
-}
-
-Fit_KneeParams::Fit_KneeParams( double _a/*=0*/,double _b/*=0*/,double _c/*=0*/,double _k/*=0*/ ) : 
-	FittingPerfomanceInfo(GetParamsNum()), A(a[0]), B(a[1]), C(a[2]), k(a[3])
-{
-	A=_a; B=_b; C=_c; k=_k;
-}
-
-SimplePoint Fit_KneeParams::GetXabsY( double x )
-{
-	SimplePoint ret(x,f((x-leftmostX)/dx,a));
-	return ret;
-}
-
-SimplePoint Fit_KneeParams::GetXrelY( double x )
-{
-	SimplePoint ret(x+leftmostX,f(x,a));
-	return ret;
-}
-
-SimplePoint Fit_KneeParams::GetTop(double T)
-{
-	double &A=a[0], &B=a[1], &C=a[2], &k=a[3];
-	double t=B+log(T/(1-T))/(2*k);
-	return SimplePoint(leftmostX+t*dx, f(t,a));	
-}
-
-int Fit_Knee::f (const gsl_vector * x, void *data, gsl_vector * f)
-{
-	MultiFitterFuncParams *params=(MultiFitterFuncParams *)data;
-	size_t& n = params->n, p = x->size, i; double Yi;
-	double *y = params->y, *sigma = params->sigma, *a=x->data;
-
-	for (i = 0; i < n; i++)
-	{
-		Yi=Fit_KneeParams::f(i,a);
-		gsl_vector_set (f, i, (Yi - y[i])/sigma[i]);
-	}
-	func_call_cntr++;
-	return GSL_SUCCESS;
-}
-int Fit_Knee::df (const gsl_vector * x, void *data, gsl_matrix * J)
-{
-	MultiFitterFuncParams *params=(MultiFitterFuncParams *)data;
-	size_t& n = params->n, p = x->size, i;
-	double *sigma = params->sigma;
-	double &A=x->data[0], &B=x->data[1], &C=x->data[2], &k=x->data[3];
-
-	for (i = 0; i < n; i++)
-	{
-		double s = sigma[i]; 
-		double t0=exp(-2*k*(i-B)), t=1/(1+t0), t1=-A*t*t/s; 
-
-		gsl_matrix_set (J, i, 0, t/s);		
-		gsl_matrix_set (J, i, 1, 2*k*t1*t0);		
-		gsl_matrix_set (J, i, 2, 1/s);		
-		gsl_matrix_set (J, i, 3, (-2*(i-B))*t1*t0);		
-	}
-	return GSL_SUCCESS;
-}

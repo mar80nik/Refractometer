@@ -120,12 +120,12 @@ void CalibrationData::SetCalibration( CalibrationParams& _cal )
 {
 	int i = 0;
 	cal=_cal;
-	fi.SetParamValue(cal.fi0); 
-	d.SetParamValue(cal.d0); 
-	N.SetParamValue(cal.N0); 
-	L.SetParamValue(cal.L);
-	Q.SetParamValue(cal.alfa);
-	n_p.SetParamValue(cal.n_p);
+	fi.SetParamValue(cal.val.get(CalibrationParams::ind_fi0)); 
+	d.SetParamValue(cal.val.get(CalibrationParams::ind_d0)); 
+	N.SetParamValue(cal.val.get(CalibrationParams::ind_N0)); 
+	L.SetParamValue(cal.val.get(CalibrationParams::ind_L));
+	Q.SetParamValue(cal.val.get(CalibrationParams::ind_alfa));
+	n_p.SetParamValue(cal.val.get(CalibrationParams::ind_n_p));
 	for(i = 0; i < cal.Nexp.GetSize(); i++)
 	{
 		N_exp[i]->SetParamValue(cal.Nexp[i]);

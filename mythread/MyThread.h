@@ -160,16 +160,16 @@ public:
 	BOOL HasMessages() {return (GetSize() != 0);}
 };
 
-class ConrtoledLogMessage
+class ControledLogMessage
 {
 protected:
 	LogMessage* msg; 
 public:
 	CString T;
 
-	ConrtoledLogMessage(::MessagePriorities prio = ::lmprLOW)	
+	ControledLogMessage(::MessagePriorities prio = ::lmprLOW)	
 		{msg = NULL;	msg = new LogMessage(prio);}
-	~ConrtoledLogMessage()	
+	~ControledLogMessage()	
 		{if (msg != NULL) delete msg;}	
 	virtual void Dispatch()	
 	{

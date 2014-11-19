@@ -52,8 +52,7 @@ protected:
 	virtual void OnCancel() {};
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnBnClickedCalibrate();
-	afx_msg void OnBnClickedCalcTE();
-	afx_msg void OnBnClickedCalcTM();		
+	afx_msg void OnBnClickedCalcFilm();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:

@@ -83,9 +83,6 @@ class CaptureWnd : public CWnd, public PerfomanceStaff
 		virtual void OnOK() {};
 		virtual void OnCancel() {};
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-		//}}AFX_MSG
-		DECLARE_MESSAGE_MAP()
-	public:
 		afx_msg void OnBnClicked_Live();
 		afx_msg void OnBnClicked_StopCapture();
 		afx_msg void OnBnClicked_PauseCapture();
@@ -100,7 +97,10 @@ class CaptureWnd : public CWnd, public PerfomanceStaff
 		CButton BtnFilterParams;
 	public:
 		BOOL IsProgramBW;
-		ColorTransformModes ColorTransformSelector;
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+public:
+	ColorTransformModes ColorTransformSelector;
 	};
 
 protected:

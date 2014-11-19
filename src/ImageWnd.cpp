@@ -189,7 +189,7 @@ void ImageWnd::CtrlsTab::OnBnClickedScan()
 	UpdateData(); ImageWnd* parent=(ImageWnd*)Parent;
 	MyTimer Timer1,Timer2; sec time; 
 	void* x; CString T; BOOL exit = FALSE;		
-	ConrtoledLogMessage log; log << _T("Speed tests results");
+	ControledLogMessage log; log << _T("Speed tests results");
 	ImagesAccumulator &dark = parent->dark.accum, &cupol = parent->cupol.accum, &strips = parent->strips.accum;
 
 	if (dark.bmp == NULL) 	{log << _T("There is no DARK image"); exit = TRUE;}
@@ -350,7 +350,7 @@ HRESULT ImageWnd::PicWnd::TryLoadBitmap(CString T, BMPanvas &bmp)
 		{
 			if (ColorTransformModes == CaptureWnd::CtrlsTab::ColorTransformModes::TrueColor)
 			{
-				ConrtoledLogMessage log(lmprHIGH);
+				ControledLogMessage log(lmprHIGH);
 				log.T.Format("Error: Image you are trying to load which is no GRAYSCALE."); log << log.T;
 				log.T.Format("*****: In order to use bult-in convertor please select"); log << log.T;
 				log.T.Format("*****: convert method: NativeGDI, HSL or HSV."); log << log.T;
@@ -369,7 +369,7 @@ HRESULT ImageWnd::PicWnd::TryLoadBitmap(CString T, BMPanvas &bmp)
 
 HRESULT ImageWnd::PicWnd::LoadPic(CString T)
 {	
-	HRESULT ret; ConrtoledLogMessage log;
+	HRESULT ret; ControledLogMessage log;
 	if(FAILED(ret = accum.LoadFrom(T)))
 	{
 		BMPanvas org;
@@ -416,7 +416,7 @@ void ImageWnd::PicWnd::OnDropFiles(HDROP hDropInfo)
 	Timer1.Start(); 
 	if (SUCCEEDED(LoadPic(T)))
 	{
-		BMPanvas &org = *(accum.bmp); ConrtoledLogMessage log;
+		BMPanvas &org = *(accum.bmp); ControledLogMessage log;
 		Parent->SetScanRgn(Parent->GetRgnOfScan());
 		Timer1.Stop(); 
 		time=Timer1.GetValue(); 
@@ -783,7 +783,7 @@ void ImageWnd::PicWnd::OnPicWndScanLine()
 {
 	void* x; CString T; 	
 	TPointVsErrorSeries::DataImportMsg *ChartMsg = NULL; 
-	ConrtoledLogMessage log; log << _T("Speed tests results");
+	ControledLogMessage log; log << _T("Speed tests results");
 
 	if (accum.bmp != NULL)
 	{
@@ -1004,7 +1004,7 @@ HRESULT ImagesAccumulator::FillAccum(BMPanvas *src)
 		if (FAILED(ret))
 		{
 			Reset();
-			ConrtoledLogMessage log(lmprHIGH);
+			ControledLogMessage log(lmprHIGH);
 			log.T.Format("ImagesAccumualtor error: %d != %d or %d != %d", w, src->w, h, src->h); log << log.T;
 			log.Dispatch(); 
 			return ret;
@@ -1098,7 +1098,7 @@ void ImagesAccumulator::ConvertToBitmap(CWnd *ref)
 
 HRESULT ImagesAccumulator::SaveTo( const CString &file )
 {
-	HRESULT ret; ConrtoledLogMessage log; MyTimer Timer1;
+	HRESULT ret; ControledLogMessage log; MyTimer Timer1;
 
 	if (sums != NULL)
 	{
@@ -1141,7 +1141,7 @@ HRESULT ImagesAccumulator::SaveTo( const CString &file )
 
 HRESULT ImagesAccumulator::LoadFrom( const CString &file )
 {	
-	HRESULT ret = E_FAIL; ConrtoledLogMessage log;
+	HRESULT ret = E_FAIL; ControledLogMessage log;
 	if (bmp == NULL) bmp = new BMPanvas();		
 	bmp->Destroy();
 	

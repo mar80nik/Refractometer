@@ -1,119 +1,88 @@
 #include "stdafx.h"
 #include "my_gsl.h"
 
-//DoubleArray& DoubleArray::operator=(const DoubleArray& arr )
-//{
-//	RemoveAll();
-//	SetSize(arr.GetSize());
-//	for(int i=0; i<arr.GetSize();i++) Add(arr[i]);
-//	return *this;
-//}
-
-int Solver1d::Main ()
+void DoubleArray::operator=( const gsl_vector& vector )
 {
-	fsolver_type=gsl_root_fsolver_brent;
-	s = gsl_root_fsolver_alloc (fsolver_type);
-	gsl_root_fsolver_set (s, &F, x_lo, x_hi);
-	do
+	double t; RemoveAll();
+	for (size_t i = 0; i < vector.size; i++)  
 	{
-		iter++;
-		status = gsl_root_fsolver_iterate (s);
-		x_lo = gsl_root_fsolver_x_lower (s);
-		x_hi = gsl_root_fsolver_x_upper (s);
-		status = gsl_root_test_interval (x_lo, x_hi, epsabs, epsrel);
+		t = gsl_vector_get (&vector, i);
+		(*this).Add(t);
 	}
-	while (status == GSL_CONTINUE && iter < max_iter);	
-	return status;
 }
-
-int Solver1d::Init( double& _x_lo, double& _x_hi, double _epsabs, double _epsrel )
+gsl_vector* DoubleArray::CreateGSLReplica()
 {
-    x_lo=_x_lo; x_hi=_x_hi; epsabs=_epsabs; epsrel=_epsrel; iter=0;
-	return GSL_SUCCESS;
+	gsl_vector* ret=NULL; double* arr = GetData(); int size = GetSize();
+	ret = gsl_vector_alloc (size); ASSERT(ret);
+
+	for (int i = 0; i < size; i++)  
+		gsl_vector_set (ret, i, arr[i]);
+	return ret;
 }
-
-void Solver1d::CleanUp()
+void DoubleArray::Serialize( CArchive& ar )
 {
-	if(s!=NULL) { gsl_root_fsolver_free (s); s=NULL; }
+	int i, n; double t;
+	if(ar.IsStoring())
+	{
+		n = GetSize(); ar << n; 
+		for(i = 0; i < n; i++) { t = operator[](i); ar << t; }
+	}
+	else
+	{		
+		RemoveAll(); ar >> n; 
+		for(i = 0; i < n; i++) { ar >> t; Add(t); }
+	}
 }
 //////////////////////////////////////////////////////////////////////////
-int MultiDimMinimizer::Main(void)
-{
-	double size;
-	fminimizer_type = gsl_multimin_fminimizer_nmsimplex; 
-	s = gsl_multimin_fminimizer_alloc (fminimizer_type, np);
-	gsl_multimin_fminimizer_set (s, &F, x, ss);
-	do
-	{
-		iter++;
-		status = gsl_multimin_fminimizer_iterate(s);
-		if (status) break;
-		size = gsl_multimin_fminimizer_size (s);
-		status = gsl_multimin_test_size (size, epsabs);
-	}
-	while (status == GSL_CONTINUE && iter < max_iter);
-	return status;
+BaseForMultiFitterFuncParams::BaseForMultiFitterFuncParams(
+	const size_t _p, const DoubleArray &_x, const DoubleArray &_y, const DoubleArray &_sigma): BaseForFuncParams(), p(_p)
+{		
+	ASSERT(_y.GetSize() ==_sigma.GetSize());
+	y = _y.GetData(); sigma = _sigma.GetData(); n =_y.GetSize(); 
+	ASSERT(n >= p);
+	leftmostX = _x[0]; rightmostX = _x[n - 1];
+	dx = (rightmostX - leftmostX)/(n - 1);
+	pDerivatives = NULL; pFunction = NULL; pDerivatives = new pDerivFunc[p];
 }
-
-int MultiDimMinimizer::Init( double _epsabs )
+int BaseForMultiFitterFuncParams::f( const gsl_vector * x, gsl_vector * f )
 {
-	epsabs=_epsabs;	s = NULL; iter=0; np=GetParamsNum();
+	for (size_t i = 0; i < n; i++)
+	{
+		gsl_vector_set (f, i, (pFunction(i, x->data, p) - y[i])/sigma[i]);
+	}
 	return GSL_SUCCESS;
 }
-
-void MultiDimMinimizer::CleanUp()
+int BaseForMultiFitterFuncParams::df( const gsl_vector * x, gsl_matrix * J )
 {
-	if(x!=NULL)		{gsl_vector_free(x); x=NULL;}
-	if(ss!=NULL)	{gsl_vector_free(ss);ss=NULL;}
-	if(s!=NULL)		{gsl_multimin_fminimizer_free (s); s=NULL;}
+	double *c;
+	for (size_t i = 0; i < n; i++)
+	{
+		c = PrepareDerivBuf(i, x->data, p);
+		for (size_t j = 0; j < p; j++)
+		{
+			gsl_matrix_set (J, i, j, pDerivatives[j](i, x->data, p, c)/sigma[i]);		
+		}
+	}
+	return GSL_SUCCESS;
 }
-
+BaseForMultiFitterFuncParams::~BaseForMultiFitterFuncParams()
+{
+	delete[] pDerivatives;
+}
+//////////////////////////////////////////////////////////////////////////
+void BaseForFitFunc::InitFrom( const BaseForMultiFitterFuncParams &params )
+{
+	leftmostX = params.leftmostX; rightmostX = params.rightmostX; dx = params.dx; pFunction = params.pFunction;
+}
+void BaseForFitFunc::InitFrom( const SolverData &data ) { *((SolverData*)this) = *((SolverData*)&data); }
+double BaseForFitFunc::GetXabsY( const double &x ) { return pFunction((x - leftmostX)/dx, a, a.GetSize()); }
+double BaseForFitFunc::GetXrelY( double &x ) { double ret = pFunction(x, a, a.GetSize()); x += leftmostX; return ret; }
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 ComplexGSL sqrt( ComplexGSL& c )	{ return ComplexGSL(gsl_complex_sqrt(c.z)); }
 ComplexGSL pow2( ComplexGSL& c )	{ return ComplexGSL(gsl_complex_mul(c.z,c.z)); }
 ComplexGSL exp( ComplexGSL& c )		{ return ComplexGSL(gsl_complex_exp(c.z)); }
 //////////////////////////////////////////////////////////////////////////
-
-int MultiFitter::Init(double _epsabs, double _epsrel)
-{
-	epsabs=_epsabs; epsrel=_epsrel;	s = NULL; iter=0; p=GetParamsNum();
-	return GSL_SUCCESS;
-}
-
-int MultiFitter::MainFDF()
-{	
-	multifit_fdfsolver_type = gsl_multifit_fdfsolver_lmsder;
-	s = gsl_multifit_fdfsolver_alloc (multifit_fdfsolver_type, n, p);
-	gsl_multifit_fdfsolver_set (s, &F, &x.vector);
-	do
-	{
-		iter++;
-		status = gsl_multifit_fdfsolver_iterate (s);
-		status = gsl_multifit_test_delta (s->dx, s->x, epsabs, epsrel);
-	}
-	while (status == GSL_CONTINUE && iter < max_iter);
-    return status;	
-}
-
-int MultiFitter::MainF()
-{
-	multifit_fdfsolver_type = gsl_multifit_fdfsolver_lmsder;
-	sf = gsl_multifit_fsolver_alloc (multifit_fsolver_type, n, p);
-	gsl_multifit_fsolver_set (sf, &Ff, &x.vector);
-	do
-	{
-		iter++;
-		status = gsl_multifit_fsolver_iterate (sf);
-		status = gsl_multifit_test_delta (sf->dx, sf->x, epsabs, epsrel);
-	}
-	while (status == GSL_CONTINUE && iter < max_iter);
-	return status;	
-}
-
-void MultiFitter::CleanUp()
-{
-	if(s!=NULL) { gsl_multifit_fdfsolver_free (s); s=NULL; }
-	if(sf!=NULL) { gsl_multifit_fsolver_free (sf); sf=NULL; }
-}
 //////////////////////////////////////////////////////////////////////////
 int FFTRealTransform::Main()
 {
@@ -143,7 +112,7 @@ void FFTRealTransform::CleanUp()
 
 int FFTRealTransform::Run( Params& params,Direction dir )
 {
-	Timer1.Start();
+	MyTimer Timer1; Timer1.Start();
 	if( (status=Init(params, dir))==GSL_SUCCESS)
 	{
 		status=Main();
@@ -164,4 +133,3 @@ int FFTRealTransform::Init( Params& _params, Direction _dir )
 	return GSL_SUCCESS;
 }
 
-//////////////////////////////////////////////////////////////////////////

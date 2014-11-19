@@ -121,5 +121,5 @@ void SystemConfig::SetCalibration( CalibrationParams &_cal )
 
 void SystemConfig::GetCalibration(CalibrationParams* tt)
 {
-	*tt=cal.cal;
+	*tt = cal.cal;
 }
