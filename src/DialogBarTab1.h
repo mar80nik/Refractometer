@@ -23,7 +23,7 @@ protected:
 	ProtectedSeriesArray* Series;
 	CalibrationParams cal;
 	CalibratorDialog CalibratorDlg;
-	CalcTEDialog	CalcTEDlg, CalcTMDlg;
+	CalcTEDialog	CalcTEDlg;
 
 public:
 	DialogBarTab1(CWnd* pParent = NULL);   // standard constructor	

@@ -132,11 +132,6 @@ void CalibratorDialog::OnBnClickedCalculateCal()
 		t=Q[i]*DEGREE; teta.Add(t);
 	}
 	UpdateData();
-	for(int i = 0; i < modes_num; i++)
-	{
-		t=N[i]; Nexp.Add(N[i]); 
-		t=Q[i]*DEGREE; teta.Add(t);
-	}
 	//TChart *chart=(TChart*)&GlobalChart; 
 	//ASSERT(chart != NULL);
 	//if (chart == NULL) return;
@@ -172,7 +167,8 @@ void CalibratorDialog::OnBnClickedCalculateCal()
 	cal.CalculateFrom(Nexp, teta, n_p, 1, 1.45705, alfa*DEGREE, 632.8);
 
 	fi0 = cal.val[CalibrationParams::ind_fi0]/DEGREE;
-	N0 = cal.val[CalibrationParams::ind_N0]; L = cal.val[CalibrationParams::ind_L]; d0 = cal.val[CalibrationParams::ind_d0]; 
+	N0 = cal.val[CalibrationParams::ind_N0]; L = cal.val[CalibrationParams::ind_L]; 
+	d0 = cal.val[CalibrationParams::ind_d0]; 
 	UpdateData(0);
 
 	T.Format("****Statistics***"); *log << T;

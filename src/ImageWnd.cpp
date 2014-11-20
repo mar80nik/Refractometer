@@ -52,9 +52,9 @@ int ImageWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 #define TEST1
 #ifdef DEBUG
 	#if defined TEST1
-//	 	dark.LoadPic(CString("..\\exe\\ttt.png"));
-	 	//cupol.LoadPic(CString("..\\exe\\cupol.png"));
-	 	//strips.LoadPic(CString("..\\exe\\strips.png"));
+	 	dark.LoadPic(CString("..\\exe\\dark.png"));
+	 	cupol.LoadPic(CString("..\\exe\\cupol.png"));
+	 	strips.LoadPic(CString("..\\exe\\strips.png"));
 	#elif defined TEST2
 		dark.LoadPic(CString("exe\\test1.png"));
 		cupol.LoadPic(CString("exe\\test2.png"));

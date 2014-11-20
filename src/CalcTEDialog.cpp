@@ -18,7 +18,7 @@ CalcTEDialog::CalcTEDialog(CWnd* pParent /*=NULL*/)
 #if defined DEBUG
 	N[3]=3077; N[2]=2594; N[1]=1951; N[0]=1161;
 #endif
-	lambda = 632.8; n3 = 1.45705;
+	lambda = 632.8; n3 = 1.45705; n_p = 2.15675;
 }
 
 CalcTEDialog::~CalcTEDialog()
@@ -59,7 +59,16 @@ END_MESSAGE_MAP()
 void CalcTEDialog::OnBnClickedConvertToAngles()
 {
 	CalibrationParams cal; UpdateData();
-	MainCfg.GetCalibration(&cal); cal.val[CalibrationParams::ind_n_p] = n_p; teta_exp.RemoveAll(); 
+	MainCfg.GetCalibration(&cal); 
+	if (cal.IsValidCalibration() == FALSE)
+	{
+		ControledLogMessage log(::lmprHIGH);
+		log.T.Format("Pixels could not be converted because of wrong calibrations"); log << log.T;
+		log.Dispatch();
+		return;
+	}
+	teta_exp.RemoveAll(); 
+	cal.val[CalibrationParams::ind_n_p] = n_p; 
 	for(int i = 0, j = 0; i < modes_num; i++)
 	{	
 		AngleFromCalibration angle = cal.ConvertPixelToAngle(N[i]);
@@ -75,6 +84,7 @@ void CalcTEDialog::OnBnClickedConvertToAngles()
 		log.T.Format("Wrong number of converted angles because of wrong calibrations"); log << log.T;
 		log.Dispatch();
 	}
+	
 	UpdateData(0);
 }
 
@@ -129,6 +139,18 @@ void CalcTEDialog::OnBnClickedCalculate()
 {
 	CString T; LogMessage *log=new LogMessage(); FilmParams film;
 	UpdateData();
+
+	CalibrationParams cal; MainCfg.GetCalibration(&cal);
+	if (cal.IsValidCalibration() == FALSE)
+	{
+		ControledLogMessage log(::lmprHIGH);
+		log.T.Format("Film params could not be converted because of wrong calibrations"); log << log.T;
+		log.Dispatch();
+		return;
+	}
+	cal.val[CalibrationParams::ind_n_s] = n3; 
+	cal.val[CalibrationParams::ind_lambda] = lambda; 
+
 	if (teta_exp.GetSize() != modes_num)
 	{
 		ControledLogMessage log(::lmprHIGH);
@@ -145,10 +167,7 @@ void CalcTEDialog::OnBnClickedCalculate()
 		T.Format("--FilmParamsTE---");
 	}
 	log->CreateEntry("*",T);
-
-	CalibrationParams cal; MainCfg.GetCalibration(&cal);
-	cal.val[CalibrationParams::ind_lambda] = lambda;
-
+	
 	if(film.Calculator(pol, cal, teta_exp) == GSL_SUCCESS)
 	{
 		nf = film.n; hf = film.H;

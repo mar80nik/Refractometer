@@ -18,8 +18,7 @@ class CalcTEDialog : public CDialog
 public:
 	double N[modes_num]; TypeArray<AngleFromCalibration> teta_exp;
 	double Q[modes_num];
-	//BOOL IsTM;
-
+	
 	CalcTEDialog(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CalcTEDialog();
 

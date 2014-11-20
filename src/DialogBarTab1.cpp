@@ -130,78 +130,83 @@ void DialogBarTab1::Serialize(CArchive& ar)
 
 void DialogBarTab1::OnBnClicked_Fit()
 {		
-		CString str; UpdateData(); TPointVsErrorSeries *graph; SimplePoint pnt;		
-		PointVsErrorArray buf;		
-		LogMessage *log=new LogMessage(); 
-		void *x; TChart *chart=(TChart *)Parent;
+	UpdateData();  	
+	PointVsErrorArray buf; ControledLogMessage log;		
+	void *x; TChart *chart=(TChart *)Parent;
 
-		if((x=chart->Series.GainAcsess(READ))!=NULL)
+	if((x=chart->Series.GainAcsess(READ))!=NULL)
+	{
+		SeriesProtector guard(x); TSeriesArray& series(guard); TPointVsErrorSeries *graph;
+		if(	(graph = GetSeries(series)) != NULL) 
 		{
-			SeriesProtector guard(x); TSeriesArray& series(guard);
-			if(	(graph=GetSeries(series))!=NULL) 
+			graph->GetValues(buf);
+			int N = buf.GetSize(), n0=GetArrayIndex(buf.x,X0), n1 = n0-dX, n2 = n0+dX;
+			if(n1 < 0 || n2 >= N)
 			{
-				graph->GetValues(buf);
-				int N=buf.GetSize(), n0=GetArrayIndex(buf.x,X0), n1=n0-dX, n2=n0+dX;
-				if(n1<0 || n2>=N)
-				{
-					str.Format("No valid points found %d+/-%d",X0,dX); log->CreateEntry("ERR",str,LogMessage::high_pr);	
-					log->Dispatch(); 
-					return;
-				}				
-				buf.RemoveAll(); graph->GetValues(buf,n1,n2);					
-			}			
-			else
-			{
-				str.Format("No series matching criteria (ACTIVE) found"); log->CreateEntry("ERR",str,LogMessage::high_pr);	
-				log->Dispatch(); return;
-			}
-		}
-		else return;
-
-		DoubleArray init; ParabolaFitFunc fiting;
-		init << 1 << 1e-1 << 1e-2;		
-		fiting.CalculateFrom(buf.x, buf.y, buf.dy, init);
-		
-		str.Format("************ ParabolaFit ******************"); *log << str;
-		str.Format("status = %s", gsl_strerror (fiting.status)); *log << str;
-		str.Format("----------------------------------"); *log << str;
-		if (fiting.status == GSL_SUCCESS)
-		{
-			for(int i = 0; i < fiting.a.GetSize(); i++)
-			{
-				str.Format("x%d = %g +/- %g%%", i, fiting.a[i], 100*fiting.da[i]/fiting.a[i]); *log << str;
-			}
-			pnt.y = fiting.GetTop(pnt.x); str.Format("xmin = %g ymin = %g", pnt.x, pnt.y);
-		}
+				log.T.Format("No valid points found %d+/-%d",X0,dX); log.SetPriority(lmprHIGH); log << log.T;
+				log.Dispatch(); 
+				return;
+			}				
+			buf.RemoveAll(); graph->GetValues(buf,n1,n2);					
+		}			
 		else
 		{
-			log->SetPriority(lmprHIGH);
+			log.T.Format("No series matching criteria (ACTIVE) found"); log.SetPriority(lmprHIGH); log << log.T;
+			log.Dispatch(); 
+			return;
 		}
-		str.Format("time = %g ms", fiting.dt.val()); *log << str;
-		str.Format("func_cals = %d", fiting.cntr.func_call); *log << str;
-		str.Format("iter_num = %d", fiting.cntr.iter); *log << str;
-		
-		if(fiting.status == GSL_SUCCESS && (x=chart->Series.GainAcsess(WRITE))!=NULL)
-		{
-			SeriesProtector guard(x); TSeriesArray& series(guard); str.Format("PolyFit%d",PolinomOrder);
-			TSimplePointSeries* t1 = NULL; 
-			if((t1=new TSimplePointSeries(str))!=0)	
-			{
-				series.Add(t1); 
-				t1->_SymbolStyle::Set(NO_SYMBOL);
-				t1->AssignColors(ColorsStyle(clRED,series.GetRandomColor()));
-				t1->SetVisible(true); 
+	}
+	else return;
 
-				t1->ParentUpdate(UPD_OFF);
-				for(int i = 0; i < buf.x.GetSize(); i++) 
-				{
-					pnt.x = i; pnt.y = fiting.GetXrelY(pnt.x); t1->AddXY(pnt);
-				}
-				t1->ParentUpdate(UPD_ON);
-			}	
+	DoubleArray init; ParabolaFitFunc fiting; 	SimplePoint pnt;	
+	init << 1 << 1e-1 << 1e-2;		
+	fiting.CalculateFrom(buf.x, buf.y, buf.dy, init);
+
+	log.T.Format("************ ParabolaFit ******************"); log << log.T;
+	log.T.Format("status = %s", gsl_strerror (fiting.status)); log << log.T;
+	log.T.Format("----------------------------------"); log << log.T;
+	if (fiting.status != GSL_SUCCESS)
+	{
+		log.SetPriority(lmprHIGH);
+		for(int i = 0; i < fiting.a.GetSize(); i++)
+		{
+			log.T.Format("x%d = %g", i, fiting.a[i]); log << log.T;
 		}
-		chart->PostMessage(UM_CHART_SHOWALL);		
-		log->Dispatch();
+	}
+	else
+	{
+		for(int i = 0; i < fiting.a.GetSize(); i++)
+		{
+			log.T.Format("x%d = %g +/- %g%%", i, fiting.a[i], 100*fiting.da[i]/fiting.a[i]); log << log.T;
+		}
+	}
+	pnt.y = fiting.GetTop(pnt.x); log.T.Format("xmin = %g ymin = %g", pnt.x, pnt.y); log << log.T;
+	log.T.Format("time = %g ms", fiting.dt.val()); log << log.T;
+	log.T.Format("func_cals = %d", fiting.cntr.func_call); log << log.T;
+	log.T.Format("iter_num = %d", fiting.cntr.iter); log << log.T;
+
+	if(fiting.status == GSL_SUCCESS && (x=chart->Series.GainAcsess(WRITE))!=NULL)
+	{
+		SeriesProtector guard(x); TSeriesArray& series(guard); CString str;
+		TSimplePointSeries* t1 = NULL; SimplePoint pnt;	
+		str.Format("PolyFit%d",PolinomOrder);
+		if((t1=new TSimplePointSeries(str))!=0)	
+		{
+			series.Add(t1); 
+			t1->_SymbolStyle::Set(NO_SYMBOL);
+			t1->AssignColors(ColorsStyle(clRED,series.GetRandomColor()));
+			t1->SetVisible(true); 
+
+			t1->ParentUpdate(UPD_OFF);
+			for(int i = 0; i < buf.x.GetSize(); i++) 
+			{
+				pnt.x = i; pnt.y = fiting.GetXrelY(pnt.x); t1->AddXY(pnt);
+			}
+			t1->ParentUpdate(UPD_ON);
+		}	
+	}
+	chart->PostMessage(UM_CHART_SHOWALL);		
+	log.Dispatch();		
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -763,7 +768,6 @@ BOOL DialogBarTab1::DestroyWindow()
 {
 	CalibratorDlg.DestroyWindow();
 	CalcTEDlg.DestroyWindow();
-	CalcTMDlg.DestroyWindow();
 	return BarTemplate::DestroyWindow();
 }
  
