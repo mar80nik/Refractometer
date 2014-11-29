@@ -34,11 +34,12 @@ void DoubleArray::Serialize( CArchive& ar )
 	}
 }
 //////////////////////////////////////////////////////////////////////////
-BaseForMultiFitterFuncParams::BaseForMultiFitterFuncParams(
-	const size_t _p, const DoubleArray &_x, const DoubleArray &_y, const DoubleArray &_sigma): BaseForFuncParams(), p(_p)
+BaseForMultiFitterFuncParams::
+	BaseForMultiFitterFuncParams(const size_t _p, 
+	const DoubleArray &_x, const DoubleArray &_y, const DoubleArray &_sigma): BaseForFuncParams(), p(_p)
 {		
-	ASSERT(_y.GetSize() ==_sigma.GetSize());
-	y = _y.GetData(); sigma = _sigma.GetData(); n =_y.GetSize(); 
+	ASSERT(_y.GetSize() ==_sigma.GetSize()); sigma = NULL;
+	y = _y.GetData(); FillSigma(_sigma); n =_y.GetSize(); 
 	ASSERT(n >= p);
 	leftmostX = _x[0]; rightmostX = _x[n - 1];
 	dx = (rightmostX - leftmostX)/(n - 1);
@@ -68,7 +69,38 @@ int BaseForMultiFitterFuncParams::df( const gsl_vector * x, gsl_matrix * J )
 BaseForMultiFitterFuncParams::~BaseForMultiFitterFuncParams()
 {
 	delete[] pDerivatives;
+	if (sigma != NULL)
+	{
+		delete[] sigma; sigma = NULL;
+	}
 }
+
+int BaseForMultiFitterFuncParams::FillSigma(const DoubleArray &_sigma)
+{
+	int ret = -1;
+	if (sigma != NULL)
+	{
+		delete[] sigma; sigma = NULL;
+	}
+	if (_sigma.HasValues())
+	{
+		ret = 0;
+		sigma = new double[_sigma.GetSize()];
+		for (int i = 0; i < _sigma.GetSize(); i++)
+		{
+			if (_sigma[i] < 1e-10)
+			{
+				sigma[i] = 1e-10; ret++;
+			}
+			else
+			{
+				sigma[i] = _sigma[i];
+			}
+		}
+	}
+	return ret;
+}
+
 //////////////////////////////////////////////////////////////////////////
 void BaseForFitFunc::InitFrom( const BaseForMultiFitterFuncParams &params )
 {

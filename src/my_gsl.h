@@ -49,6 +49,7 @@ public:
 			return 0;
 		}
 	}
+	BOOL HasValues() const {return (GetSize() != 0);}
 };
 
 class DoubleArray: public TypeArray<double>
@@ -325,7 +326,7 @@ typedef double (*pDerivFunc)(const double &x, const double *a, const size_t &p, 
 struct BaseForMultiFitterFuncParams:public BaseForFuncParams
 {
 public:
-	size_t n, p; const double *y, *sigma; double leftmostX, rightmostX, dx;
+	size_t n, p; const double *y; double *sigma; double leftmostX, rightmostX, dx;
 	pDerivFunc *pDerivatives; pFunc pFunction;
 
 	BaseForMultiFitterFuncParams(const size_t _p, const DoubleArray &_x, const DoubleArray &_y, const DoubleArray &_sigma);
@@ -334,6 +335,7 @@ public:
 	size_t GetPointsNum() {return n;}
 	int f(const gsl_vector * x, gsl_vector * f);
 	int df(const gsl_vector * x, gsl_matrix * J);
+	int FillSigma(const DoubleArray &sigma);
 };
 
 
