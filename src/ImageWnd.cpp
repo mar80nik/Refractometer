@@ -162,7 +162,7 @@ BOOL ImageWnd::CtrlsTab::OnInitDialog()
 ImageWnd::CtrlsTab::CtrlsTab( CWnd* pParent /*= NULL*/ ): BarTemplate(pParent)
 {
 #if defined DEBUG
-	stroka = 220; AvrRange = 1; Xmin = 100; Xmax = 6000;
+	stroka = 1200; AvrRange = 1; Xmin = 600; Xmax = 3100;
 #else
 	stroka = 1224; Xmin = 2; Xmax = 3263;
 #endif
@@ -1243,6 +1243,7 @@ void ImagesAccumulator::ScanLine( void *_buf, const ScanRgnData &data)
 			buf->Add(pnte);
 		}
 		Timer1.Stop(); fillTime = Timer1.GetValue();
+		delete[] avr_accum; delete[] avr_accum2;
 	}
 }
 
