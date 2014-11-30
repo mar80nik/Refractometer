@@ -84,13 +84,38 @@ int BaseForMultiFitterFuncParams::FillSigma(const DoubleArray &_sigma)
 	}
 	if (_sigma.HasValues())
 	{
-		ret = 0;
-		sigma = new double[_sigma.GetSize()];
+		size_t i = 0, size = _sigma.GetSize(); double min;
+		ret = 0; sigma = new double[size];
+				
+		while (i < size)
+		{
+			if (_sigma[i] != 0) break;
+			i++;
+		}
+			
+		if (i < size)
+		{
+			min = _sigma[i]; i++;
+			while(i < size)
+			{
+				if (_sigma[i] < min && _sigma[i] != 0)
+				{
+					min = _sigma[i];
+				}
+				i++;
+			}
+		}
+		else // all sigmas are equal to 0
+		{
+			min = 1.;
+		}
+		min /= 10;
+
 		for (int i = 0; i < _sigma.GetSize(); i++)
 		{
-			if (_sigma[i] < 1e-10)
+			if (_sigma[i] == 0)
 			{
-				sigma[i] = 1e-10; ret++;
+				sigma[i] = min; ret++;
 			}
 			else
 			{
@@ -102,11 +127,6 @@ int BaseForMultiFitterFuncParams::FillSigma(const DoubleArray &_sigma)
 }
 
 //////////////////////////////////////////////////////////////////////////
-void BaseForFitFunc::InitFrom( const BaseForMultiFitterFuncParams &params )
-{
-	leftmostX = params.leftmostX; rightmostX = params.rightmostX; dx = params.dx; pFunction = params.pFunction;
-}
-void BaseForFitFunc::InitFrom( const SolverData &data ) { *((SolverData*)this) = *((SolverData*)&data); }
 double BaseForFitFunc::GetXabsY( const double &x ) { return pFunction((x - leftmostX)/dx, a, a.GetSize()); }
 double BaseForFitFunc::GetXrelY( double &x ) { double ret = pFunction(x, a, a.GetSize()); x += leftmostX; return ret; }
 //////////////////////////////////////////////////////////////////////////

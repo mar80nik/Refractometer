@@ -345,8 +345,6 @@ struct BaseForFitFunc: public SolverData
 	DoubleArray a, da; pFunc pFunction;
 
 	BaseForFitFunc(): SolverData() { leftmostX = rightmostX = dx = 0; pFunction = NULL;}
-	void InitFrom(const BaseForMultiFitterFuncParams &params);
-	void InitFrom(const SolverData &data);
 	double GetXabsY(const double &x);
 	double GetXrelY(double &x);
 };
@@ -432,6 +430,19 @@ public:
 		}	
 		dt=Timer1.StopStart(); params->DestroyBuffers();
 		return status;
+	}
+	HRESULT Fill_FitFunc(BaseForFitFunc* FitFunc)
+	{
+		if (FitFunc != NULL && params != NULL)
+		{
+			FitFunc->a = a; 
+			FitFunc->leftmostX = params->leftmostX;
+			FitFunc->rightmostX = params->rightmostX; 
+			FitFunc->dx = params->dx; FitFunc->pFunction = params->pFunction;
+			*((SolverData*)FitFunc) = *((SolverData*)this); 
+			return S_OK;
+		}
+		return E_FAIL;		
 	}
 };
 //////////////////////////////////////////////////////////////////////////

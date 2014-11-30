@@ -262,7 +262,7 @@ int ParabolaFitFunc::CalculateFrom(	const DoubleArray& x, const DoubleArray& y,
 	{
 		da = solver.da; 		
 	}
-	a = solver.a; InitFrom(params); InitFrom(solver);
+	solver.Fill_FitFunc(this);
 	return solver.status;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -305,7 +305,7 @@ int KneeFitFunc::CalculateFrom(	const DoubleArray& x, const DoubleArray& y,
 	{
 		da = solver.da; 		
 	}
-	a = solver.a; InitFrom(params); InitFrom(solver);
+	solver.Fill_FitFunc(this);
 	return solver.status;
 }
 
