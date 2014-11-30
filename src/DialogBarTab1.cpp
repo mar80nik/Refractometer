@@ -136,18 +136,19 @@ void DialogBarTab1::OnBnClicked_Fit()
 
 	if((x=chart->Series.GainAcsess(READ))!=NULL)
 	{
-		SeriesProtector guard(x); TSeriesArray& series(guard); TPointVsErrorSeries *graph;
+		SeriesProtector guard(x); TSeriesArray& series(guard); TPointVsErrorSeries *graph; PointVsErrorArray buft;
 		if(	(graph = GetSeries(series)) != NULL) 
 		{
-			graph->GetValues(buf);
-			int N = buf.GetSize(), n0=GetArrayIndex(buf.x,X0), n1 = n0-dX, n2 = n0+dX;
+			graph->GetValues(buft);
+			int N = buft.GetSize(), index = GetArrayIndex(buft.x, X0), n1 = index - dX, n2 = index + dX;
+
 			if(n1 < 0 || n2 >= N)
 			{
 				log.T.Format("No valid points found %d+/-%d",X0,dX); log.SetPriority(lmprHIGH); log << log.T;
 				log.Dispatch(); 
 				return;
 			}				
-			buf.RemoveAll(); graph->GetValues(buf,n1,n2);					
+			buf.CopyFrom(buft, 2*dX + 1, index - dX); 
 		}			
 		else
 		{
@@ -305,11 +306,45 @@ void ShowMinimums(ProtectedSeriesArray &Series, SimplePointArray &data)
 }
 //////////////////////////////////////////////////////////////////////////
 
+enum FitingFailReason {OUT_OF_RANGE = 0,FIT_GSL_FAIL_DMAX, FIT_SIGN_FAIL_DMAX,FIT_GSL_FAIL, FIT_SIGN_FAIL};
+
+struct FailedFiting
+{
+	SimplePoint min;
+	FitingFailReason Reason;
+
+	FailedFiting() {}
+	FailedFiting(const SimplePoint _min, const FitingFailReason _Reason)		
+	{
+		min = _min; Reason = _Reason;
+	}
+	FailedFiting& operator=(const FailedFiting &f)
+	{
+		min = f.min;
+		Reason = f.Reason;
+		return *this;
+	}
+};
+
 struct MinimumsFitFilterParams
 {	
 	ms dt;
 	int status; 
 	TypeArray<ParabolaFitFunc> fitings;
+	TypeArray<FailedFiting> failed_fitings;
+	void GetReport(ControledLogMessage &log)
+	{
+		log.T.Format("minimums=%d time=%g ms", fitings.GetSize(), dt.val()); log << log.T;
+		if (failed_fitings.HasValues())
+		{
+			log.T.Format("--=== Failed Mins (%d) ===--", failed_fitings.GetSize()); log << log.T;
+			for (int i = 0; i < failed_fitings.GetSize(); i++)
+			{
+				FailedFiting &tt = failed_fitings[i];
+				log.T.Format("%d: at %g with Reason = %d", i + 1, tt.min.x, (int)tt.Reason); log << log.T;
+			}
+		}
+	}
 };
 
 #define INDEX_OUT_OF_RANGE -1;
@@ -347,18 +382,46 @@ MinimumsFitFilterParams* MinimumsFitFilterFunc(PointVsErrorArray &data,SimplePoi
 	for(i = 0; i < mins.GetSize(); i++)
 	{
 		SimplePoint tt = mins[i];
-		index = GetArrayIndex(data.x,mins[i].x);
-		if( index < dn_max ) continue;
+		index = GetArrayIndex(data.x, tt.x);
+		if( index < dn_max ) 
+		{
+			FailedFiting ff(tt, OUT_OF_RANGE); 
+			ret->failed_fitings << ff;
+			continue;
+		}
 
 		buft.CopyFrom(data, 2*dn_max + 1, index - dn_max); 
 		fiting.CalculateFrom(buft.x, buft.y, buft.dy, init);
-	    if(fiting.status != GSL_SUCCESS) continue;
-		if(fiting.a[2] < 0) continue;
+	    if(fiting.status != GSL_SUCCESS) 
+		{
+			FailedFiting ff(tt, FIT_GSL_FAIL_DMAX); 
+			ret->failed_fitings << ff;
+			continue;
+		}
+		if(fiting.a[2] < 0) 
+		{
+			FailedFiting ff(tt, FIT_SIGN_FAIL_DMAX); 
+			ret->failed_fitings << ff;
+			continue;
+		}
 
 		buft.CopyFrom(data,2*dn+1,index-dn); 
 		fiting.CalculateFrom(buft.x, buft.y, buft.dy, init);
-        if(fiting.status != GSL_SUCCESS) continue;
-		if(fiting.a[2] < 0) continue;
+		double a0 = fiting.a[ParabolaFitFunc::ind_c];
+		double a1 = fiting.a[ParabolaFitFunc::ind_b];
+		double a2 = fiting.a[ParabolaFitFunc::ind_a];
+		if(fiting.status != GSL_SUCCESS) 
+		{
+			FailedFiting ff(tt, FIT_GSL_FAIL); 
+			ret->failed_fitings << ff;
+			continue;
+		}
+		if(fiting.a[2] < 0) 
+		{
+			FailedFiting ff(tt, FIT_SIGN_FAIL); 
+			ret->failed_fitings << ff;
+			continue;
+		}
 
 		SimplePoint top; top.y = fiting.GetTop(top.x);
 		if( top.x < fiting.leftmostX || top.x > fiting.rightmostX ) continue;
@@ -420,7 +483,7 @@ afx_msg void DialogBarTab1::OnBnClicked_Locate()
 	int n=0; MyTimer timer1; ms dt1,dt2,dt3,dt4,dt5; UpdateData();
 	TPointVsErrorSeries *graph; CString str;
 	PointVsErrorArray BUF; SimplePointArray buf_smooth; 
-	LogMessage *log=new LogMessage(); 
+	ControledLogMessage log; 
 	
 	timer1.Start();
 	if((x=chart->Series.GainAcsess(READ))!=NULL)
@@ -432,8 +495,9 @@ afx_msg void DialogBarTab1::OnBnClicked_Locate()
 		}			
 		else
 		{
-			str.Format("No series matching criteria (ACTIVE) found"); log->CreateEntry("ERR",str,LogMessage::high_pr);	
-			log->Dispatch(); return;
+			log.SetPriority(lmprHIGH);
+			log.T.Format("No series matching criteria (ACTIVE) found"); log << log.T;
+			log.Dispatch(); return;
 		}
 	}
 	else return;
@@ -448,16 +512,16 @@ afx_msg void DialogBarTab1::OnBnClicked_Locate()
 	ShowFittings(chart->Series, *MinimumsFitFilter);
 	dt1=timer1.StopStart();
 
-	str.Format("********Fourier smooth*************"); *log << str;
-	str.Format("time=%g ms",FourierSmooth.dt.val()); *log << str;
-	str.Format("********Minimums 1stage*************"); *log << str;
-	str.Format("minimums=%d time=%g ms", LocateMinimums.minimumN, LocateMinimums.dt.val()); *log << str;
-	str.Format("********Minimums 2stage*************"); *log << str;
-	str.Format("minimums=%d time=%g ms", MinimumsFitFilter->fitings.GetSize(), MinimumsFitFilter->dt.val()); *log << str;
-	str.Format("*********Total********************"); *log << str;
-	str.Format("time=%g ms",dt1.val()); *log << str;
+	log.T.Format("********Fourier smooth*************"); log << log.T;
+	log.T.Format("time=%g ms",FourierSmooth.dt.val()); log << log.T;
+	log.T.Format("********Minimums 1stage*************"); log << log.T;
+	log.T.Format("minimums=%d time=%g ms", LocateMinimums.minimumN, LocateMinimums.dt.val()); log << log.T;
+	log.T.Format("********Minimums 2stage*************"); log << log.T;
+	MinimumsFitFilter->GetReport(log);
+	log.T.Format("*********Total********************"); log << log.T;
+	log.T.Format("time=%g ms",dt1.val()); log << log.T;
 
-	log->Dispatch();
+	log.Dispatch();
 	delete MinimumsFitFilter;
 }
 
