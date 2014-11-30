@@ -143,7 +143,7 @@ public:
 	int Add(Point1D& pnt);
 	double* GetX();
 	virtual void SetSize(int n);
-	virtual int CopyFrom( Point1DArray& src, UINT total=0, UINT src_shift=0 );
+	virtual int CopyFrom( const Point1DArray& src, UINT total=0, UINT src_shift=0 );
 	virtual void RemoveAll() {x.RemoveAll(); AbstractPoint2DArray::RemoveAll(); }
 	virtual void RemoveAt(int n) {x.RemoveAt(n); AbstractPoint2DArray::RemoveAt(n); }
 	virtual void Serialize(CArchive& ar);
@@ -160,7 +160,7 @@ public:
 	int Add(SimplePoint& pnt);
 	double* GetY();
 	virtual void SetSize(int n);
-	virtual int CopyFrom( SimplePointArray& src, UINT total=0, UINT src_shift=0 );
+	virtual int CopyFrom( const SimplePointArray& src, UINT total=0, UINT src_shift=0 );
 	virtual void RemoveAll() {y.RemoveAll(); Point1DArray::RemoveAll(); }
 	virtual void RemoveAt(int n) {y.RemoveAt(n); Point1DArray::RemoveAt(n); }
 	virtual void Serialize(CArchive& ar);
@@ -176,7 +176,7 @@ public:
 	int Add(PointVsError& pnt);
 	double* GetdY();
 	virtual void SetSize(int n);
-	virtual int CopyFrom( PointVsErrorArray& src, UINT total=0, UINT src_shift=0 );
+	virtual int CopyFrom( const PointVsErrorArray& src, UINT total=0, UINT src_shift=0 );
 	virtual void RemoveAll() {dy.RemoveAll(); SimplePointArray::RemoveAll(); }
 	virtual void RemoveAt(int n) {dy.RemoveAt(n); SimplePointArray::RemoveAt(n); }
 	virtual void Serialize(CArchive& ar);
