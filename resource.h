@@ -128,6 +128,7 @@
 #define IDC_BUTTON11                    1023
 #define IDC_BUTTON16                    1024
 #define IDC_LIST1                       1025
+#define IDC_BUTTON17                    1025
 #define IDC_TAB1                        1026
 #define IDC_START_BUTTON                1027
 #define IDC_QUANTITY_EDIT               1028
@@ -153,6 +154,7 @@
 #define IDC_RADIO5                      1052
 #define IDC_RADIO6                      1053
 #define IDC_LIST3                       1056
+#define IDC_CHECK2                      1058
 #define IDC_RADIO7                      1060
 #define VOLTMETER1                      32771
 #define ID_CONFIG                       32772
@@ -294,7 +296,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        238
 #define _APS_NEXT_COMMAND_VALUE         32824
-#define _APS_NEXT_CONTROL_VALUE         1057
+#define _APS_NEXT_CONTROL_VALUE         1059
 #define _APS_NEXT_SYMED_VALUE           105
 #endif
 #endif

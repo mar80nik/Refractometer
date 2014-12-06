@@ -7,13 +7,15 @@
 IMPLEMENT_DYNAMIC(CalibratorDialog, CDialog)
 
 CalibratorDialog::CalibratorDialog(CWnd* pParent /*=NULL*/)
-	: CDialog(CalibratorDialog::IDD, pParent), Nc(cal.N0), Lc(cal.L), dc(cal.d0), n_p(cal.n_p)
+	: CDialog(CalibratorDialog::IDD, pParent)
 {
 	for(int i=0;i<modes_num;i++) { N[i]=0; Q[i]=0; }
-	Nc = Lc = dc = fic = alfa = n_p = 0.;
+	N0 = L = d0 = fi0 = alfa = n_p = 0.;
 	Series=NULL; 
 #if defined DEBUG
-	Q[0]=63.37; Q[1]=60.02; Q[2]=55.13; Q[3]=48.98;
+	N[0]=3077; N[1]=2594; N[2]=1951; N[3]=1161;
+	Q[0]=64.02; Q[1]=60.43; Q[2]=55.24; Q[3]=48.62;
+	alfa = 51; n_p = 2.15675;
 #endif
 }
 
@@ -32,10 +34,10 @@ void CalibratorDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT13, Q[1]);
 	DDX_Text(pDX, IDC_EDIT8, Q[2]);
 	DDX_Text(pDX, IDC_EDIT16, Q[3]);
-	DDX_Text(pDX, IDC_EDIT14, Nc);
-	DDX_Text(pDX, IDC_EDIT17, Lc);
-	DDX_Text(pDX, IDC_EDIT18, dc);
-	DDX_Text(pDX, IDC_EDIT19, fic);
+	DDX_Text(pDX, IDC_EDIT14, N0);
+	DDX_Text(pDX, IDC_EDIT17, L);
+	DDX_Text(pDX, IDC_EDIT18, d0);
+	DDX_Text(pDX, IDC_EDIT19, fi0);
 	DDX_Text(pDX, IDC_EDIT15, alfa);
 	DDX_Text(pDX, IDC_EDIT20, n_p);
 	DDX_Control(pDX, IDC_COMBO1, SeriesCombo);
@@ -123,21 +125,19 @@ void CalibratorDialog::OnBnClickedCalculateCal()
 {
 	MyTimer Timer1; ms dt1,dt2; double t;
 	DoubleArray Nexp,teta; CString T;
-	cal.n_s=1.; 
 	UpdateData();
 	for(int i = 0; i < modes_num; i++)
 	{
 		t=N[i]; Nexp.Add(N[i]); 
 		t=Q[i]*DEGREE; teta.Add(t);
 	}
-	cal.n_p = n_p; cal.alfa = alfa*DEGREE; 
-
-	TChart *chart=(TChart*)&GlobalChart; 
-	ASSERT(chart != NULL);
-	if (chart == NULL) return;
-	
+	UpdateData();
+	//TChart *chart=(TChart*)&GlobalChart; 
+	//ASSERT(chart != NULL);
+	//if (chart == NULL) return;
+	//
 	//void *xxx; 	CString str; TSimplePointSeries* t1=NULL; SimplePoint pnt;
-	
+	//
 	//if((xxx=chart->Series.GainAcsess(WRITE))!=NULL)
 	//{
 	//	SeriesProtector guard(xxx); TSeriesArray& series(guard); str.Format("PolyFit%d",1234);
@@ -148,13 +148,13 @@ void CalibratorDialog::OnBnClickedCalculateCal()
 	//		t1->AssignColors(ColorsStyle(clRED,series.GetRandomColor()));
 	//		t1->SetVisible(true); 
 
-	//		CalibrationFuncParams in_params(Nexp.GetSize(), Nexp, teta, cal.n_p, cal.n_s, cal.alfa );
+	//		//CalculateCalibrationParams::FuncParams in_params(Nexp.GetSize(), Nexp, teta, cal.n_p, cal.n_s, cal.alfa );
 
 	//		t1->ParentUpdate(UPD_OFF);
 	//		for(double x=0; x<45.0; x+=0.1)
 	//		{
 	//			pnt.x=x;
-	//			pnt.y=CalibrationSolver::func(x*DEGREE,&in_params);
+	//			//pnt.y=Solver1dTemplate<CalculateCalibrationParams::FuncParams>::func(x*DEGREE,&in_params);
 	//			t1->AddXY(pnt);
 	//		}
 	//		t1->ParentUpdate(UPD_ON);
@@ -164,38 +164,34 @@ void CalibratorDialog::OnBnClickedCalculateCal()
 	
 	LogMessage *log=new LogMessage(); log->CreateEntry("Log","Speed tests results",LogMessage::low_pr);
 
-	CreateCalibration(Nexp, teta, cal);
+	cal.CalculateFrom(Nexp, teta, n_p, 1, 1.45705, alfa*DEGREE, 632.8);
 
-	fic=cal.fi0/DEGREE; 
+	fi0 = cal.val[CalibrationParams::ind_fi0]/DEGREE;
+	N0 = cal.val[CalibrationParams::ind_N0]; L = cal.val[CalibrationParams::ind_L]; 
+	d0 = cal.val[CalibrationParams::ind_d0]; 
 	UpdateData(0);
 
-	T.Format("****Statistics***"); 
-	if(cal.status!=GSL_SUCCESS) log->CreateEntry("*",T,LogMessage::low_pr);
-	T.Format("---Calibration---"); log->CreateEntry("*",T);
-	T.Format("Nexp=[%g %g %g %g]",cal.Nexp[0],cal.Nexp[1],cal.Nexp[2],cal.Nexp[3]);log->CreateEntry("*",T);
-	T.Format("teta=[%g %g %g %g]",cal.teta[0],cal.teta[1],cal.teta[2],cal.teta[3]);log->CreateEntry("*",T);
-	T.Format("N0=%.10f L=%.10f d0=%.10f fi0=%.10f errabs=%g errrel=%g",cal.N0,cal.L,cal.d0,cal.fi0,cal.epsabs,cal.epsrel); log->CreateEntry("*",T);
-	T.Format("dt=%.3f ms func_calls=%d",cal.dt.val(), cal.func_call_cntr); log->CreateEntry("*",T);
+	T.Format("****Statistics***"); *log << T;
+	if (cal.status != GSL_SUCCESS) log->SetPriority(lmprHIGH);
+	T.Format("---Calibration---"); *log << T;
+	T.Format("Nexp=[%g %g %g %g]",cal.Nexp[0],cal.Nexp[1],cal.Nexp[2],cal.Nexp[3]); *log << T;
+	T.Format("teta=[%g %g %g %g]",cal.teta[0],cal.teta[1],cal.teta[2],cal.teta[3]); *log << T;
+	T.Format("N0=%.10f L=%.10f d0=%.10f fi0=%.10f errabs=%g errrel=%g", N0, L, d0, fi0, cal.err.abs, cal.err.rel); 
+	*log << T;
+	T.Format("dt=%.3f ms func_calls=%d", cal.dt.val(), cal.cntr.func_call); *log << T;
 	log->Dispatch();		
 }
 
 void CalibratorDialog::OnBnClickedSaveToConfig()
 {
-	UpdateData(); cal.fi0 = fic*DEGREE; cal.alfa = alfa*DEGREE; 
+	UpdateData(); 
 	MainCfg.SetCalibration(cal);	
 	MainFrame.pWND->PostMessage(UM_UPDATE_CONFIG,0,0);
 }
 
 void CalibratorDialog::OnBnClickedLoadFromConfig()
 {
-	int i;
-	MainCfg.GetCalibration(&cal); fic=cal.fi0/DEGREE; alfa = cal.alfa/DEGREE; 
-
-	for(i = 0; i < cal.Nexp.GetSize() && i < modes_num; i++)
-	{
-		N[i] = cal.Nexp[i];
-		Q[i] = cal.teta[i]/DEGREE;
-	}
+	MainCfg.GetCalibration(&cal); 
 	UpdateData(FALSE);
 }
 

@@ -34,13 +34,6 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // EventLogDialog message handlers
-/*
-void EventLogDialog::OnOK() 
-{
-
-	CDialog::OnOK();
-}
-*/
 void EventLogDialog::OnClearBtn() 
 {	
 	m_ListBox1.ResetContent();
@@ -93,12 +86,7 @@ void EventLogDialog::OnSaveButton()
 		f.Close();
 	}
 }
-/*
-void EventLogDialog::OnCancel()
-{
-	CDialog::OnCancel();
-}
-*/
+
 void EventLogDialog::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	CMenu* menu = menu1.GetSubMenu(0);

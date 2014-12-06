@@ -11,12 +11,14 @@ IMPLEMENT_DYNAMIC(CalcTEDialog, CDialog)
 
 CalcTEDialog::CalcTEDialog(CWnd* pParent /*=NULL*/)
 	: CDialog(CalcTEDialog::IDD, pParent)
-	, nf(0)
-	, hf(0)
+	, nf(0), hf(0), pol(TE)
 {
-	for(int i=0;i<modes_num;i++) { N[i]=0; Q[i]=0; beta[i]=0; }
-	Series=NULL; IsTM=FALSE; lambda = 632.8; n3 = 1.45705;
-//	N[0]=3128.82; N[1]=2714.61; N[2]=2149; N[3]=1426.4;
+	for(int i=0;i<modes_num;i++) { N[i] = 0; Q[i] = 0;}
+	Series=NULL; 
+#if defined DEBUG
+	N[3]=3077; N[2]=2594; N[1]=1951; N[0]=1161;
+#endif
+	lambda = 632.8; n3 = 1.45705; n_p = 2.15675;
 }
 
 CalcTEDialog::~CalcTEDialog()
@@ -39,6 +41,7 @@ void CalcTEDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT17, hf);
 	DDX_Text(pDX, IDC_EDIT18, lambda);
 	DDX_Text(pDX, IDC_EDIT19, n3);
+	DDX_Radio(pDX, IDC_RADIO1, (int&)pol);
 	DDX_Text(pDX, IDC_EDIT21, n_p);
 }
 
@@ -56,14 +59,32 @@ END_MESSAGE_MAP()
 void CalcTEDialog::OnBnClickedConvertToAngles()
 {
 	CalibrationParams cal; UpdateData();
-	MainCfg.GetCalibration(&cal); cal.n_p = n_p;
-	for(int i=0;i<modes_num;i++)
+	MainCfg.GetCalibration(&cal); 
+	if (cal.IsValidCalibration() == FALSE)
 	{
-		CalibratorParams calb_params(N[i]);
-		Calibrator(calb_params,cal);	
-		Q[i]=calb_params.teta;
-		beta[i]=calb_params.betta;
+		ControledLogMessage log(::lmprHIGH);
+		log.T.Format("Pixels could not be converted because of wrong calibrations"); log << log.T;
+		log.Dispatch();
+		return;
 	}
+	teta_exp.RemoveAll(); 
+	cal.val[CalibrationParams::ind_n_p] = n_p; 
+	for(int i = 0, j = 0; i < modes_num; i++)
+	{	
+		AngleFromCalibration angle = cal.ConvertPixelToAngle(N[i]);
+		if (SUCCEEDED(angle.status))
+		{
+			teta_exp << angle;
+			Q[j++] = teta_exp[i].teta/DEGREE;
+		}
+	}
+	if (teta_exp.GetSize() != modes_num)
+	{
+		ControledLogMessage log(::lmprHIGH);
+		log.T.Format("Wrong number of converted angles because of wrong calibrations"); log << log.T;
+		log.Dispatch();
+	}
+	
 	UpdateData(0);
 }
 
@@ -116,47 +137,55 @@ void CalcTEDialog::OnCbnSelchangeCombo1()
 
 void CalcTEDialog::OnBnClickedCalculate()
 {
-	CString T; LogMessage *log=new LogMessage(); FilmParams *outTX=NULL; FilmFuncParams *in_TX=NULL;
-	double k, n1; DoubleArray bettaexp_TX; 
+	CString T; LogMessage *log=new LogMessage(); FilmParams film;
 	UpdateData();
-	k = 2.*M_PI/lambda;	n1 = 1.; 
 
-	for(int i=0;i<modes_num;i++) bettaexp_TX << beta[i];	
-	outTX=new FilmParams();
-
-	if(IsTM)
+	CalibrationParams cal; MainCfg.GetCalibration(&cal);
+	if (cal.IsValidCalibration() == FALSE)
 	{
-		in_TX=new FilmFuncTMParams(bettaexp_TX, n1,n3,k);
-		CalclFilmParamsTM(*((FilmFuncTMParams*)in_TX),*outTX);
-		T.Format("--FilmParamsTM---"); log->CreateEntry("*",T);
+		ControledLogMessage log(::lmprHIGH);
+		log.T.Format("Film params could not be converted because of wrong calibrations"); log << log.T;
+		log.Dispatch();
+		return;
 	}
+	cal.val[CalibrationParams::ind_n_s] = n3; 
+	cal.val[CalibrationParams::ind_lambda] = lambda; 
+
+	if (teta_exp.GetSize() != modes_num)
+	{
+		ControledLogMessage log(::lmprHIGH);
+		log.T.Format("Film params could not be calculated because of wrong number of converted angles"); log << log.T;
+		log.Dispatch();
+		return;
+	}
+	if (pol == TM)
+	{
+		T.Format("--FilmParamsTM---"); 
+	} 
 	else
 	{
-		in_TX=new FilmFuncTEParams(bettaexp_TX, n1,n3,k);
-		CalclFilmParamsTE(*((FilmFuncTEParams*)in_TX),*outTX);
-		T.Format("--FilmParamsTE---"); log->CreateEntry("*",T);
+		T.Format("--FilmParamsTE---");
 	}
-
-	T.Format("status = %s", gsl_strerror (outTX->status)); 
-	if(outTX->status==GSL_SUCCESS)
+	log->CreateEntry("*",T);
+	
+	if(film.Calculator(pol, cal, teta_exp) == GSL_SUCCESS)
 	{
-		nf=outTX->n;
-		hf=outTX->H;
+		nf = film.n; hf = film.H;
 		UpdateData(0);
 		log->CreateEntry(CString('*'),T);
 	}
 	else log->CreateEntry(CString('*'),T,LogMessage::high_pr);
 	
-	T.Format("n=%.10f H=%.10f nm",outTX->n, outTX->H, outTX->epsabs, outTX->epsrel ); log->CreateEntry("*",T);
-	T.Format("errabs=%g errrel=%g fval=%.10f, step=%.10f",outTX->epsabs, outTX->epsrel, outTX->fval, outTX->size ); log->CreateEntry("*",T);
-	T.Format("dt=%.3f ms func_calls=%d",outTX->dt.val(), outTX->func_call_cntr); log->CreateEntry("*",T);
-	
-	for(int i=0;i<in_TX->betta_teor.GetSize();i++)
+	T.Format("status = %s", gsl_strerror (film.status)); 
+	T.Format("n=%.10f H=%.10f nm",film.n, film.H); log->CreateEntry("*",T);
+	T.Format("errabs=%g errrel=%g fval=%.10f",film.err.abs, film.err.rel, film.minimum_value); log->CreateEntry("*",T);
+	T.Format("dt=%.3f ms func_calls=%d",film.dt.val(), film.cntr.func_call); log->CreateEntry("*",T);
+
+	for(int i = 0; i < film.betta_teor.GetSize(); i++)
 	{
-		T.Format("betta_teor[%d]=%.5f betta_exp=%.5f",in_TX->betta_teor[i].n,in_TX->betta_teor[i].val,bettaexp_TX[i]); log->CreateEntry("*",T);
-	}	
-	
+		T.Format("betta_teor[%d]=%.5f betta_exp=%.5f",
+			film.betta_teor[i].n, film.betta_teor[i].val, film.betta_exp[i]); 
+		log->CreateEntry("*",T);
+	}		
 	log->Dispatch();
-	if(outTX!=NULL) delete outTX; 
-	if(in_TX!=NULL) delete in_TX;
 }

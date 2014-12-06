@@ -469,35 +469,39 @@ int SimplePointArray::Add( SimplePoint& pnt ) { Point1DArray::Add(pnt); return y
 double* SimplePointArray::GetY() { return y.GetData(); }
 void SimplePointArray::SetSize( int n ) { Point1DArray::SetSize(n); y.SetSize(n); }
 //////////////////////////////////////////////////////////////////////////
-int Point1DArray::CopyFrom( Point1DArray& src, UINT total/*=0*/, UINT src_shift/*=0*/ )
+int Point1DArray::CopyFrom( const Point1DArray& src, UINT total/*=0*/, UINT src_shift/*=0*/ )
 {
 	UINT n=src.x.GetSize();
 	if( (total + src_shift) > n ) return -1;
 	RemoveAll(); if(total==0) total=n;	 SetSize(total); 
-	double *xSrc=src.x.GetData()+src_shift; memcpy(x.GetData(),xSrc,total*sizeof(double));
-	AbstractPoint2D *abstrSrc=src.GetData()+src_shift; memcpy(GetData(),abstrSrc,total*sizeof(AbstractPoint2D));
+	const double *xSrc = src.x.GetData(); xSrc += src_shift; 
+	memcpy(x.GetData(),xSrc,total*sizeof(double));
+	const AbstractPoint2D *abstrSrc=src.GetData(); abstrSrc += src_shift; 
+	memcpy(GetData(),abstrSrc,total*sizeof(AbstractPoint2D));
 	return total;
 }
 
-int SimplePointArray::CopyFrom( SimplePointArray& src, UINT total, UINT src_shift )
+int SimplePointArray::CopyFrom( const SimplePointArray& src, UINT total, UINT src_shift )
 {	
 	UINT n=src.x.GetSize();
 	if( (total + src_shift) > n ) return -1;
 	RemoveAll(); 
 	Point1DArray::CopyFrom(src,total,src_shift);
 	if(total==0) total=n;	 SetSize(total); 
-	double *ySrc=src.y.GetData()+src_shift; memcpy(y.GetData(),ySrc,total*sizeof(double));	
+	const double *ySrc = src.y.GetData(); ySrc += src_shift; 
+	memcpy(y.GetData(),ySrc,total*sizeof(double));	
 	return total;
 }
 
-int PointVsErrorArray::CopyFrom( PointVsErrorArray& src, UINT total, UINT src_shift )
+int PointVsErrorArray::CopyFrom( const PointVsErrorArray& src, UINT total, UINT src_shift )
 {
 	UINT n=src.x.GetSize();
 	if( (total + src_shift) > n ) return -1;
 	RemoveAll(); 
 	SimplePointArray::CopyFrom(src,total,src_shift);
 	if(total==0) total=n;	 SetSize(total); 
-	double *dySrc=src.dy.GetData()+src_shift; memcpy(dy.GetData(),dySrc,total*sizeof(double));	
+	const double *dySrc = src.dy.GetData(); dySrc += src_shift; 
+	memcpy(dy.GetData(),dySrc,total*sizeof(double));	
 	return total;
 }
 

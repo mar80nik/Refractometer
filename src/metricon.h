@@ -1,154 +1,210 @@
 #pragma once
 
-#include "TChart/TChartSeries.h"
+#include "TChart\TChartSeries.h"
 #include "my_gsl.h"
 
-//////////////////////////////////////////////////////////////////////////
-struct Solver1DPerfomanceInfo: public PerfomanceInfoMk1
-{
-};
-struct MinimizerPerfomanceInfo: public PerfomanceInfoMk1
-{
-	double fval,size;
-	MinimizerPerfomanceInfo() {fval=size=0;}
-};
-struct FittingPerfomanceInfo: public PerfomanceInfoMk1
-{	
-protected:
-	int p;
-public:
-	double *a,*da;
-	double chisq_dof, leftmostX, rightmostX, dx;
-	size_t n;
+enum Polarization {TE, TM};
 
-	FittingPerfomanceInfo(int p);
-	virtual ~FittingPerfomanceInfo();
-	void GetSolverResults(gsl_multifit_fdfsolver *s);	
-	void operator= (const FittingPerfomanceInfo& t);
+//////////////////////////////////////////////////////////////////////////
+//struct FittingPerfomanceInfo: public PerfomanceInfoMk1
+//{	
+//protected:
+//	int p;
+//public:
+//	double *a,*da;
+//	double chisq_dof, leftmostX, rightmostX, dx;
+//	size_t n;
+//
+//	FittingPerfomanceInfo(int p);
+//	virtual ~FittingPerfomanceInfo();
+//	void GetSolverResults(gsl_multifit_fdfsolver *s);	
+//	void operator= (const FittingPerfomanceInfo& t);
+//};
+//////////////////////////////////////////////////////////////////////////
+struct AngleFromCalibration: public SolverData
+{ 
+	int status; double teta, Npix; DoubleArray cal; 
+	AngleFromCalibration() {teta = Npix = 0; status = GSL_FAILURE;}
+	AngleFromCalibration& operator=(const AngleFromCalibration& ref) 
+	{
+		status = ref.status; teta = ref.teta; cal = ref.cal; Npix = ref.Npix;
+		*((SolverData*)this) = *((SolverData*)&ref);
+		return (*this);
+	}
 };
 //////////////////////////////////////////////////////////////////////////
-struct CalibrationParams: public Solver1DPerfomanceInfo
+struct CalibrationParams: public SolverData
 {
-	double alfa, n_p, n_s;	//	constatnts
-	double N0, L, d0, fi0;	//	variables
-	DoubleArray Nexp,teta;
-	CalibrationParams() { alfa = (50. + 59./60.)*DEGREE; n_s=n_p=0; N0=L=d0=fi0=0;}
+	class Calculator
+	{
+	public:
+		struct FuncParams: public BaseForFuncParams
+		{
+			friend struct CalibrationParams;
+		protected:
+			double *A, *B; DoubleArray &N, &teta; double n_p, n_i, n_s, alfa, lambda;
+			int size;
+		public:	
+			double (FuncParams::*funcCB)(double x);
+			double func (double x); //This is callback function for GSL solver
+
+			FuncParams(	DoubleArray& _N, DoubleArray& _teta, 
+						double _n_p, double _n_i, double _n_s, double _alfa, double _lambda):
+							N(_N), teta(_teta), n_p(_n_p), n_i(_n_i), n_s(_n_s), alfa(_alfa), lambda(_lambda)
+			{
+				A = B = NULL; size = N.GetSize(); 
+				funcCB = &FuncParams::func;
+			}
+			virtual ~FuncParams()
+			{
+				DestroyBuffers();			
+			}							
+			FuncParams(FuncParams& p):
+				N(p.N), teta(p.teta), n_p(p.n_p), n_s(p.n_s), alfa(p.alfa), funcCB(p.funcCB)
+			{
+				A = B = NULL; size = p.size; 
+			}
+			virtual void PrepareBuffers() 
+			{ 
+				DestroyBuffers(); 
+				A = new double[size]; B = new double[size];
+			}
+			virtual void DestroyBuffers()
+			{
+				if(A != NULL) {delete[] A; A = NULL;}
+				if(B != NULL) {delete[] B; B = NULL;}
+			}	
+			virtual void CleanUp()
+			{
+				BaseForFuncParams::CleanUp();
+				DestroyBuffers();
+			}
+		};
+	};
+
+	class PixelToAngleSolver
+	{
+	public:
+		struct FuncParams: public BaseForFuncParams
+		{		
+			double Npix; DoubleArray& cal;
+			double (FuncParams::*funcCB)(double x);
+
+			double func(double x); //This is callback function for GSL solver
+			FuncParams(double _Npix, DoubleArray& _cal): Npix(_Npix), cal(_cal) 
+			{ 
+				funcCB = &FuncParams::func;
+			}
+			FuncParams(FuncParams& p): Npix(p.Npix), cal(p.cal), funcCB(p.funcCB) { }
+		};	
+	};
+
+	enum {ind_alfa, ind_n_p, ind_n_i, ind_n_s, ind_lambda, ind_fi0, ind_L, ind_d0, ind_N0, ind_max};
+public:
+	DoubleArray val;
+	DoubleArray Nexp, teta;
+	
+	CalibrationParams(): SolverData()  {CleanUp();}
+	~CalibrationParams() {CleanUp();}
 	virtual void Serialize(CArchive& ar);
-	CalibrationParams& operator=(CalibrationParams& t);
+	CalibrationParams& operator=(const CalibrationParams& t);
+	BOOL IsValidCalibration() {return (val.GetSize() == ind_max);}
 
-};
-/////////////////////////////////////////////////////////////////////////
-struct CalibrationFuncParams
-{
-protected:
-	double *A,*B;
-public:
-	double *N,*teta, n_p, n_s, alfa;
-	int size;
-	CalibrationFuncParams(int _size, double *_N, double *_teta, double _n_p, double _n_s, double _alfa)
+	int CalculateFrom(	DoubleArray& _Nexp, DoubleArray& _teta, 
+						double _n_p, double _n_i, double _n_s, double _alfa, double _lambda);
+	AngleFromCalibration ConvertPixelToAngle(double Npix);
+	double ConertAngleToBeta(double teta) { return val[ind_n_p]*sin(teta); }
+	static double Get_k(const DoubleArray& cal_val) {return 2*M_PI/cal_val[ind_lambda];}
+	virtual void CleanUp()
 	{
-		A=B=NULL; size=_size; A=new double[size]; B=new double[size];
-		N=_N; teta=_teta; n_p=_n_p; n_s=_n_s; alfa=_alfa;
+		val.RemoveAll(); Nexp.RemoveAll(); teta.RemoveAll();	
 	}
-	CalibrationFuncParams(CalibrationFuncParams& p)
-	{
-		A=B=NULL; size=p.size; A=new double[size]; B=new double[size];
-		N=p.N; teta=p.teta; n_p=p.n_p; n_s=p.n_s; alfa=p.alfa;
-	}
-	~CalibrationFuncParams()
-	{
-		if(A!=NULL) {delete[] A; A=NULL;}
-		if(B!=NULL) {delete[] B; B=NULL;}
-	}
-	double* GetA() {return A;} double* GetB() {return B;}	
 };
-typedef Solver1dTemplate<CalibrationFuncParams> CalibrationSolver;
-//////////////////////////////////////////////////////////////////////////
-struct CalibratorParams: public Solver1DPerfomanceInfo
-{
-	double Npix, teta, betta;
-	CalibratorParams(double _Npix) {Npix=_Npix; betta=0;}
-};
-struct CalibratorFuncParams
-{
-	double Npix;
-	CalibrationParams& cal;
-	CalibratorFuncParams(double _Npix, CalibrationParams& _cal): cal(_cal) {Npix=_Npix;}
-};
-typedef Solver1dTemplate<CalibratorFuncParams> CalibratorSolver;
-//////////////////////////////////////////////////////////////////////////
-int CreateCalibration(DoubleArray& N, DoubleArray& teta, CalibrationParams& cal);
-//double Get_betta(double teta, CalibrationParams& cal);
-int Calibrator( CalibratorParams& params, CalibrationParams& cal );
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-struct DispEqFuncParams 
-{
-	double n1, n2, n3, kHf;
-	DispEqFuncParams(double _n1, double _n2, double _n3, double _kHf) {n1=_n1; n2=_n2; n3=_n3; kHf=_kHf;}
-};
-struct DispEqTEFuncParams: public DispEqFuncParams 
-{
-	DispEqTEFuncParams(double _n1, double _n2, double _n3, double _kHf): DispEqFuncParams(_n1,_n2,_n3,_kHf) {}
-};
-struct DispEqTMFuncParams: public DispEqFuncParams 
-{
-	DispEqTMFuncParams(double _n1, double _n2, double _n3, double _kHf): DispEqFuncParams(_n1,_n2,_n3,_kHf) {}
-};
-
-typedef Solver1dMULTITemplate<DispEqTEFuncParams> DispEqTESolver;
-typedef Solver1dMULTITemplate<DispEqTMFuncParams> DispEqTMSolver;
-
-//////////////////////////////////////////////////////////////////////////
-struct FilmParams: public MinimizerPerfomanceInfo
-{
-	double n,H, m; 
-	FilmParams( double _n=0, double _H=0, double _m=0 ) { n=_n; H=_H; m=_m;}
-	int GetParamsNum() {return 2;}
-	operator gsl_vector*()
-	{
-		gsl_vector* ret=NULL;
-		ret = gsl_vector_alloc (GetParamsNum());
-		gsl_vector_set (ret, 0, n);
-		gsl_vector_set (ret, 1, H);
-		return ret;
-	}
-	FilmParams& operator=(gsl_vector* p) { n=gsl_vector_get (p, 0); H=gsl_vector_get (p, 1); return *this;}
-	FilmParams(const gsl_vector* p) { n=gsl_vector_get (p, 0); H=gsl_vector_get (p, 1); }
-};
-
 struct betta_info 
 {
 	double val; int n;
-	betta_info() {val=0; n=0;}
+	betta_info(double _val = 0, int _n = 0): val(_val), n(_n) {}
 };
 
-class FilmFuncParams 
-{ 
+class FilmParams: public SolverData
+{
 public:
-	double n1, n3, k; DoubleArray& bettaexp; 
-	CArray<betta_info> betta_teor;
-
-	FilmFuncParams(DoubleArray& _bettaexp, double _n1=0, double _n3=0, double _k=0): bettaexp(_bettaexp)
+	enum {index_n, index_H};
+public:
+	class DispEqSolver
 	{
-		n1=_n1; n3=_n3; k=_k; 
-	}
-};
+	public:
+		struct FuncParams: public BaseForFuncParams
+		{
+		public:
+			double n_i, n_f, n_s, kHf;
+		public:
+			//This is callback function for GSL solver
+			double (FuncParams::*funcCB) (double x); 
+			double funcTE (double x); double funcTM (double x);
+			void SetFunc(Polarization pol)
+			{
+				switch (pol)
+				{
+				case TE: funcCB = &FuncParams::funcTE; break;
+				case TM: funcCB = &FuncParams::funcTM; break;
+				default: funcCB = NULL;
+				}
+			}
+			FuncParams(Polarization pol, double _n1, double _n2, double _n3, double _kHf):
+			n_i(_n1), n_f(_n2), n_s(_n3), kHf(_kHf)
+			{
+				SetFunc(pol);
+			}
+			FuncParams(FuncParams& params):
+				n_i(params.n_i), n_f(params.n_f), n_s(params.n_s), kHf(params.kHf), funcCB(params.funcCB)
+			{}
+		};	
+	};
+	struct FuncParams: public BaseForFuncParams
+	{
+	protected:
+		CalibrationParams cal;
+		double k, n_i, n_s;
+	public:
+		TypeArray<AngleFromCalibration> betta_exp; Polarization pol;
+		TypeArray<betta_info> betta_teor;
+	public:
+		double func(const gsl_vector * x);
+		FuncParams(const Polarization _pol, const TypeArray<AngleFromCalibration> &tetaexp, 
+			const CalibrationParams &_cal): 
+			pol(_pol)
+		{			
+			cal = _cal;
+			k = 2*M_PI/cal.val[CalibrationParams::ind_lambda];
+			n_i = cal.val[CalibrationParams::ind_n_i]; n_s = cal.val[CalibrationParams::ind_n_s];
 
-class FilmFuncTEParams: public FilmFuncParams
-{
+			for(int i = 0; i < tetaexp.GetSize(); i++)
+			{
+				AngleFromCalibration angle(tetaexp[i]);				
+				angle.teta = cal.ConertAngleToBeta(angle.teta); 
+				betta_exp << angle;
+			}
+		}
+		FuncParams(FuncParams& params): 
+			pol(params.pol), betta_exp(params.betta_exp)
+		{}
+		virtual void CleanUp();
+
+	};	
 public:
-	FilmFuncTEParams(DoubleArray& _bettaexp,double _n1=0, double _n3=0, double _k=0): FilmFuncParams(_bettaexp, _n1,_n3,_k) {}
-};
-class FilmFuncTMParams: public FilmFuncParams
-{
-public:
-	FilmFuncTMParams(DoubleArray& _bettaexp,double _n1=0, double _n3=0, double _k=0): FilmFuncParams(_bettaexp, _n1,_n3,_k) {}
+	double n, H, m, minimum_value;
+	DoubleArray betta_exp;
+	TypeArray<betta_info> betta_teor;	
+
+	FilmParams(double _n = 0, double _H = 0, double _m = 0): n(_n), H(_H), m(_m), SolverData() {minimum_value = 0; m = 0;}
+	int Calculator( const Polarization pol, const CalibrationParams &cal, 
+		const TypeArray<AngleFromCalibration> &tetaexp, 
+		FilmParams initX = FilmParams(), FilmParams initdX = FilmParams(1e-4, 1e-1));
 };
 
-
-typedef MultiDimMinimizerTemplate<FilmParams, FilmFuncTEParams> FilmMinimizerTE;
-typedef MultiDimMinimizerTemplate<FilmParams, FilmFuncTMParams> FilmMinimizerTM;
 //////////////////////////////////////////////////////////////////////////
 struct CalcRParams
 {
@@ -159,61 +215,68 @@ struct CalcRParams
 	CalcRParams() { num_pnts=7000; R=teta=NULL; }
 };
 
-int CalclFilmParamsTE(FilmFuncTEParams& in, FilmParams& out);
-int CalclFilmParamsTM(FilmFuncTMParams& in, FilmParams& out);
 void CalcR_TE(CalcRParams& params);
 void CalcR_TM(CalcRParams& params);
 //////////////////////////////////////////////////////////////////////////
-
-struct Fit_Ax2BxCParams: public FittingPerfomanceInfo
+//////////////////////////////////////////////////////////////////////////
+class ParabolaFitFunc: public BaseForFitFunc
 {
+//f = a*x*x + b*x + c
 public:
-	Fit_Ax2BxCParams(double _a=0,double _b=0,double _c=0);
-	operator double*() {return a;}
-	virtual size_t GetParamsNum() {return 3;}
-	SimplePoint GetTop();
-	static double f(double x, double* a);
-	SimplePoint GetXabsY(double x);
-	SimplePoint GetXrelY(double x);
-};
-
-struct MultiFitterFuncParams 
-{
-	size_t n;
-	double *y, *sigma, leftmostX, rightmostX,dx;
-	MultiFitterFuncParams(DoubleArray& _x, DoubleArray& _y, DoubleArray& _sigma) 
+	enum {ind_c, ind_b, ind_a, ind_max};
+protected:
+	struct FuncParams: public BaseForMultiFitterFuncParams
 	{
-		n=0; y=sigma=NULL;
-		if(_y.GetSize()!=_sigma.GetSize()) return;
-        y=_y.GetData(); sigma=_sigma.GetData(); n=_y.GetSize();
-		leftmostX=_x[0]; 
-		rightmostX=_x[(int)n-1];
-		dx=(rightmostX-leftmostX)/n;
-	}
-	size_t GetPointsNum() {return n;}
-};
-typedef MultiFitterTemplate<Fit_Ax2BxCParams,MultiFitterFuncParams> Fit_Ax2BxC;
-int Fit_Parabola(MultiFitterFuncParams& in, Fit_Ax2BxCParams& init,Fit_Ax2BxCParams& out);
-//////////////////////////////////////////////////////////////////////////
-//************************************************************************
-//////////////////////////////////////////////////////////////////////////
+		static double func(const double &x, const double *a, const size_t &p);	
 
-struct Fit_KneeParams: public FittingPerfomanceInfo
-{
+		static double df_da(const double &x, const double *a, const size_t &p, double *c);	
+		static double df_db(const double &x, const double *a, const size_t &p, double *c);	
+		static double df_dc(const double &x, const double *a, const size_t &p, double *c);	
+
+		FuncParams( const DoubleArray& x, const DoubleArray& y, const DoubleArray& sigma ) : 
+			BaseForMultiFitterFuncParams(ind_max, x, y, sigma)
+		{
+			pFunction = FuncParams::func;
+			pDerivatives[ind_a] = df_da; pDerivatives[ind_b] = df_db; pDerivatives[ind_c] = df_dc;
+		}
+	};
 public:
-	double &A, &B, &C, &k;
-
-	Fit_KneeParams(double _a=0,double _b=0,double _c=0,double _k=0);
-	void operator= (const Fit_KneeParams& t);
-	operator double*() {return a;}
-	virtual size_t GetParamsNum() {return 4;}
-	SimplePoint GetTop(double l);
-	static double f(double x, double* a);
-	SimplePoint GetXabsY(double x);
-	SimplePoint GetXrelY(double x);
+	double GetTop(double &x);	
+	int CalculateFrom(const DoubleArray& x, const DoubleArray& y, const DoubleArray& sigma, DoubleArray& init_a);
 };
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+class KneeFitFunc: public BaseForFitFunc
+{
+//f = C + (A/(1 + exp(-2*k*(x - B))));
+public:
+	enum {ind_A, ind_B, ind_C, ind_k, ind_max};
+protected:	
+	struct FuncParams: public BaseForMultiFitterFuncParams
+	{
+		double buf;
+		
+		static double func(const double &x, const double *a, const size_t &p);	
 
-typedef MultiFitterTemplate<Fit_KneeParams,MultiFitterFuncParams> Fit_Knee;
-int Fit_StepFunc(MultiFitterFuncParams& in, Fit_KneeParams& init,Fit_KneeParams& out);
+		static double df_dA(const double &x, const double *a, const size_t &p, double *c);	
+		static double df_dB(const double &x, const double *a, const size_t &p, double *c);	
+		static double df_dC(const double &x, const double *a, const size_t &p, double *c);	
+		static double df_dk(const double &x, const double *a, const size_t &p, double *c);	
+
+		FuncParams( const DoubleArray& x, const DoubleArray& y, const DoubleArray& sigma ) : 
+			BaseForMultiFitterFuncParams(ind_max, x, y, sigma)
+		{
+			pFunction = FuncParams::func;
+			pDerivatives[ind_A] = df_dA; pDerivatives[ind_B] = df_dB; 
+			pDerivatives[ind_C] = df_dC; pDerivatives[ind_k] = df_dk;
+		}
+		virtual double * PrepareDerivBuf(const double &x, const double *a, const size_t &p);	
+	};
+	
+public:
+	double GetInflection(double &x, const double &level);	
+	int CalculateFrom(const DoubleArray& x, const DoubleArray& y, const DoubleArray& sigma, DoubleArray& init_a);
+};
+//////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 int FourierFilter(FFTRealTransform::Params& in, double spec_width, FFTRealTransform::Params& out);

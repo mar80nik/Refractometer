@@ -29,7 +29,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	double N[modes_num], Q[modes_num];
-	double &Nc, &Lc, &dc, fic, alfa, &n_p;
+	double N0, L, d0, fi0, alfa, n_p;
 	void * GetChartFromParent();;
 	
 	CComboBox SeriesCombo;

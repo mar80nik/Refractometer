@@ -891,5 +891,6 @@
     <None Include="res\stateico.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="ClassDiagram4.cd" />
   </ItemGroup>
 </Project>
