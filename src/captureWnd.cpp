@@ -152,6 +152,12 @@ void CaptureWnd::CtrlsTab::OnBnClicked_StopCapture()
 	BtnResume.EnableWindow(FALSE);
 	BtnChooseCam.EnableWindow(TRUE);
 	BtnFilterParams.EnableWindow(FALSE);
+
+	CaptureRequestStack::Item request;
+	while(pParent->Stack >> request)
+	{
+		request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureStop,0);
+	}
 }
 
 void CaptureWnd::CtrlsTab::OnBnClicked_PauseCapture()
@@ -367,7 +373,7 @@ void CaptureWnd::OnPaint()
 					request.buf->CreateGrayPallete();
 				}
 				ColorTransform(&buf, request.buf, Ctrls.ColorTransformSelector);
-				request.sender->PostMessage(UM_CAPTURE_READY,0,0);
+				request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureReady,0);
 			}
 		}
 

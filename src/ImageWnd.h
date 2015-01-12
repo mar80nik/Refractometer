@@ -6,13 +6,11 @@
 #include "CalcTEDialog.h"
 #include "afxwin.h"
 
-enum CaptureWndMSGS {UM_CAPTURE_REQUEST=4000, UM_CAPTURE_READY};
+enum CaptureWndMSGS {UM_CAPTURE_REQUEST=4000, UM_CAPTURE_EVENT};
 enum CEditInterceptorMessages {UM_BUTTON_ITERCEPTED = 3000};
 
-
-
 enum HelperEvent {
-	EvntOnCaptureButton, EvntOnCaptureReady,
+	EvntOnCaptureButton, EvntOnCaptureReady, EvntOnCaptureStop,
 	RSLT_HELPER_COMPLETE, RSLT_OK, RSLT_OK_RGN_MODIFIED, RSLT_BMP_ERR, RSLT_ERR
 };
 //================================================
@@ -159,7 +157,6 @@ public:
 		HRESULT ValidateScanRgn( CRect& rgn ) const;
 		void ConvertOrgToGrayscale();
 		HRESULT TryLoadBitmap(CString T, BMPanvas &bmp);
-		LRESULT OnCaptureReady( WPARAM wParam, LPARAM lParam );
 
 		DECLARE_MESSAGE_MAP()
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -172,6 +169,7 @@ public:
 		afx_msg void OnMove(int x, int y);	
 		HRESULT ConvertAvaToOrg( CPoint& pnt ) const;
 		HRESULT ConvertOrgToAva( CRect& rgn ) const;
+		LRESULT OnCaptureEvent( WPARAM wParam, LPARAM lParam );
 	};
 	
 	DECLARE_DYNAMIC(ImageWnd)

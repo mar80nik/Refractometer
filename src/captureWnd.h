@@ -15,11 +15,12 @@ public:
 		CWnd* sender; BMPanvas *buf;
 		Item(CWnd* _sender=NULL, BMPanvas* _buf=NULL) {sender=_sender; buf=_buf;}
 	};
-    CArray<Item> stack;
-
+protected:
+	CArray<Item> stack;
+public:
 	CaptureRequestStack() {};
 	~CaptureRequestStack() {};
-	CaptureRequestStack& operator << (Item item)
+	CaptureRequestStack& operator << (const Item &item)
 	{
 		stack.Add(item);
 		return *this;
@@ -33,6 +34,10 @@ public:
 			stack.RemoveAt(size-1);
 		}		
 		return ret;
+	}
+	void RemoveAll()
+	{
+		stack.RemoveAll();
 	}
 };
 
