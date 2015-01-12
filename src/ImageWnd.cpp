@@ -279,7 +279,7 @@ BEGIN_MESSAGE_MAP(ImageWnd::PicWnd, CWnd)
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
 	ON_COMMAND(CaptureBtnID, OnCaptureButton)
-	ON_MESSAGE(UM_CAPTURE_READY,OnCaptureReady)
+	ON_MESSAGE(UM_CAPTURE_EVENT,OnCaptureEvent)
 	ON_WM_CONTEXTMENU()
 	ON_COMMAND(ID_PICWNDMENU_ERASE, OnPicWndErase)
 	ON_COMMAND(ID_PICWNDMENU_SAVE, OnPicWndSave)
@@ -510,14 +510,22 @@ void ImageWnd::PicWnd::OnRButtonUp(UINT nFlags, CPoint point)
 
 void ImageWnd::PicWnd::OnCaptureButton()
 {
-	UpdateHelpers(EvntOnCaptureButton);
+	UpdateHelpers(EvntOnCaptureButton);	
 }
 
-LRESULT ImageWnd::PicWnd::OnCaptureReady( WPARAM wParam, LPARAM lParam )
+LRESULT ImageWnd::PicWnd::OnCaptureEvent( WPARAM wParam, LPARAM lParam )
 {
-	UpdateHelpers(EvntOnCaptureReady);
+	HelperEvent event;
+	switch (wParam)
+	{
+	case EvntOnCaptureReady:	event = EvntOnCaptureReady; break;
+	case EvntOnCaptureStop:		event = EvntOnCaptureStop; break;
+	default: return 0;
+	}
+	UpdateHelpers(event);
 	return 0;
 }
+
 void ImageWnd::PicWnd::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	if (accum.bmp != NULL)
@@ -741,7 +749,7 @@ HRESULT ImageWnd::PicWnd::ConvertOrgToAva( CRect& rgn ) const
 
 void ImageWnd::PicWnd::UpdateHelpers( const HelperEvent &event )
 {
-	BaseForHelper * accumCapture = NULL;
+	BaseForHelper * accumCapture = NULL; POSITION pos;
 	ImageWnd::CtrlsTab &ctrls = Parent->Ctrls; ctrls.UpdateData();
 	switch (event)
 	{
@@ -750,8 +758,8 @@ void ImageWnd::PicWnd::UpdateHelpers( const HelperEvent &event )
 		accumCapture = new AccumHelper(this, ctrls.GetNofScans());
 		helpers.AddTail(accumCapture);
 		break;
-	default:
-		POSITION pos = helpers.GetHeadPosition();
+	case EvntOnCaptureReady:
+		pos = helpers.GetHeadPosition();
 		while ( pos != NULL)
 		{
 			POSITION prev = pos;
@@ -761,6 +769,17 @@ void ImageWnd::PicWnd::UpdateHelpers( const HelperEvent &event )
 				delete helper; helpers.RemoveAt(prev);
 			}			
 		}
+		break;
+	case EvntOnCaptureStop:
+		pos = helpers.GetHeadPosition();
+		while ( pos != NULL)
+		{
+			POSITION prev = pos;
+			BaseForHelper* helper = helpers.GetNext(pos); 
+			delete helper; helpers.RemoveAt(prev);
+		}
+		UpdateNow();
+		break;
 	}
 }
 
