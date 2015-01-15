@@ -4,6 +4,7 @@
 #include "mytime.h"
 #include "metricon.h"
 
+
 IMPLEMENT_DYNAMIC(MainChartWnd, TChart)
 MainChartWnd::MainChartWnd(): TChart("Chart1")
 {
@@ -732,19 +733,9 @@ void DialogBarTab1::OnBnClickedKneeTest()
 	log->Dispatch();
 }
 
-void MyGSL_Tester_Helper(Polarization pol, DoubleArray &Nexp, DoubleArray &teta_exp)
+void MyGSL_Tester_Helper(Polarization pol, DoubleArray &Nexp, DoubleArray &_n_exp, int shift)
 {
-	// TE	
-	//Metricon			nf = 1.9572		Hf = 993.8
-	//Victor Ivanovich	nf = 1.9591		Hf = 989.6
-	//Refractometr		nf = 2.01086	Hf = 1174.25
-	//NewRefractmtr		nf = 1.959		Hf = 989.67
-	//					
-	// TM
-	//Metricon			nf = 1.9490		Hf = 1026.2	
-	//Victor Ivanovich	nf = 1.9488		Hf = 1028.7	
-	//Refractometr		nf = 1.9488		Hf = 1028.57	
-	//NewRefractmtr		nf = 1.9488		Hf = 1028.57
+	MyTimer Timer1; sec dt;
 
 	FilmParams film; CalibrationParams cal; ControledLogMessage log;
 	if (pol == TE)
@@ -755,72 +746,95 @@ void MyGSL_Tester_Helper(Polarization pol, DoubleArray &Nexp, DoubleArray &teta_
 	{
 		log.T.Format("Log: ---=== TM testing ===---"); log << log.T;
 	}
+	log.Dispatch();
 
 	// tetsing calibration creation
-	cal.CalculateFrom(Nexp, teta_exp, 2.15675, 1., 1.45705, 51*DEGREE, 632.8);
-	log.T.Format("---Calibration (status = %s)---", gsl_strerror (cal.status)); log << log.T;
-	log.T.Format("N0=%.10f L=%.10f", 
-		cal.val[CalibrationParams::ind_N0], cal.val[CalibrationParams::ind_L]); log << log.T;
-	log.T.Format("d0=%.10f fi0=%.10f", 
-		cal.val[CalibrationParams::ind_d0],	cal.val[CalibrationParams::ind_fi0]); log << log.T;
-
-	log.T.Format("errabs=%g errrel=%g dt=%.3f ms func_calls=%d",
-		cal.err.abs, cal.err.rel, cal.dt.val(), cal.cntr.func_call); log << log.T;
+	ControledLogMessage log1;
+	cal.CalculateFrom(Nexp, _n_exp, 2.15675, 1., 1.45705, 51*DEGREE, 632.8);
+	log1.T.Format("---Calibration (status = %s)---", gsl_strerror (cal.status)); log1 << log1.T;
+	log1.T.Format("N0=%.10f L=%.10f", 
+		cal.val[CalibrationParams::ind_N0], cal.val[CalibrationParams::ind_L]); log1 << log1.T;
+	log1.T.Format("d0=%.10f fi0=%.10f", 
+		cal.val[CalibrationParams::ind_d0],	cal.val[CalibrationParams::ind_fi0]); log1 << log1.T;
+	log1.T.Format("errabs=%g errrel=%g dt=%s func_calls=%d",
+		cal.err.abs, cal.err.rel, ConvTimeToStr(cal.dt), cal.cntr.func_call); log1 << log1.T;
+	log1.T.Format("delta = %g", cal.delta); log1 << log1.T;
+	for(int i = 0; i < Nexp.GetSize(); i++)
+	{		
+		log1.T.Format("m = %d -> exp = %g calc = %g", i, cal.Nexp[i], cal.Ncalc[i]); log1 << log1.T;
+	}
+	if (cal.status != GSL_SUCCESS) log1.SetPriority(lmprHIGH);
+	log1.Dispatch();
 
 	// testing pixel to angle conversion with calibration
-	log.T.Format("---Calibrator----"); log << log.T;
-	TypeArray<AngleFromCalibration> bettaexp; 
+	ControledLogMessage log2;
+	log2.T.Format("---Calibrator----"); log2 << log2.T;
+	DoubleArray n_exp; 
 	for(int i = 0; i < Nexp.GetSize(); i++)
 	{
-		AngleFromCalibration angle;
+		AngleFromCalibration angle; double n_calc;
 		angle = cal.ConvertPixelToAngle(Nexp[i]); 
-		log.T.Format("status = %s", gsl_strerror (angle.status)); log << log.T;
-		log.T.Format("teta_calc=%.10f teta_orig=%.10f diff=%g%%", 
-			angle.teta, teta_exp[i], (angle.teta - teta_exp[i])/teta_exp[i]); log << log.T;
-		log.T.Format("dt=%.3f ms func_calls=%d", angle.dt.val(), angle.cntr.func_call); log << log.T;
-		bettaexp << angle;
+		n_calc = cal.ConertAngleToBeta(angle.teta);
+		log2.T.Format("status = %s", gsl_strerror (angle.status)); log2 << log2.T;
+		log2.T.Format("teta_calc=%.5f degree n_calc = %.4f n_orig=%.4f diff=%g%%", 
+			angle.teta/DEGREE, n_calc, _n_exp[i], 100.*(_n_exp[i] - n_calc)/n_calc); log2 << log2.T;
+		log2.T.Format("dt=%s func_calls=%d", ConvTimeToStr(angle.dt), angle.cntr.func_call); log2 << log2.T;
+		n_exp << n_calc;
+		if (angle.status != GSL_SUCCESS) log1.SetPriority(lmprHIGH);		
 	}
+	log2.Dispatch();
+
+
+	DoubleArray range_min, range_max, dd;
+	range_min << _n_exp[0] << 200; 
+	range_max << 2.1 << 2000;
+	dd << 1e-3 << 18;
 
 	// test film parameters calculation
-	film.Calculator(pol, cal, bettaexp); 
-	log.T.Format("--FilmParams (status = %s)---", gsl_strerror (film.status)); log << log.T;	
-	log.T.Format("n=%.10f H=%.10f nm", film.n, film.H); log << log.T;
-	log.T.Format("errabs=%g errrel=%g fval=%.10f", 
-		film.err.abs, film.err.rel, film.minimum_value); log << log.T;
-	log.T.Format("dt=%.3f ms func_calls=%d", film.dt.val(), film.cntr.func_call); log << log.T;
-	for( int i = 0; i < film.betta_teor.GetSize(); i++)
+	ControledLogMessage log3;
+	film.Calculator2(pol, cal, n_exp, shift, range_min, range_max, dd); 	
+	log3.T.Format("--FilmParams (status = %s)---", gsl_strerror (film.status)); log3 << log3.T;	
+	log3.T.Format("---- frst ----n=%.10f H=%.10f nm", film.n_init, film.H_init); log3 << log3.T;
+	log3.T.Format("---- last ----n=%.10f H=%.10f nm", film.n, film.H); log3 << log3.T;
+	log3.T.Format("errabs=%g errrel=%g fval=%.10f", film.err.abs, film.err.rel, film.minimum_value); log3 << log3.T;
+	log3.T.Format("dt=%s iters=%d func_calls=%d", ConvTimeToStr(film.dt), film.cntr.iter, film.cntr.func_call); log3 << log3.T;
+	for( int i = 0; i < film.n_teor.GetSize(); i++)
 	{
-		log.T.Format("betta_teor[%d]=%.5f betta_exp=%.5f", 
-			film.betta_teor[i].n, film.betta_teor[i].val, film.betta_exp[i]); log << log.T;
+		log3.T.Format("betta_teor=%.10f betta_exp=%.10f", film.n_teor[i], film.n_exp[i]); log3 << log3.T;
 	}	
-	log.Dispatch();
+	if (film.status != GSL_SUCCESS) log3.SetPriority(lmprHIGH);	
+
+	double N_fval = 0.;
+	for( int i = 0; i < film.n_teor.GetSize(); i++)
+	{
+		double Nteor = cal.ConvertBettaToPixel(film.n_teor[i]);
+		log3.T.Format("Nexp=%.10f Nteor=%.10f", Nexp[i], Nteor); log3 << log3.T;
+		N_fval += fabs(Nexp[i] - Nteor);
+	}	
+	log3.T.Format("N_fval=%.10f", N_fval); log3 << log3.T;
+
+	log3.Dispatch();
 }
 
 void DialogBarTab1::OnBnClickedCalibrate()
 {
-	CalibratorDlg.ShowWindow(SW_SHOW);
-
-	TSimplePointSeries *t1=NULL; 
-	TSimplePointSeries::DataImportMsg *CHM1, *CHM2; CHM1=CHM2=NULL; 
-	CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
-	SimplePoint pnt; pnt.type.Set(GenericPnt);
-	ImageWnd* parent=(ImageWnd*)Parent; void *x=NULL; MyTimer Timer1; ms dt1, dt2;
-	DoubleArray Nexp_TE, Nexp_TM, teta_exp_TE, teta_exp_TM; CString T; 
-	CalibrationParams cal_TE, cal_TM; AngleFromCalibration angle;
-
+#ifdef DEBUG
+	DoubleArray Nexp_TE, Nexp_TM, n_exp_TE, n_exp_TM; 
 	CalcRParams params;
 	params.i=FilmParams(1,			150,	0+1e-100); 
 	params.f=FilmParams(1.84,		1082,	5e-3+1e-100);  
 	params.s=FilmParams(1.45705,	1e6,	0+1e-100); 
-	params.lambda=632.8; params.Np=2.14044; params.teta_min=15; params.teta_max=85;
+	params.lambda=632.8; params.Np=2.15675; params.teta_min=15; params.teta_max=85;
 
-	Nexp_TE << 1161 << 1951 << 2594 << 3077; 
-	teta_exp_TE << 48.62*DEGREE << 55.24*DEGREE << 60.43*DEGREE << 64.02*DEGREE;
-	Nexp_TM << 1014 << 1856 << 2514 << 2990 ;
-	teta_exp_TM << 47.4*DEGREE << 54.08*DEGREE << 59.63*DEGREE << 63.4*DEGREE;
-
-	MyGSL_Tester_Helper(TE, Nexp_TE, teta_exp_TE);
-	MyGSL_Tester_Helper(TM, Nexp_TM, teta_exp_TM);
+	Nexp_TE << 2995.4 << 2159.1 << 1550.8 << 0833.1; 
+	n_exp_TE << 1.94514 << 1.85266 << 1.72802 << 1.55678;
+	Nexp_TM << 2995.4 << 2159.1 << 1550.8 << 0833.1; ; 
+	n_exp_TM << 1.94906 << 1.84743 << 1.70400 << 1.51424;
+	
+	MyGSL_Tester_Helper(TE, Nexp_TE, n_exp_TE, 1);
+	MyGSL_Tester_Helper(TM, Nexp_TM, n_exp_TM, 1);	
+#endif
+	CalibratorDlg.ShowWindow(SW_SHOW);
 }
 
 void DialogBarTab1::OnBnClickedCalcFilm()
@@ -835,3 +849,23 @@ BOOL DialogBarTab1::DestroyWindow()
 	return BarTemplate::DestroyWindow();
 }
  
+//TE
+//	nf=    2.012999999999971      Hf=    1083.000000000000      DETabs= 4.2799999999971750E-003
+//	neffexp(0)=    0.000000000000000      neffthr(0)=    0.000000000000000
+//	neffexp(1)=    1.945140000000000      neffthr(1)=    1.944499999999973
+//	neffexp(2)=    1.852660000000000      neffthr(2)=    1.855999999999983
+//	neffexp(3)=    1.728020000000000      neffthr(3)=    1.727999999999997
+//	neffexp(4)=    1.556780000000000      neffthr(4)=    1.556500000000016
+//	neffexp(5)=    0.000000000000000      neffthr(5)=    0.000000000000000
+//	neffexp(6)=    0.000000000000000      neffthr(6)=    0.000000000000000
+//	neffexp(7)=    0.000000000000000      neffthr(7)=    0.000000000000000
+//TM
+//	nf=    2.028499999999976      Hf=    1074.000000000000      DETabs= 4.3699999999908812E-003
+//	neffexp(0)=    0.000000000000000      neffthr(0)=    0.000000000000000
+//	neffexp(1)=    1.949060000000000      neffthr(1)=    1.948999999999973
+//	neffexp(2)=    1.847430000000000      neffthr(2)=    1.847499999999984
+//	neffexp(3)=    1.704000000000000      neffthr(3)=    1.700000000000000
+//	neffexp(4)=    1.514240000000000      neffthr(4)=    1.514000000000020
+//	neffexp(5)=    0.000000000000000      neffthr(5)=    0.000000000000000
+//	neffexp(6)=    0.000000000000000      neffthr(6)=    0.000000000000000
+//	neffexp(7)=    0.000000000000000      neffthr(7)=    0.000000000000000

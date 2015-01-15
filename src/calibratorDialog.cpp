@@ -9,12 +9,12 @@ IMPLEMENT_DYNAMIC(CalibratorDialog, CDialog)
 CalibratorDialog::CalibratorDialog(CWnd* pParent /*=NULL*/)
 	: CDialog(CalibratorDialog::IDD, pParent)
 {
-	for(int i=0;i<modes_num;i++) { N[i]=0; Q[i]=0; }
+	for(int i=0;i<calibrator_modes_num;i++) { N[i]=0; n[i]=0; }
 	N0 = L = d0 = fi0 = alfa = n_p = 0.;
 	Series=NULL; 
 #if defined DEBUG
-	N[0]=3077; N[1]=2594; N[2]=1951; N[3]=1161;
-	Q[0]=64.02; Q[1]=60.43; Q[2]=55.24; Q[3]=48.62;
+	N[0] = 2995.4; N[1] = 2159.1; N[2] = 1550.8; N[3] = 0833.1;
+	n[0] = 1.94514; n[1] = 1.85266; n[2] = 1.72802; n[3] = 1.55678;
 	alfa = 51; n_p = 2.15675;
 #endif
 }
@@ -30,10 +30,10 @@ void CalibratorDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT10, N[1]);
 	DDX_Text(pDX, IDC_EDIT2, N[2]);
 	DDX_Text(pDX, IDC_EDIT6, N[3]);
-	DDX_Text(pDX, IDC_EDIT5, Q[0]);
-	DDX_Text(pDX, IDC_EDIT13, Q[1]);
-	DDX_Text(pDX, IDC_EDIT8, Q[2]);
-	DDX_Text(pDX, IDC_EDIT16, Q[3]);
+	DDX_Text(pDX, IDC_EDIT5, n[0]);
+	DDX_Text(pDX, IDC_EDIT13, n[1]);
+	DDX_Text(pDX, IDC_EDIT8, n[2]);
+	DDX_Text(pDX, IDC_EDIT16, n[3]);
 	DDX_Text(pDX, IDC_EDIT14, N0);
 	DDX_Text(pDX, IDC_EDIT17, L);
 	DDX_Text(pDX, IDC_EDIT18, d0);
@@ -96,26 +96,26 @@ void CalibratorDialog::OnCbnSelchangeCombo1()
 		{
 			t=(*seriea)[i].x;
 			t*=100; t=(int)t; t/=100;
-			N[modes_num-i-1]=t;			
+			N[calibrator_modes_num-i-1]=t;			
 		}
-		for(;i<4;i++) N[modes_num-i-1]=0;
+		for(;i<4;i++) N[calibrator_modes_num-i-1]=0;
 		UpdateData(0);
 	}
 }
 
 void CalibratorDialog::OnCbnSelchangeCombo3()
 {
-	int n, i; double t;
-	if( (n=SeriesCombo1.GetCurSel())!=CB_ERR)
+	int j, i; double t;
+	if( (j = SeriesCombo1.GetCurSel()) != CB_ERR)
 	{
-		TSimplePointSeries *seriea=(TSimplePointSeries *)SeriesCombo1.GetItemData(n);
-		for(i=0;i<seriea->GetSize() && i<4;i++)
+		TSimplePointSeries *seriea=(TSimplePointSeries *)SeriesCombo1.GetItemData(j);
+		for(i = 0; i < seriea->GetSize() && i < 4; i++)
 		{
 			t=(*seriea)[i].x;
 			t*=100; t=(int)t; t/=100;
-			Q[modes_num-i-1]=t;			
+			n[calibrator_modes_num-i-1]=t;			
 		}
-		for(;i<4;i++) Q[modes_num-i-1]=0;
+		for(;i<4;i++) n[calibrator_modes_num-i-1]=0;
 		UpdateData(0);
 	}
 }
@@ -123,13 +123,12 @@ void CalibratorDialog::OnCbnSelchangeCombo3()
 
 void CalibratorDialog::OnBnClickedCalculateCal()
 {
-	MyTimer Timer1; ms dt1,dt2; double t;
-	DoubleArray Nexp,teta; CString T;
+	MyTimer Timer1; ms dt1, dt2;
+	DoubleArray Nexp, nn; CString T;
 	UpdateData();
-	for(int i = 0; i < modes_num; i++)
+	for(int i = 0; i < calibrator_modes_num; i++)
 	{
-		t=N[i]; Nexp.Add(N[i]); 
-		t=Q[i]*DEGREE; teta.Add(t);
+		Nexp << N[i]; nn << n[i];
 	}
 	UpdateData();
 	//TChart *chart=(TChart*)&GlobalChart; 
@@ -162,24 +161,27 @@ void CalibratorDialog::OnBnClickedCalculateCal()
 	//}
 	//chart->PostMessage(UM_CHART_SHOWALL);	
 	
-	LogMessage *log=new LogMessage(); log->CreateEntry("Log","Speed tests results",LogMessage::low_pr);
+	ControledLogMessage log;
+	log.T.Format("Speed tests results"); log << log.T;
 
-	cal.CalculateFrom(Nexp, teta, n_p, 1, 1.45705, alfa*DEGREE, 632.8);
+	cal.CalculateFrom(Nexp, nn, n_p, 1, 1.45705, alfa*DEGREE, 632.8);
 
-	fi0 = cal.val[CalibrationParams::ind_fi0]/DEGREE;
+	fi0 = cal.val[CalibrationParams::ind_fi0];
 	N0 = cal.val[CalibrationParams::ind_N0]; L = cal.val[CalibrationParams::ind_L]; 
 	d0 = cal.val[CalibrationParams::ind_d0]; 
 	UpdateData(0);
 
-	T.Format("****Statistics***"); *log << T;
-	if (cal.status != GSL_SUCCESS) log->SetPriority(lmprHIGH);
-	T.Format("---Calibration---"); *log << T;
-	T.Format("Nexp=[%g %g %g %g]",cal.Nexp[0],cal.Nexp[1],cal.Nexp[2],cal.Nexp[3]); *log << T;
-	T.Format("teta=[%g %g %g %g]",cal.teta[0],cal.teta[1],cal.teta[2],cal.teta[3]); *log << T;
-	T.Format("N0=%.10f L=%.10f d0=%.10f fi0=%.10f errabs=%g errrel=%g", N0, L, d0, fi0, cal.err.abs, cal.err.rel); 
-	*log << T;
-	T.Format("dt=%.3f ms func_calls=%d", cal.dt.val(), cal.cntr.func_call); *log << T;
-	log->Dispatch();		
+	log.T.Format("****Statistics***"); log << log.T;
+	if (cal.status != GSL_SUCCESS) log.SetPriority(lmprHIGH);
+	log.T.Format("---Calibration---"); log << log.T;
+	log.T.Format("Nexp=[%g %g %g %g]",cal.Nexp[0],cal.Nexp[1],cal.Nexp[2],cal.Nexp[3]); log << log.T;
+	log.T.Format("n=[%g %g %g %g]",cal.n[0],cal.n[1],cal.n[2],cal.n[3]); log << log.T;
+	log.T.Format("N0=%.10f", N0); log << log.T;
+	log.T.Format("L=%.10f", L); log << log.T;
+	log.T.Format("d0=%.10f", d0); log << log.T;
+	log.T.Format("fi0=%.10f", fi0); log << log.T;
+	log.T.Format("dt=%.3f ms func_calls=%d", cal.dt.val(), cal.cntr.func_call); log << log.T;
+	log.Dispatch();		
 }
 
 void CalibratorDialog::OnBnClickedSaveToConfig()

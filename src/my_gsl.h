@@ -21,9 +21,9 @@ class TypeArray: public CArray<type>
 {
 public:
 	TypeArray()	{}
-	TypeArray(const TypeArray& ref)	{ *this = ref; }
+	TypeArray(const TypeArray& ref)	{ RemoveAll(); Copy(ref); }
 	TypeArray& operator << (const type &d) {(*this).Add(d); return (*this);}
-	TypeArray& operator =(const TypeArray &arr)
+	TypeArray& operator =(const TypeArray& arr)
 	{
 		RemoveAll(); Copy(arr);
 		return *this;
@@ -55,6 +55,9 @@ public:
 class DoubleArray: public TypeArray<double>
 {
 public:
+	DoubleArray() {};
+	DoubleArray(const DoubleArray& ref): TypeArray<double>(ref) {};
+
 	gsl_vector* CreateGSLReplica();
 	void operator= (const gsl_vector& vector);
 	virtual void Serialize(CArchive& ar);
@@ -153,21 +156,24 @@ struct BoundaryConditions
 	double min, max;
 	BoundaryConditions() {min = max = 0; }
 	BoundaryConditions(double _min, double _max) {min = _min; max = _max; }
+	double GetWidth() const { return (max - min);}
 };
+typedef CArray<BoundaryConditions> BoundaryConditionsArray;
 
 template <class FuncParams>
 class Solver1dTemplate: public SolverData
 {
 //************************************************//	
+protected:
 	static double func(double x, void * data)
 	{
-		Solver1dTemplate<FuncParams> *solver = (Solver1dTemplate<FuncParams>*)data; FuncParams *params = solver->params;
+		Solver1dTemplate<FuncParams> *solver = (Solver1dTemplate<FuncParams>*)data; 
+		FuncParams *params = solver->params;
 		solver->cntr.func_call++;		
 		return (params->*(params->funcCB))(x);
 	};
-	typedef CArray<BoundaryConditions> BoundaryConditionsArray;
 //************************************************//
-private:
+protected:
 	gsl_root_fsolver *s;
 	const gsl_root_fsolver_type *fsolver_type;
 	gsl_function F; size_t iter;
@@ -226,8 +232,9 @@ public:
 			params->CleanUp(); params = NULL;	
 		}		
 	}
-protected:
-	int FindSubRgns(const BoundaryConditions &X, BoundaryConditionsArray& SubRgns)
+public:
+	virtual int FindSubRgns(const BoundaryConditions &X) {return FindSubRgns(X, SubRgns);}
+	virtual int FindSubRgns (const BoundaryConditions &X, BoundaryConditionsArray& SubRgns)
 	{
 		if (rgm == SINGLE_ROOT)
 		{
@@ -236,16 +243,16 @@ protected:
 		else
 		{
 			double x, dx = (X.max - X.min)/(subrgns_max - 1); 
-			BoundaryConditions y(func(X.min, F.params), 0);
+			double y_l, y_r = func(X.max, F.params);
 
 			for(int i = 1; i < subrgns_max; i++)
 			{
-				x = X.min + i*dx; y.max = func(x, F.params);
-				if ((y.min < 0 && y.max > 0) || (y.min > 0 && y.max < 0))
+				x = X.max - i*dx; y_l = func(x, F.params);
+				if ((y_l < 0 && y_r > 0) || (y_l > 0 && y_r < 0))
 				{
-					SubRgns.Add(BoundaryConditions(x - dx, x));
+					SubRgns.Add(BoundaryConditions(x, x + dx));
 				}
-				y.min = y.max;
+				y_r = y_l;
 			}
 		}
 		return GSL_SUCCESS;
@@ -253,6 +260,7 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////////
+#define MAX_DELTA 1000
 //////////////////////////////////////////////////////////////////////////
 template <class FuncParams>
 class MultiDimMinimizerTemplate: public SolverData
@@ -277,7 +285,7 @@ public:
 //************************************************//
 	MultiDimMinimizerTemplate(const int _max_iter=100): SolverData(_max_iter)
 	{
-		fminimizer_type = gsl_multimin_fminimizer_nmsimplex; 
+		fminimizer_type = gsl_multimin_fminimizer_nmsimplex2; 
 		s = NULL; X = dX = NULL; 
 		F.f = func; F.params = this; params = NULL;
 	}
@@ -318,6 +326,94 @@ public:
 		{
 			params->CleanUp(); params = NULL;	
 		}
+	}
+	FuncParams * Attach_params(FuncParams *_params)
+	{
+		FuncParams *ret = params; params = _params; return ret;
+	}
+};
+//////////////////////////////////////////////////////////////////////////
+template <class FuncParams>
+class Simple2DMinimizerTemplate: public SolverData
+{
+	//************************************************//
+public:
+	static double func(const gsl_vector * x, void * data)
+	{
+		Simple2DMinimizerTemplate<FuncParams>* solver = (Simple2DMinimizerTemplate<FuncParams>*)data;
+		solver->cntr.func_call++;
+		return solver->params->func(x);
+	};
+	//************************************************//
+private:
+	gsl_vector *film;
+protected:
+	FuncParams* params;
+	DoubleArray range_min, range_max, dd; CArray<size_t> iter;
+	size_t dim_size;
+public:
+	DoubleArray Roots; double minimum_value;
+	//************************************************//
+	Simple2DMinimizerTemplate(const int _max_iter=100): SolverData(_max_iter)
+	{
+		params = NULL; film = NULL;
+	}
+	~Simple2DMinimizerTemplate()
+	{
+		CleanUp();
+	}
+	int Run(FuncParams* _params, const DoubleArray& _range_min, const DoubleArray& _range_max, const DoubleArray& _dd)
+	{
+		MyTimer Timer1; Timer1.Start(); CleanUp(); 
+		params = _params; ASSERT(params); params->PrepareBuffers(); 
+		range_min = _range_min; range_max = _range_max; dd = _dd;
+		dim_size = dd.GetSize(); ASSERT(dim_size == 2);
+		gsl_vector *film = gsl_vector_alloc (dim_size); ASSERT(film);	
+
+		for (size_t i = 0; i< dim_size; i++) 
+		{
+			iter.Add(1 + (int)((range_max[i] - range_min[i])/dd[i]));
+		}
+		for (size_t i = 0; i < iter[0]; i++)
+		{
+			gsl_vector_set (film, 0, range_max[0] - dd[0]*i); 
+			for (size_t j = 0; j < iter[1]; j++)
+			{
+				gsl_vector_set (film, 1, range_max[1] - dd[1]*j);
+
+				double diff = func(film, this);
+				if (diff == MAX_DELTA)
+				{
+					break;
+				}
+				else 
+				{
+					cntr.iter++;
+					if (diff < minimum_value)
+					{
+						minimum_value = diff;
+						Roots = *film;					
+					}
+				}
+			}
+		}
+
+		params->DestroyBuffers();
+		dt = Timer1.StopStart();
+		status = GSL_SUCCESS;
+		return status;
+	}	
+	virtual void CleanUp()
+	{
+		SolverData::CleanUp();
+		Roots.RemoveAll(); range_max.RemoveAll(); range_min.RemoveAll(); dd.RemoveAll(); iter.RemoveAll(); 
+		minimum_value = MAX_DELTA;
+		if (params != NULL) {params->CleanUp(); params = NULL;}
+		if (film != NULL) {gsl_vector_free(film); film = NULL;}			
+	}
+	FuncParams * Attach_params(FuncParams *_params)
+	{
+		FuncParams *ret = params; params = _params; return ret;
 	}
 };
 //////////////////////////////////////////////////////////////////////////
