@@ -131,22 +131,20 @@ sec MyTimer::StopStart()
 
 CString ConvTimeToStr(sec _time)
 {
-	int hour,min,sec,msec; double t,time=_time.val();
+	int h, m, s, ms, us; double t = _time.val(), t2;
 
-	modf(time/3600., &t); 
-	time=fmod(time,3600.); 
-	hour=(int)t;
-	modf(time/60., &t); 
-	time=fmod(time,60.);
-	min=(int)t;
-	msec=(int)(1e3*modf(time,&t)); 
-	sec=(int)t;
-		
+	t = 3600*modf(t/3600., &t2);	h = (int)t2;
+	t = 60*modf(t/60., &t2);		m = (int)t2;	
+	t = modf(t, &t2);				s = (int)t2;
+	t = modf(t*1e3, &t2);		    ms = (int)t2;
+	t = modf(t*1e3, &t2);			us = (int)t2; 
+	
 	CString T, Out;
-	if(hour) {T.Format("%d h ",hour); Out+=T;}
-	if(min)	{T.Format("%d m ",min); Out+=T;}
-	if(sec) {T.Format("%d s ",sec); Out+=T;}	
-	if(!hour && !min ) {T.Format("%d ms",msec); Out+=T;}
+	if(h)	{T.Format("%d h ",h); Out+=T;}
+	if(m)	{T.Format("%d m ",m); Out+=T;}
+	if(s)	{T.Format("%d s ",s); Out+=T;}	
+	if(ms)	{T.Format("%d ms ",ms); Out+=T;}	
+	if(us)	{T.Format("%d us ",us); Out+=T;}		
 	return Out;
 }
 

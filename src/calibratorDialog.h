@@ -7,7 +7,7 @@
 #include "SystemConfig.h"
 
 
-#define modes_num 4
+#define calibrator_modes_num 4
 
 class CalibratorDialog : public CDialog
 {
@@ -28,7 +28,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	double N[modes_num], Q[modes_num];
+	double N[calibrator_modes_num], n[calibrator_modes_num];
 	double N0, L, d0, fi0, alfa, n_p;
 	void * GetChartFromParent();;
 	

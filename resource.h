@@ -111,11 +111,14 @@
 #define IDC_EDIT21                      1012
 #define IDC_EDIT20                      1013
 #define IDC_EDIT3                       1014
+#define IDC_EDIT22                      1014
 #define IDC_EDIT4                       1015
+#define IDC_EDIT23                      1015
 #define IDC_TREE1                       1016
 #define IDC_EDIT9                       1016
 #define IDC_BUTTON8                     1016
 #define IDC_BUTTON13                    1016
+#define IDC_EDIT24                      1017
 #define IDC_COMBO1                      1018
 #define IDC_BUTTON14                    1018
 #define IDC_BUTTON10                    1019
@@ -123,7 +126,9 @@
 #define IDC_COMBO2                      1019
 #define IDC_COMBO3                      1020
 #define IDC_COMBO5                      1020
+#define IDC_BUTTON18                    1020
 #define IDC_BUTTON15                    1021
+#define IDC_EDIT25                      1021
 #define IDC_BUTTON4                     1022
 #define IDC_BUTTON11                    1023
 #define IDC_BUTTON16                    1024
@@ -155,6 +160,7 @@
 #define IDC_RADIO6                      1053
 #define IDC_LIST3                       1056
 #define IDC_CHECK2                      1058
+#define IDC_CHECK1                      1059
 #define IDC_RADIO7                      1060
 #define VOLTMETER1                      32771
 #define ID_CONFIG                       32772
@@ -294,9 +300,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        238
+#define _APS_NEXT_RESOURCE_VALUE        239
 #define _APS_NEXT_COMMAND_VALUE         32824
-#define _APS_NEXT_CONTROL_VALUE         1059
+#define _APS_NEXT_CONTROL_VALUE         1060
 #define _APS_NEXT_SYMED_VALUE           105
 #endif
 #endif

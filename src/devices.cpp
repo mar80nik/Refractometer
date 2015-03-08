@@ -60,17 +60,20 @@ void AbstractDevice::ParamUpdate( CfgParamTypeBase* t )
 
 
 CalibrationData::CalibrationData( void ):
-	fi("fi","град",0), d("d","отн.ед",0), L("L","отн.ед",0), N("N","отн.ед",0), Q("Q", "град", 0), n_p("n_p", "", 0)//,
+	fi("fi","град",0), d("d","отн.ед",0), L("L","отн.ед",0), N("N","отн.ед",0), Q("Q", "град", 0), n_p("n_p", "", 0),
+	n_i("n_i", "", 1), n_s("n_s", "", 1.5)
 {
 	Name="Calibration";
-	RegisterParam(&Q); RegisterParam(&n_p);
+	RegisterParam(&Q); RegisterParam(&n_p); 
+	RegisterParam(&n_i); 
+	RegisterParam(&n_s);
 	RegisterParam(&fi); RegisterParam(&d); RegisterParam(&L); RegisterParam(&N);   
 
 	CString T;
 	for(int i=0;i<CALIBRATION_MODES_NUM; i++) 
 	{ 
 		T.Format("Nexp[%d]",i); N_exp[i] = new DblCfgParam(T,"пикс",0); RegisterParam(N_exp[i]);
-		T.Format("teta[%d]",i); teta[i] = new AngleCfgParam(T,"град",0); RegisterParam(teta[i]);
+		T.Format("n[%d]",i); n[i] = new DblCfgParam(T,"",0); RegisterParam(n[i]);
 	}
 }
 
@@ -78,7 +81,7 @@ CalibrationData::~CalibrationData()
 {
 	for(int i=0;i<CALIBRATION_MODES_NUM; i++) 
 	{
-		delete N_exp[i]; delete teta[i];
+		delete N_exp[i]; delete n[i];
 	}
 }
 
@@ -104,11 +107,21 @@ void CalibrationData::FillCfgTree( CTreeCtrl* t,HTREEITEM l0 )
 	{
 		Params[j++]->FillCfgTree(t, l1);
 	}
+	l1 = t->InsertItem("Immersion",l0); 
+	for(i = 0; i < Params.GetSize() && i < 1; i++)
+	{
+		Params[j++]->FillCfgTree(t, l1);
+	}
+	l1 = t->InsertItem("Substrate",l0); 
+	for(i = 0; i < Params.GetSize() && i < 1; i++)
+	{
+		Params[j++]->FillCfgTree(t, l1);
+	}
 	for(i = 0; i < Params.GetSize() && i < 4; i++)
 	{
 		Params[j++]->FillCfgTree(t, l0);
 	}
-	l1 = t->InsertItem("Nexp",l0); l2 = t->InsertItem("teta",l0); 
+	l1 = t->InsertItem("Nexp",l0); l2 = t->InsertItem("n",l0); 
 	for(;j < Params.GetSize();)
 	{
 		Params[j++]->FillCfgTree(t,l1);
@@ -126,6 +139,8 @@ void CalibrationData::SetCalibration( CalibrationParams& _cal )
 	L.SetParamValue(cal.val.get(CalibrationParams::ind_L));
 	Q.SetParamValue(cal.val.get(CalibrationParams::ind_alfa));
 	n_p.SetParamValue(cal.val.get(CalibrationParams::ind_n_p));
+	n_i.SetParamValue(cal.val.get(CalibrationParams::ind_n_i));
+	n_s.SetParamValue(cal.val.get(CalibrationParams::ind_n_s));
 	for(i = 0; i < cal.Nexp.GetSize(); i++)
 	{
 		N_exp[i]->SetParamValue(cal.Nexp[i]);
@@ -135,13 +150,13 @@ void CalibrationData::SetCalibration( CalibrationParams& _cal )
 		N_exp[i]->SetParamValue(0);
 	}
 	
-	for(i = 0; i < cal.teta.GetSize(); i++)
+	for(i = 0; i < cal.n.GetSize(); i++)
 	{
-		teta[i]->SetParamValue(cal.teta[i]);
+		n[i]->SetParamValue(cal.n[i]);
 	}
 	for(; i < CALIBRATION_MODES_NUM; i++)
 	{
-		teta[i]->SetParamValue(0);
+		n[i]->SetParamValue(0);
 	}
 }
 
