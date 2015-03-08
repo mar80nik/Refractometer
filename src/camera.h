@@ -5,6 +5,7 @@
 #include "dcm800.h"
 #include "MessageInspector.h"
 #include "MyThread.h"
+#include "GlobalHeader.h"
 
 #define SAFE_RELEASE_(a) if(a!=NULL) { a->Release(); a=NULL; }
 class MyDSFilter;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mythread\mythread.h"
+#include "mythread.h"
 #include "resource.h"
 
 enum RequestType {DONT_CARE=0xFFFFFF};
