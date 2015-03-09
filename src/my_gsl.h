@@ -368,7 +368,7 @@ public:
 		params = _params; ASSERT(params); params->PrepareBuffers(); 
 		range_min = _range_min; range_max = _range_max; dd = _dd;
 		dim_size = dd.GetSize(); ASSERT(dim_size == 2);
-		gsl_vector *film = gsl_vector_alloc (dim_size); ASSERT(film);	
+		film = gsl_vector_alloc (dim_size); ASSERT(film);	
 
 		for (size_t i = 0; i< dim_size; i++) 
 		{
