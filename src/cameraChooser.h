@@ -3,7 +3,7 @@
 #include "MyListBox.h"
 #include "resource.h"
 #include "camera.h"
-#include "mythread\mythread.h"
+#include "mythread.h"
 
 
 // CameraChooser dialog

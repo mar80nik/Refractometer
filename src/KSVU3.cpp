@@ -6,8 +6,6 @@
 #include "MainFrm.h"
 #include "KSVU3Doc.h"
 #include "KSVU3View.h"
-//#include "externals.h"
-//#include "chipthread.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,6 +19,8 @@ SystemConfig MainCfg;
 WindowAddress EventsLog, MainFrame;
 MessagesInspector GlobalInspector;
 MessagesInspector* MessagesInspectorSubject::GlobalInspector=&::GlobalInspector;
+WindowAddress LogMessage::LogWindow;
+WindowAddress MyThread::ConfigParentWindow;
 
 BEGIN_MESSAGE_MAP(CKSVU3App, CWinApp)
 	//{{AFX_MSG_MAP(CKSVU3App)
@@ -97,8 +97,13 @@ BOOL CKSVU3App::InitInstance()
 	CMainFrame* MainWnd=(CMainFrame*)m_pMainWnd;
 	EventsLog.pThrd=AfxGetThread(); EventsLog.pWND=&MainWnd->EventLog1;
 	MainFrame.pThrd=AfxGetThread(); MainFrame.pWND=MainWnd;
+
+	LogMessage::LogWindow = EventsLog;
+	MyThread::ConfigParentWindow = MainFrame;
+
 	MainCfg.LoadConfig(); 
 	MainWnd->InitChart(); 
+
 	if(cmdInfo.m_strFileName=="") MainWnd->TabCtrl1.ChangeTab(1);	
 	else MainWnd->TabCtrl1.ChangeTab(0);	
 	CString ProgPortName;

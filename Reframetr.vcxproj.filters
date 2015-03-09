@@ -16,6 +16,9 @@
     <Filter Include="Source Files\ok">
       <UniqueIdentifier>{3ecdd378-162c-46bb-9338-504443910528}</UniqueIdentifier>
     </Filter>
+    <Filter Include="my_lib">
+      <UniqueIdentifier>{aae60ec9-4c02-4d63-a613-8d8ddd4b741e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DialogBarTab1.cpp">
@@ -24,28 +27,13 @@
     <ClCompile Include="src\devices.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
-    <ClCompile Include="mythread\MessageInspector.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="my_cpp\my_color.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
     <ClCompile Include="TChart\MouseTrackerWnd.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
     <ClCompile Include="src\MyListBox.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
-    <ClCompile Include="mythread\MyTime.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="mythread\MyThread.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
     <ClCompile Include="src\OwnerDrawBtn.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="mythread\ProtectedObject.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
     <ClCompile Include="tchart\TChart.cpp">
@@ -70,9 +58,6 @@
       <Filter>Source Files\ok</Filter>
     </ClCompile>
     <ClCompile Include="src\calibratorDialog.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="my_cpp\BMPanvas.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
     <ClCompile Include="src\CalcTEDialog.cpp">
@@ -140,6 +125,24 @@
     </ClCompile>
     <ClCompile Include="src\compressor.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\my_lib\src\BMPanvas.cpp">
+      <Filter>my_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\my_lib\src\MessageInspector.cpp">
+      <Filter>my_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\my_lib\src\my_color.cpp">
+      <Filter>my_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\my_lib\src\MyThread.cpp">
+      <Filter>my_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\my_lib\src\MyTime.cpp">
+      <Filter>my_lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\my_lib\src\ProtectedObject.cpp">
+      <Filter>my_lib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -788,24 +791,6 @@
     <ClInclude Include="gsl\gsl\gsl_wavelet2d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mythread\errors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mythread\MessageInspector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mythread\MyThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mythread\MyTime.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mythread\ProtectedObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="my_cpp\my_color.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\BarTemplate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -866,13 +851,37 @@
     <ClInclude Include="src\compressor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\my_lib\src\BMPanvas.h">
+      <Filter>my_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\my_lib\src\globals.h">
+      <Filter>my_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\my_lib\src\MessageInspector.h">
+      <Filter>my_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\my_lib\src\my_color.h">
+      <Filter>my_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\my_lib\src\my_lib_resources.h">
+      <Filter>my_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\my_lib\src\MyThread.h">
+      <Filter>my_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\my_lib\src\MyTime.h">
+      <Filter>my_lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\my_lib\src\ProtectedObject.h">
+      <Filter>my_lib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="KSVU3.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-    <ResourceCompile Include="mythread\errors.rc">
-      <Filter>Resource Files</Filter>
+    <ResourceCompile Include="..\..\my_lib\src\my_lib_resources.rc">
+      <Filter>my_lib</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>

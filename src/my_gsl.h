@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mythread\MyTime.h"
+#include "MyTime.h"
 #include "gsl\gsl_math.h"
 #include "gsl\gsl_multimin.h"
 #include "gsl\gsl_errno.h"

@@ -45,7 +45,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\zlib;$(IncludePath);D:\DXSDK\include;$(SolutionDir)\gsl-1.16;$(SolutionDir)\my_cpp;$(SolutionDir);$(SolutionDir)\mythread;$(SolutionDir)\TChart;$(SolutionDir)\src</IncludePath>
+    <IncludePath>$(SolutionDir)\zlib;$(IncludePath);D:\DXSDK\include;$(SolutionDir)\gsl-1.16;$(SolutionDir)\my_cpp;$(SolutionDir);$(SolutionDir)\mythread;$(SolutionDir)\TChart;$(SolutionDir)\src;d:\REPO\my_lib\src\</IncludePath>
     <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)\..\exe\</OutDir>
@@ -53,7 +53,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\zlib;$(IncludePath);D:\DXSDK\include;$(SolutionDir)\gsl-1.16;$(SolutionDir)\my_cpp;$(SolutionDir);$(SolutionDir)\mythread;$(SolutionDir)\TChart;$(SolutionDir)\src</IncludePath>
+    <IncludePath>$(SolutionDir)\zlib;$(IncludePath);D:\DXSDK\include;$(SolutionDir)\gsl-1.16;$(SolutionDir)\my_cpp;$(SolutionDir);$(SolutionDir)\mythread;$(SolutionDir)\TChart;$(SolutionDir)\src;d:\REPO\my_lib\src\</IncludePath>
     <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\..\exe\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
@@ -106,12 +106,12 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="mythread\MessageInspector.cpp" />
-    <ClCompile Include="mythread\MyThread.cpp" />
-    <ClCompile Include="mythread\MyTime.cpp" />
-    <ClCompile Include="mythread\ProtectedObject.cpp" />
-    <ClCompile Include="my_cpp\BMPanvas.cpp" />
-    <ClCompile Include="my_cpp\my_color.cpp" />
+    <ClCompile Include="..\..\my_lib\src\BMPanvas.cpp" />
+    <ClCompile Include="..\..\my_lib\src\MessageInspector.cpp" />
+    <ClCompile Include="..\..\my_lib\src\MyThread.cpp" />
+    <ClCompile Include="..\..\my_lib\src\MyTime.cpp" />
+    <ClCompile Include="..\..\my_lib\src\my_color.cpp" />
+    <ClCompile Include="..\..\my_lib\src\ProtectedObject.cpp" />
     <ClCompile Include="src\BarTemplate.cpp" />
     <ClCompile Include="src\CalcTEDialog.cpp" />
     <ClCompile Include="src\calibratorDialog.cpp" />
@@ -149,6 +149,14 @@
     <ClCompile Include="tchart\TChartSeries.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\my_lib\src\BMPanvas.h" />
+    <ClInclude Include="..\..\my_lib\src\globals.h" />
+    <ClInclude Include="..\..\my_lib\src\MessageInspector.h" />
+    <ClInclude Include="..\..\my_lib\src\MyThread.h" />
+    <ClInclude Include="..\..\my_lib\src\MyTime.h" />
+    <ClInclude Include="..\..\my_lib\src\my_color.h" />
+    <ClInclude Include="..\..\my_lib\src\my_lib_resources.h" />
+    <ClInclude Include="..\..\my_lib\src\ProtectedObject.h" />
     <ClInclude Include="gsl\gsl\gsl_blas.h" />
     <ClInclude Include="gsl\gsl\gsl_blas_types.h" />
     <ClInclude Include="gsl\gsl\gsl_block.h" />
@@ -362,12 +370,6 @@
     <ClInclude Include="gsl\gsl\gsl_version.h" />
     <ClInclude Include="gsl\gsl\gsl_wavelet.h" />
     <ClInclude Include="gsl\gsl\gsl_wavelet2d.h" />
-    <ClInclude Include="mythread\errors.h" />
-    <ClInclude Include="mythread\MessageInspector.h" />
-    <ClInclude Include="mythread\MyThread.h" />
-    <ClInclude Include="mythread\MyTime.h" />
-    <ClInclude Include="mythread\ProtectedObject.h" />
-    <ClInclude Include="my_cpp\my_color.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\BarTemplate.h" />
     <ClInclude Include="src\CalcTEDialog.h" />
@@ -392,8 +394,8 @@
     <ClInclude Include="tchart\TChartSeries.h" />
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="..\..\my_lib\src\my_lib_resources.rc" />
     <ResourceCompile Include="KSVU3.rc" />
-    <ResourceCompile Include="mythread\errors.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\bitmap1.bmp" />

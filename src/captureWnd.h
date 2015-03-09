@@ -2,8 +2,9 @@
 #include "BarTemplate.h"
 #include "camera.h"
 #include "cameraChooser.h"
-#include "mythread/MyThread.h"
+#include "MyThread.h"
 #include "afxwin.h"
+#include "GlobalHeader.h"
 
 #define SET_RGBQUAD(a,r,g,b) {a.rgbBlue=b; a.rgbGreen=g; a.rgbRed=r;}
 
