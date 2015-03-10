@@ -38,14 +38,14 @@ END_MESSAGE_MAP()
 ////////////////////////////////////////////////////////////////////////////
 // CMainFrame construction/destruction
 
-CMainFrame::CMainFrame(): TabCtrl1(&MainBar,IDC_TAB1), Chart1(GlobalChart)
+CMainFrame::CMainFrame(): TabCtrl1(&MainBar,IDC_TAB1)
 {
 }
 
 CMainFrame::~CMainFrame()
 {
 	Chart1.DestroyWindow();
-	SeriesList.DestroyWindow();	
+	//SeriesList.DestroyWindow();	
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -108,7 +108,8 @@ void CMainFrame::InitChart()
 	TabCtrl1.AddTab("Image control",&Img.Ctrls,IDD_DIALOGBARTAB1);		
 
 	Img.Create(0, "ImageWnd", WS_CHILD, r, pFirstView, ID_MV_WND+1, 0);
-	Chart1.Create(pFirstView,r); Chart1.SetVisible(true); Chart1.SeriesDataWnd=&SeriesList;
+	Chart1.Create(pFirstView,r); Chart1.SetVisible(true); 
+	//Chart1.SeriesDataWnd=&SeriesList;
 
 #ifdef DEBUG
 	Img.CameraWnd.SelectCaptureSrc(CString("Logitech HD Webcam C270"));
@@ -133,7 +134,7 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 	{		
 		EventLog1.Create(IDD_DIALOG5,this);
 		Config.Create(IDD_CONFIG,this);
-		SeriesList.Create(IDD_DIALOGBARTAB2,this);	
+		//SeriesList.Create(IDD_DIALOGBARTAB2,this);	
 	}
 }
 

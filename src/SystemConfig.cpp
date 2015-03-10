@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "SystemConfig.h"
+#include "GlobalHeader.h"
 #include "resource.h"
 #include <math.h>
 

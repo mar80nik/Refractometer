@@ -1,7 +1,7 @@
 #pragma once
 #include "afxwin.h"
 #include "resource.h"
-#include "TChart/TChartSeries.h"
+#include "TChartSeries.h"
 #include "metricon.h"
 #include "SystemConfig.h"
 #include <math.h>

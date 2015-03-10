@@ -15,7 +15,7 @@
 #include "resource.h"       // main symbols
 #include "systemconfig.h"
 #include "externals.h"
-#include "tchart\tchartglobal.h"
+#include "tchartglobal.h"
 #include "GlobalHeader.h"	// Added by ClassView
 //#include "chipdriver.h"
 

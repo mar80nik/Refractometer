@@ -54,9 +54,11 @@ BOOL CKSVU3Doc::OnNewDocument()
 void CKSVU3Doc::Serialize(CArchive& ar)
 {
 	void *x;
+	CMainFrame* MW=(CMainFrame*)AfxGetMainWnd();
+	if (MW == NULL) return;	
 	if (ar.IsStoring())
 	{
-		if((x=GlobalChart.Series.GainAcsess(READ))!=0)
+		if((x = MW->Chart1.Series.GainAcsess(READ))!=0)
 		{
 			SeriesProtector Protector(x); TSeriesArray& Series(Protector);
 			Series.Serialize(ar);
@@ -64,7 +66,7 @@ void CKSVU3Doc::Serialize(CArchive& ar)
 	}
 	else
 	{
-		if((x=GlobalChart.Series.GainAcsess(WRITE))!=0)
+		if((x = MW->Chart1.Series.GainAcsess(WRITE))!=0)
 		{
 			SeriesProtector Protector(x); TSeriesArray& Series(Protector);
 			Series.Serialize(ar);
