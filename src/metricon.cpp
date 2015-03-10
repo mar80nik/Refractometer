@@ -245,7 +245,8 @@ DispEqSolver_FuncParams::DispEqSolver_FuncParams( Polarization pol, const Calibr
 
 double FilmParams::FuncParams::func(const gsl_vector * x)
 {
-    double ret = MAX_DELTA; int status;	DoubleArray film; film = *x;
+    double ret = MAX_DELTA; int status;	DoubleArray film; 
+	Convert_gsl_vector_to_DoubleArray(x, film);
 
 	int roots_n = n_exp.GetSize();
 	DispEqSolver FindBettas(MULTI_ROOT, shift, roots_n);

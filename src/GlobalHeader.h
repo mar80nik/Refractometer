@@ -45,15 +45,6 @@ class Error;
 
 struct IndicatorsText {CString device, running, paused;};
 
-struct PerfomanceStaff
-{
-	MyTimer Timer1;
-	bool LogEvents;
-	int pass_num;
-
-	PerfomanceStaff() {LogEvents=false;pass_num=0;}	
-};
-
 union FloatInt
 {
 	float flt;
