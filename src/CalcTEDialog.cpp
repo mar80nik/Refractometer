@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "CalcTEDialog.h"
+#include "GlobalHeader.h"
 #define EMPTY_VAL _T("*****")
 
 // CalcTEDialog dialog

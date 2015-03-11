@@ -184,7 +184,6 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""res\\KSVU3.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""afxres.rc""         // Standard components\r\n"
     "#endif\r\n"
     "\0"
@@ -240,14 +239,6 @@ BEGIN
     CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",0x0,2,2,621,74
 END
 
-IDD_SERIES_LIST_DLG DIALOGEX 0, 0, 231, 127
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Series List"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    CONTROL         "List2",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_NOLABELWRAP | LVS_EDITLABELS | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,3,3,223,121
-END
-
 IDD_MODIF_VALUE_DLG DIALOG 0, 0, 186, 33
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION
 CAPTION "Modify value"
@@ -256,16 +247,6 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,134,17,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,134,2,50,14
     EDITTEXT        IDC_EDIT1,13,8,98,14,ES_AUTOHSCROLL
-END
-
-IDD_SERIES_VALUES_DLG DIALOGEX 0, 0, 199, 226
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Series values"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    DEFPUSHBUTTON   "Close",IDOK,73,210,50,14
-    LISTBOX         IDC_LIST1,2,2,195,45,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
-    CONTROL         "List2",IDC_LIST2,"SysListView32",LVS_REPORT | WS_BORDER | WS_TABSTOP,2,47,195,161
 END
 
 IDD_LOCATE_CTRLS_DLG DIALOGEX 0, 0, 569, 59
@@ -416,37 +397,6 @@ BEGIN
     CONTROL         "QuickSearch",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,318,85,55,10
 END
 
-IDD_SERIES_PROP_DLG DIALOGEX 0, 0, 152, 103
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Series properties"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,95,80,50,14
-    EDITTEXT        IDC_EDIT1,30,7,115,14,ES_AUTOHSCROLL
-    LTEXT           "Name",IDC_STATIC,9,9,19,8
-    COMBOBOX        IDC_COMBO1,59,25,86,93,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Symbol style",IDC_STATIC,7,28,41,8
-    COMBOBOX        IDC_COMBO4,59,42,86,61,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Line style",IDC_STATIC,7,46,31,8
-    LTEXT           "Error bars style",IDC_STATIC,7,62,50,8
-    COMBOBOX        IDC_COMBO5,59,60,86,64,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Line color",IDC_BUTTON1,"Button",BS_OWNERDRAW | BS_BITMAP | WS_TABSTOP,7,80,39,14
-    CONTROL         "Fill color",IDC_BUTTON3,"Button",BS_OWNERDRAW | BS_BITMAP | WS_TABSTOP,47,80,40,14
-END
-
-IDD_SET_AXIS_RANGE_DLG DIALOGEX 0, 0, 132, 44
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Set axis  range"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,75,7,50,14,NOT WS_TABSTOP
-    PUSHBUTTON      "Cancel",IDCANCEL,75,23,50,14,NOT WS_TABSTOP
-    EDITTEXT        IDC_EDIT1,30,7,40,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT2,30,23,40,14,ES_AUTOHSCROLL
-    LTEXT           "Max Y",IDC_STATIC,3,8,24,8,0,WS_EX_RIGHT
-    LTEXT           "Min Y",IDC_STATIC,0,24,26,8,0,WS_EX_RIGHT
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -485,28 +435,12 @@ BEGIN
         TOPMARGIN, 2
     END
 
-    IDD_SERIES_LIST_DLG, DIALOG
-    BEGIN
-        LEFTMARGIN, 3
-        RIGHTMARGIN, 226
-        TOPMARGIN, 3
-        BOTTOMMARGIN, 124
-    END
-
     IDD_MODIF_VALUE_DLG, DIALOG
     BEGIN
         LEFTMARGIN, 2
         RIGHTMARGIN, 184
         TOPMARGIN, 2
         BOTTOMMARGIN, 31
-    END
-
-    IDD_SERIES_VALUES_DLG, DIALOG
-    BEGIN
-        LEFTMARGIN, 2
-        RIGHTMARGIN, 197
-        TOPMARGIN, 2
-        BOTTOMMARGIN, 224
     END
 
     IDD_LOCATE_CTRLS_DLG, DIALOG
@@ -548,22 +482,6 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 95
     END
-
-    IDD_SERIES_PROP_DLG, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 145
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 96
-    END
-
-    IDD_SET_AXIS_RANGE_DLG, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 125
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 37
-    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -574,7 +492,6 @@ END
 //
 
 IDR_TOOLBAR2            BITMAP                  "res\\toolbar2.bmp"
-IDB_STATEICONS          BITMAP                  "res\\stateico.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -598,31 +515,6 @@ END
 //
 // Menu
 //
-
-IDR_MENU1 MENU
-BEGIN
-    POPUP "Series Menu"
-    BEGIN
-        MENUITEM "Show values",                 ID_SERIESMENU_SHOWVALUES
-        MENUITEM "Delete Series",               ID_SERIESMENU_DELETESERIES
-        MENUITEM "Save as Text",                ID_SERIESMENU_SAVEASTEXT
-        POPUP "Change Status"
-        BEGIN
-            MENUITEM "Active",                      ID_CHANGESTATUS_ACTIVE
-            MENUITEM "InActive",                    ID_CHANGESTATUS_INACTIVE
-            MENUITEM "Calibrator",                  ID_CHANGESTATUS_CALIBRATOR
-        END
-        MENUITEM "Change style",                ID_SERIESMENU_CHANGESTYLE
-    END
-END
-
-IDR_MENU2 MENU
-BEGIN
-    POPUP "Chart menu"
-    BEGIN
-        MENUITEM "Show values",                 ID_SERIESMENU_SHOWVALUES
-    END
-END
 
 IDR_MENU3 MENU
 BEGIN
@@ -696,30 +588,13 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_TOOLTIP_SCANSPEED   "Maximum speed = 1 nm/s"
     ID_CHART1               "id for chart"
-    ID_SERIES_UPD_COMMAND   "fref"
-    STEP_MOTOR_ICON         "grge"
-    PHEM1_ICON              "gret"
-    PHEM2_ICON              "grerte"
-    L2_TEXT_ID              "gerter"
-    IDD_BARTEMPLATE         "thrt"
-    IDS_TAGEDITTIP          "ура!"
-    ID_TAGEDITTIP           "fgertge"
-    IDS_STRING11            "]"
-    IND_GRIDTYPE            "ИК"
-    FILTERHEAD_ICON         "rter"
-    IDS_PAUSESTAGE3         "Сейчас будем измерять фон."
 END
 
 STRINGTABLE
 BEGIN
     ID_CONFIG               "system config"
-    IDS_MOTORSTAGE_R        "Ж-Ж-Ж-Ж..."
-    IDS_STRING_IDLE         "Чего ждём?!"
-    IDS_VOLTSTAGE_R         "Измеряем вольтажину"
     IDS_MAINSTAGE           "   "
-    IND_WAVELEN             "8888.88"
     IND_ACTION              "S"
     IND_DEVICE              "MOTR"
     IND_TEST                "00000000"
@@ -728,55 +603,15 @@ END
 STRINGTABLE
 BEGIN
     IND_MAIN                "0"
-    IDS_MOTORSTAGE_P        "Ну вот, на самом интересном месте..."
-    IDB_VOLTMETER_BUTTON    "Это вольтметр"
-    IDB_MOTOR_BUTTON        "Это мотор"
-    IDB_LOG_BUTTON          "Это лог"
-    IDS_ERROR_STRING        "Упс, косяк"
-    IDB_MV_BUTTON           "Это MV"
-    ID_OSCILWND             "dlsmcvasdm"
-    ID_OSCILWND1            "dkl;we"
     IND_STATUS              "00000000"
-    IDS_TERMINALBUTTON      "fgd"
     ID_CHIP_CTRL            "Управление комплексом"
     ID_EVENT_LOG            "Лог сообщений"
     ID_VIEW_CONFIG          " Настройка параметров системы"
-    ID_EventsList           "gfero"
-    ID_MV_WND               "ter"
-END
-
-STRINGTABLE
-BEGIN
-    IDD_CONFIG              "Настройка параметров системы"
-END
-
-STRINGTABLE
-BEGIN
-    ID_volt_out_ctrl        "gerjh"
-    ID_volt_out_ctrl2       "gnrej"
-    ID_volt_out_ctrl3       "rgjnek"
-    ID_wave_len_ctrl        "grengtk"
-END
-
-STRINGTABLE
-BEGIN
-    ID_SCOPE_CHNL_1         "scope_chnl_1"
 END
 
 STRINGTABLE
 BEGIN
     ID_SPINEDIT1            "spinedit1"
-    ID_SLIDERTRACK1         "rete"
-END
-
-STRINGTABLE
-BEGIN
-    ID_SPECTRUM_UNIT_1      "ID_SPECTRUM_UNIT_1"
-END
-
-STRINGTABLE
-BEGIN
-    ID_SCOPE_CHNL_2         "rfer"
 END
 
 STRINGTABLE
@@ -840,17 +675,6 @@ BEGIN
     MSG_STRING3             "Сейчас будем измерять ФОН. Ну кто-нибудь перекройте поток."
     MSG_STRING4             "Чего ждем. Фильтры я что-ли буду менять!"
     MSG_STRING0             "Ну я даже не знаю что сказать"
-END
-
-STRINGTABLE
-BEGIN
-    ID_PGA_CNTRL1           "rfer"
-    ID_PGA_CNTRL2           "gerter"
-END
-
-STRINGTABLE
-BEGIN
-    ID_PGA_DLG_WND          "ete"
 END
 
 STRINGTABLE
@@ -1040,7 +864,6 @@ END
 LANGUAGE 9, 1
 #pragma code_page(1252)
 #endif //_WIN32
-#include "res\KSVU3.rc2"  // non-Microsoft Visual C++ edited resources
 #include "afxres.rc"         // Standard components
 #endif
 

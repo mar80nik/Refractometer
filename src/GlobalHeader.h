@@ -35,10 +35,10 @@ enum UserDefinedMessages1
 	UM_MESSAGE=UM_LAST_MESSAGE+1, UM_MSG_OUT, UM_NOTIFY, UM_LAST_MESSAGE1
 };
 
-enum UserDefinedMessages2
-{	
-	UM_SERIES_UPDATE=UM_LAST_MESSAGE1+1, UM_LAST_MESSAGE2
-};
+//enum UserDefinedMessages2
+//{	
+//	UM_SERIES_UPDATE=UM_LAST_MESSAGE1+1, UM_LAST_MESSAGE2
+//};
 
 
 class Error;

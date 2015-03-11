@@ -2,7 +2,7 @@
 
 #include "MyToolBar.h"	// Added by ClassView
 #include "DialogBarTab1.h"	// Added by ClassView
-#include "DialogBarTab2.h"	// Added by ClassView
+//#include "DialogBarTab2.h"	// Added by ClassView
 #include "MyTabCtrl.h"	// Added by ClassView
 //#include "mystatusbar.h"
 
@@ -34,12 +34,12 @@ public:
 	MyToolBar Toolbar1;
 	MyTabCtrl TabCtrl1;
 	CDialog * CurTabDialog;
-	DialogBarTab2 SeriesList;
+	//DialogBarTab2 SeriesList;
 //	TerminalDialog Tab4;
     
 //	MessagesInspector Inspector1;
 	ImageWnd	Img;
-	MainChartWnd& Chart1;
+	MainChartWnd Chart1;
 //	Oscilloscope Scope1;
 //	ControllerWnd CntrlerWnd;
 

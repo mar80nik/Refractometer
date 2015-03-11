@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TChart\TChartSeries.h"
+#include "TChartSeries.h"
 #include "my_gsl.h"
 
 enum Polarization {TE, TM};

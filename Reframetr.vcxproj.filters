@@ -25,6 +25,9 @@
     <Filter Include="my_gsl\headers">
       <UniqueIdentifier>{fdd8ffaa-fb1e-496a-bb0e-005577d6e076}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tchart">
+      <UniqueIdentifier>{40611501-343f-45f8-8f19-6f3be4d62528}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DialogBarTab1.cpp">
@@ -33,25 +36,7 @@
     <ClCompile Include="src\devices.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
-    <ClCompile Include="TChart\MouseTrackerWnd.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
     <ClCompile Include="src\MyListBox.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\OwnerDrawBtn.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="tchart\TChart.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="tchart\TChartSeries.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="tchart\TChartElements.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="tchart\TChartPoints.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
     <ClCompile Include="src\SystemConfig.cpp">
@@ -73,12 +58,6 @@
       <Filter>Source Files\ok</Filter>
     </ClCompile>
     <ClCompile Include="src\camera.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SeriesStyleDialog.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="TChart\SetAxisRangeDlg.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
     <ClCompile Include="src\BarTemplate.cpp">
@@ -105,16 +84,7 @@
     <ClCompile Include="src\KSVU3View.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
-    <ClCompile Include="src\DialogBarTab2.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
     <ClCompile Include="src\MyTabCtrl.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MyListCtrl.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SeriesValuesDialog.cpp">
       <Filter>Source Files\ok</Filter>
     </ClCompile>
     <ClCompile Include="src\KSVU3.cpp">
@@ -153,6 +123,39 @@
     <ClCompile Include="..\..\my_lib\src\type_array.cpp">
       <Filter>my_lib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\TChart\src\MouseTrackerWnd.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\OwnerDrawBtn.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\SeriesListCtrl.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\SeriesListDlg.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\SeriesStyleDlg.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\SeriesValuesDlg.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\SetAxisRangeDlg.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\TChart.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\TChartElements.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\TChartPoints.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\TChart\src\TChartSeries.cpp">
+      <Filter>tchart</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -188,25 +191,7 @@
     <ClInclude Include="src\MainFrm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\MouseTrackerWnd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\SystemConfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tchart\TChart.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tchart\TChartElements.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tchart\TChartGlobal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tchart\TChartPoints.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tchart\TChartSeries.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -910,6 +895,9 @@
     <ResourceCompile Include="KSVU3.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+    <ResourceCompile Include="..\..\TChart\src\tchart_resources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\toolbar2.bmp">
@@ -919,9 +907,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\KSVU3Doc.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\bitmap1.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\stateico.bmp">
