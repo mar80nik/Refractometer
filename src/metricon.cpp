@@ -326,146 +326,116 @@ int FilmParams::Calculator2(
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-void CalcR_TE(CalcRParams& params)
+typedef void (*CalcRHelper)(const ComplexGSL &gam2, const ComplexGSL &gam3, const ComplexGSL &gam4,
+							const ComplexGSL &epsi, const ComplexGSL &epsf, const ComplexGSL &epss,
+							const double &CT, const double &Np,
+							ComplexGSL &A, ComplexGSL &B, ComplexGSL &C);
+
+void CalcRTEhelper(const ComplexGSL &gam2, const ComplexGSL &gam3, const ComplexGSL &gam4,
+				   const ComplexGSL &epsi, const ComplexGSL &epsf, const ComplexGSL &epss,
+				   const double &CT, const double &Np,
+				   ComplexGSL &A, ComplexGSL &B, ComplexGSL &C)
 {
-	SimplePoint pnt; pnt.type.Set(GenericPnt);
-	double k, teta, ST, CT, dteta;
-	ComplexGSL gam2, gam3, A, B, C, t, gam4, As, Ra;
-	double &Np = params.Np; FilmParams &i=params.i, &f=params.f, &s=params.s;
+	ComplexGSL t, t1;
+	t = gam2;			t1 = gam3;	A = (t - t1)/(t + t1); 
+	t = gam3;			t1 = gam4;	B = (t - t1)/(t + t1); 			
+	t = gam2; t *= cJ;	t1 = CT;	C = (t - t1)/(t + t1); 
+	C*=-1;
+}
+
+void CalcRTMhelper(const ComplexGSL &gam2, const ComplexGSL &gam3, const ComplexGSL &gam4,
+				   const ComplexGSL &epsi, const ComplexGSL &epsf, const ComplexGSL &epss,
+				   const double &CT, const double &Np,
+				   ComplexGSL &A, ComplexGSL &B, ComplexGSL &C)
+{
+	ComplexGSL t, t1;
+	t = epsf;	t *= gam2;	t1 = epsi;	t1 *= gam3;	
+	A = (t - t1)/(t + t1);
+	t = epss;	t *= gam3;	t1 = epsf;	t1 *= gam4;	
+	B = (t - t1)/(t + t1);
+	t = epsi;	t *= CT;	t1 = gam2; t1 *= ComplexImGSL(Np*Np);	
+	C = (t - t1)/(t + t1);	
+}
+
+CalcR_ResultArray CalcR(const Polarization pol, const CalcRParams& params)
+{
+	CalcR_ResultArray ret; CalcRHelper func;
+	double k, teta, ST, ST2, CT, dteta;
+	ComplexGSL gam2, gam3, gam4, A, B, C, t, t1, Ax, Ra;
+	const double &Np = params.Np; const FilmParams &i=params.i, &f=params.f, &s=params.s;
+
+	switch (pol)
+	{
+	case TE: func = CalcRTEhelper; break;
+	case TM: func = CalcRTMhelper; break;
+	}
 
 	k = 2*M_PI/params.lambda; dteta=(params.teta_max-params.teta_min)/(params.num_pnts-1);
 
 	ComplexGSL epsi(i.n, i.m), epsf(f.n, f.m), epss(s.n, s.m);
 	epsi=pow2(epsi); epsf=pow2(epsf); epss=pow2(epss);
-	
-	for(int j=0; j<params.num_pnts; j++)
-	{
-		teta=params.teta_min+j*dteta;
-		ST = Np*sin(teta*DEGREE); ST*=ST; CT = Np*cos(teta*DEGREE);
-
-		gam2=sqrt((epsi-ST)*-1.); 
-		gam3=sqrt((epsf-ST)*-1.); 
-		gam4=sqrt((epss-ST)*-1.); 
-
-		A=(gam2 - gam3)/(gam2 + gam3); 
-		B=(gam3 - gam4)/(gam3 + gam4);
-		t=gam2*cJ; C=(t - CT)/(t + CT); C*=-1;
-
-		t=B*exp(gam3*(-2*k*f.H)); As=( A + t )/( A*t + 1. );
-
-		t=As*exp(gam2*(-2*k*i.H)); Ra=( C + t )/( C*t + 1 );
-		
-		if(params.R!=NULL) { pnt.x=teta; pnt.y=Ra.abs2(); params.R->Points.Add(pnt); }
-		if(params.teta!=NULL) { pnt.x=teta; pnt.y=sqrt(ST); params.teta->Points.Add(pnt); }
-	}	
-	
-}
-void CalcR_TM(CalcRParams& params)
-{
-	SimplePoint pnt; pnt.type.Set(GenericPnt);
-	double k, teta, ST, CT, dteta;
-	ComplexGSL gam2, gam3, A, B, C, t, t1, gam4, Ap, Ra;
-	double &Np = params.Np; FilmParams &i=params.i, &f=params.f, &s=params.s;
-
-	k = 2*M_PI/params.lambda; dteta=(params.teta_max-params.teta_min)/(params.num_pnts-1);
-
-	ComplexGSL epsi(i.n, i.m), epsf(f.n, f.m), epss(s.n, s.m);
-	epsi=pow2(epsi); epsf=pow2(epsf); epss=pow2(epss);
 
 	for(int j=0; j<params.num_pnts; j++)
 	{
-		teta=params.teta_min+j*dteta;
-		ST = Np*sin(teta*DEGREE); ST*=ST; CT = Np*cos(teta*DEGREE);
+		teta = params.teta_min + j*dteta;
+		ST = Np*sin(teta*DEGREE); ST2 = ST*ST; CT = Np*cos(teta*DEGREE);
 
-		gam2=sqrt((epsi-ST)*-1.); 
-		gam3=sqrt((epsf-ST)*-1.); 
-		gam4=sqrt((epss-ST)*-1.); 
+		gam2 = sqrt((epsi-ST2)*-1.);	gam3 = sqrt((epsf-ST2)*-1.);	gam4 = sqrt((epss-ST2)*-1.); 
+		func(gam2, gam3, gam4, epsi, epsf, epss, CT, Np, A, B, C);
+		t = B*exp(gam3*(-2*k*f.H));		Ax = ( A + t )/( A*t + 1. );
+		t = Ax*exp(gam2*(-2*k*i.H));	Ra = ( C + t )/( C*t + 1 );
 
-		t=epsf*gam2; t1=epsi*gam3;				A = (t - t1)/(t + t1);
-		t=epss*gam3; t1=epsf*gam4;				B = (t - t1)/(t + t1);
-		t=epsi*CT; t1=gam2*ComplexImGSL(Np*Np); C = (t - t1)/(t + t1);
-
-		t=B*exp(gam3*(-2*k*f.H));
-		Ap=( A + t )/( A*t + 1. );		
-
-		t=Ap*exp(gam2*(-2*k*i.H));
-		Ra=( C + t )/( C*t + 1 );
-
-		if(params.R!=NULL) { pnt.x=teta; pnt.y=Ra.abs2(); params.R->Points.Add(pnt); }
-		if(params.teta!=NULL) { pnt.x=teta; pnt.y=sqrt(ST); params.teta->Points.Add(pnt); }
-	}		
+		ret << CalcR_Result(teta, Ra.abs2(), ST);
+	}
+	return ret;	
 }
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-double ParabolaFitFunc::FuncParams::func( const double &x, const double *a, const size_t &p )
+double ParabolaFuncParams::func( const double &x, const double *a, const size_t &p )
 {
 	return a[ind_a]*x*x + a[ind_b]*x + a[ind_c];
 }
-double ParabolaFitFunc::FuncParams::df_da( const double &x, const double *a, const size_t &p, double *c) { return x*x; }
-double ParabolaFitFunc::FuncParams::df_db( const double &x, const double *a, const size_t &p, double *c) { return x; }
-double ParabolaFitFunc::FuncParams::df_dc( const double &x, const double *a, const size_t &p, double *c) { return 1; }
+double ParabolaFuncParams::df_da( const double &x, const double *a, const size_t &p, double *c) { return x*x; }
+double ParabolaFuncParams::df_db( const double &x, const double *a, const size_t &p, double *c) { return x; }
+double ParabolaFuncParams::df_dc( const double &x, const double *a, const size_t &p, double *c) { return 1; }
 double ParabolaFitFunc::GetTop(double &x)
 {
-	x = (-a[ind_b]/(2*a[ind_a])); 
+	x = (-a[ParabolaFuncParams::ind_b]/(2*a[ParabolaFuncParams::ind_a])); 
 	return GetXrelY(x);
-}
-int ParabolaFitFunc::CalculateFrom(	const DoubleArray& x, const DoubleArray& y, 
-									const DoubleArray& sigma, DoubleArray& init_a)
-{
-	FuncParams params(x, y, sigma);	MultiFitterTemplate<FuncParams> solver;
-
-	if (solver.Run(&params, init_a, SolverErrors(1e-6)) == GSL_SUCCESS)
-	{
-		da = solver.da; 		
-	}
-	solver.Fill_FitFunc(this);
-	return solver.status;
 }
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //f = C + (A/(1 + exp(-2*k*(x - B))));
-double KneeFitFunc::FuncParams::func( const double &x, const double *a, const size_t &p )
+double KneeFuncParams::func( const double &x, const double *a, const size_t &p )
 {
 	return a[ind_C] + (a[ind_A]/( 1 + exp(-2*a[ind_k]*(x - a[ind_B])) ));	
 }
-double KneeFitFunc::FuncParams::df_dA(const double &x, const double *a, const size_t &p, double *c)
+double KneeFuncParams::df_dA(const double &x, const double *a, const size_t &p, double *c)
 {
 	double t0 = *c;
 	return 1/(1 + t0);	
 }
-double KneeFitFunc::FuncParams::df_dB(const double &x, const double *a, const size_t &p, double *c)
+double KneeFuncParams::df_dB(const double &x, const double *a, const size_t &p, double *c)
 {
 	double t0 = *c;
 	return -2*a[ind_k]*a[ind_A]*t0/((1 + t0)*(1 + t0));
 }
-double KneeFitFunc::FuncParams::df_dC(const double &x, const double *a, const size_t &p, double *c)
+double KneeFuncParams::df_dC(const double &x, const double *a, const size_t &p, double *c)
 {
 	return 1;
 }
-double KneeFitFunc::FuncParams::df_dk(const double &x, const double *a, const size_t &p, double *c)
+double KneeFuncParams::df_dk(const double &x, const double *a, const size_t &p, double *c)
 {
 	double t0 = *c;
 	return 2*(x - a[ind_B])*a[ind_A]*t0/((1 + t0)*(1 + t0));
 }
 double KneeFitFunc::GetInflection( double &x, const double &level )
 {
-	x = a[ind_B] + log(level/(1-level))/(2*a[ind_k]);
+	x = a[KneeFuncParams::ind_B] + log(level/(1-level))/(2*a[KneeFuncParams::ind_k]);
 	return GetXrelY(x);
 }
-int KneeFitFunc::CalculateFrom(	const DoubleArray& x, const DoubleArray& y, 
-	const DoubleArray& sigma, DoubleArray& init_a)
-{
-	FuncParams params(x, y, sigma);	MultiFitterTemplate<FuncParams> solver;
 
-	if (solver.Run(&params, init_a, SolverErrors(1e-6)) == GSL_SUCCESS)
-	{
-		da = solver.da; 		
-	}
-	solver.Fill_FitFunc(this);
-	return solver.status;
-}
-
-double * KneeFitFunc::FuncParams::PrepareDerivBuf( const double &x, const double *a, const size_t &p )
+double * KneeFuncParams::PrepareDerivBuf( const double &x, const double *a, const size_t &p )
 {
 	buf = exp(-2*a[ind_k]*(x - a[ind_B]));
 	return &buf;

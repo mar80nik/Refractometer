@@ -408,9 +408,9 @@ MinimumsFitFilterParams* MinimumsFitFilterFunc(PointVsErrorArray &data,SimplePoi
 
 		buft.CopyFrom(data,2*dn+1,index-dn); 
 		fiting.CalculateFrom(buft.x, buft.y, buft.dy, init);
-		double a0 = fiting.a[ParabolaFitFunc::ind_c];
-		double a1 = fiting.a[ParabolaFitFunc::ind_b];
-		double a2 = fiting.a[ParabolaFitFunc::ind_a];
+		double a0 = fiting.a[ParabolaFuncParams::ind_c];
+		double a1 = fiting.a[ParabolaFuncParams::ind_b];
+		double a2 = fiting.a[ParabolaFuncParams::ind_a];
 		if(fiting.status != GSL_SUCCESS) 
 		{
 			FailedFiting ff(tt, FIT_GSL_FAIL); 

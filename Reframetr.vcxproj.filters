@@ -887,6 +887,12 @@
     <ClInclude Include="..\..\my_gsl\header\gsl\gsl_wavelet2d.h">
       <Filter>my_gsl\headers</Filter>
     </ClInclude>
+    <ClInclude Include="src\metricon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GlobalHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\my_lib\src\my_lib_resources.rc">
