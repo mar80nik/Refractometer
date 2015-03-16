@@ -188,7 +188,7 @@ void ImageWnd::CtrlsTab::OnBnClickedScan()
 {
 	UpdateData(); ImageWnd* parent=(ImageWnd*)Parent;
 	MyTimer Timer1,Timer2; sec time; 
-	void* x; CString T; BOOL exit = FALSE;		
+	CString T; BOOL exit = FALSE;		
 	ControledLogMessage log; log << _T("Speed tests results");
 	ImagesAccumulator &dark = parent->dark.accum, &cupol = parent->cupol.accum, &strips = parent->strips.accum;
 
@@ -226,27 +226,21 @@ void ImageWnd::CtrlsTab::OnBnClickedScan()
 			}
 			if (result.GetSize() != 0)
 			{
-				CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); TChart& chrt=mf->Chart1; 			
-				if((x = chrt.Series.GainAcsess(WRITE))!=0)
+				CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
+				TPointVsErrorSeries *t1 = NULL;
+				
+				if((t1 = new TPointVsErrorSeries(T)) != NULL)	
 				{
-					SeriesProtector Protector(x); TSeriesArray& Series(Protector);
-					TPointVsErrorSeries *t2 = NULL;
-					if((t2 = new TPointVsErrorSeries(T)) != NULL)	
+					t1->SetParentUpdateStatus(UPD_OFF);
+					t1->_SymbolStyle::Set(NO_SYMBOL); t1->_ErrorBarStyle::Set(POINTvsERROR_BAR);				
+					t1->AssignColors(ColorsStyle(clRED,RANDOM_COLOR));
+
+					for (int i = 0; i < result.GetSize(); i++) 
 					{
-						t2->_SymbolStyle::Set(NO_SYMBOL); t2->_ErrorBarStyle::Set(POINTvsERROR_BAR);				
-						t2->PointType.Set(GenericPnt); 										
-						for(int i=0;i<Series.GetSize();i++) Series[i]->SetStatus(SER_INACTIVE);
-						Series.Add(t2); 
-						t2->AssignColors(ColorsStyle(clRED,Series.GetRandomColor()));
-						t2->SetStatus(SER_ACTIVE); t2->SetVisible(true);
-						TPointVsErrorSeries::DataImportMsg *ChartMsg = t2->CreateDataImportMsg(); 
-						for (int i = 0; i < result.GetSize(); i++) 
-						{
-							ChartMsg->Points.Add(result[i]);
-						}
-						ChartMsg->Dispatch(); 
-						mf->TabCtrl1.ChangeTab(mf->TabCtrl1.FindTab("Main control"));	
-					}		
+						t1->AddXY(result[i]);
+					}
+					t1->DispatchDataImportMsg(mf->Chart1);
+					mf->TabCtrl1.ChangeTab(mf->TabCtrl1.FindTab("Main control"));	
 				}				
 			}
 			Timer1.Stop(); 
@@ -800,38 +794,28 @@ HRESULT ImageWnd::PicWnd::MakeAva()
 
 void ImageWnd::PicWnd::OnPicWndScanLine()
 {
-	void* x; CString T; 	
-	TPointVsErrorSeries::DataImportMsg *ChartMsg = NULL; 
-	ControledLogMessage log; log << _T("Speed tests results");
-
 	if (accum.bmp != NULL)
 	{
-		CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); TChart& chrt=mf->Chart1; 
-		mf->TabCtrl1.ChangeTab(mf->TabCtrl1.FindTab("Main control"));	
-
+		CString T; TPointVsErrorSeries *t1 = NULL;
 		ScanRgnData data = Parent->GetScanRgnData();
 		T.Format("Scan line y = %d N = %d", data.stroka, accum.n);
-
-		if((x=chrt.Series.GainAcsess(WRITE))!=0)
+		if((t1 = new TPointVsErrorSeries(T)) != 0)	
 		{
-			SeriesProtector Protector(x); TSeriesArray& Series(Protector);
-			TPointVsErrorSeries *t2;
-			if((t2 = new TPointVsErrorSeries(T))!=0)	
-			{
-				for(int i=0;i<Series.GetSize();i++) Series[i]->SetStatus(SER_INACTIVE);
-				Series.Add(t2); 
-				t2->_SymbolStyle::Set(NO_SYMBOL); t2->_ErrorBarStyle::Set(POINTvsERROR_BAR);
-				ChartMsg = t2->CreateDataImportMsg(); 
-				t2->AssignColors(ColorsStyle(clRED,Series.GetRandomColor()));
-				t2->PointType.Set(GenericPnt); 
-				t2->SetStatus(SER_ACTIVE); t2->SetVisible(true);
-			}		
-		}		
-		accum.ScanLine(&(ChartMsg->Points), data);
-		log.T.Format("Scan of %d points took %g ms", ChartMsg->Points.GetSize(), accum.fillTime.val()); 
-		log << log.T;
-		ChartMsg->Dispatch();
-		log.Dispatch();
+			ControledLogMessage log; log << _T("Speed tests results");
+			CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
+
+			t1->SetParentUpdateStatus(UPD_OFF);
+			t1->_SymbolStyle::Set(NO_SYMBOL); t1->_ErrorBarStyle::Set(POINTvsERROR_BAR);
+			t1->AssignColors(ColorsStyle(clRED, RANDOM_COLOR));
+
+			PointVsErrorArray pnts; accum.ScanLine(&pnts, data);
+			for (int i = 0; i < pnts.GetSize(); i++) t1->AddXY(pnts[i]);	
+			log.T.Format("Scan of %d points took %g ms", pnts.GetSize(), accum.fillTime.val()); log << log.T;
+			t1->DispatchDataImportMsg(mf->Chart1);		
+			log.Dispatch();
+
+			mf->TabCtrl1.ChangeTab(mf->TabCtrl1.FindTab("Main control"));	
+		}				
 	}
 }
 

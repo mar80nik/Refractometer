@@ -403,6 +403,14 @@ double ParabolaFitFunc::GetTop(double &x)
 	x = (-a[ParabolaFuncParams::ind_b]/(2*a[ParabolaFuncParams::ind_a])); 
 	return GetXrelY(x);
 }
+
+void ParabolaFitFunc::GetReport( ControledLogMessage &log )
+{
+	MultiFitterTemplate<ParabolaFuncParams>::GetReport(log);
+	SimplePoint pnt; pnt.y = GetTop(pnt.x); 
+	log.T.Format("xmin = %g ymin = %g", pnt.x, pnt.y); log << log.T;
+}
+
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //f = C + (A/(1 + exp(-2*k*(x - B))));
@@ -433,6 +441,13 @@ double KneeFitFunc::GetInflection( double &x, const double &level )
 {
 	x = a[KneeFuncParams::ind_B] + log(level/(1-level))/(2*a[KneeFuncParams::ind_k]);
 	return GetXrelY(x);
+}
+
+void KneeFitFunc::GetReport( ControledLogMessage &log, double level )
+{
+	MultiFitterTemplate<KneeFuncParams>::GetReport(log);
+	SimplePoint pnt; pnt.y = GetInflection(pnt.x, level);
+	log.T.Format("xmin = %g ymin = %g", pnt.x, pnt.y); log << log.T;
 }
 
 double * KneeFuncParams::PrepareDerivBuf( const double &x, const double *a, const size_t &p )

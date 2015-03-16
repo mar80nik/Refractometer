@@ -50,7 +50,6 @@ public:
 // Implementation
 	//{{AFX_MSG(CKSVU3App)
 	afx_msg void OnAppAbout();
-//	afx_msg void OnEventLog(WPARAM wParam, LPARAM lParam );		
 	afx_msg void OnBackupSave(WPARAM wParam, LPARAM lParam );	
 	afx_msg void OnWavelenSet(WPARAM wParam, LPARAM lParam );
 	afx_msg void OnStop(WPARAM wParam, LPARAM lParam );
@@ -60,7 +59,6 @@ public:
 	afx_msg void OnUpdateIndicators(WPARAM wParam, LPARAM lParam );
 	afx_msg void OnUpdateConfig(WPARAM wParam, LPARAM lParam );
 	afx_msg void OnDataUpdate(WPARAM wParam, LPARAM lParam );
-//	afx_msg void OnSeriesUpdate(WPARAM wParam, LPARAM lParam );
 	afx_msg void OnGenericMessage(WPARAM wParam, LPARAM lParam );
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

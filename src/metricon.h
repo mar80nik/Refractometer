@@ -237,6 +237,7 @@ struct ParabolaFuncParams: public BaseForMultiFitterFuncParams
 class ParabolaFitFunc: public MultiFitterTemplate<ParabolaFuncParams>
 {
 public:
+	virtual void GetReport(ControledLogMessage &log);
 	double GetTop(double &x);	
 };
 /////////////////////////////////////////////////////////////////
@@ -257,18 +258,19 @@ struct KneeFuncParams: public BaseForMultiFitterFuncParams
 
 	KneeFuncParams( const DoubleArray& y, const DoubleArray& sigma ) : 
 			BaseForMultiFitterFuncParams(ind_max, y, sigma)
-		{
+	{
 		pFunction = KneeFuncParams::func;
-			pDerivatives[ind_A] = df_dA; pDerivatives[ind_B] = df_dB; 
-			pDerivatives[ind_C] = df_dC; pDerivatives[ind_k] = df_dk;
-		}
-		virtual double * PrepareDerivBuf(const double &x, const double *a, const size_t &p);	
+		pDerivatives[ind_A] = df_dA; pDerivatives[ind_B] = df_dB; 
+		pDerivatives[ind_C] = df_dC; pDerivatives[ind_k] = df_dk;
+	}
+	virtual double * PrepareDerivBuf(const double &x, const double *a, const size_t &p);	
 };//////////////////////////////////////////////////////////////////////////
 	
 
 class KneeFitFunc: public MultiFitterTemplate<KneeFuncParams>
 {
 public:
+	virtual void GetReport(ControledLogMessage &log, double level);
 	double GetInflection(double &x, const double &level);	
 };
 //////////////////////////////////////////////////////////////////////////

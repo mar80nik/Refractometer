@@ -143,7 +143,7 @@ LRESULT CalcTEDialog::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
 		Series=(ProtectedSeriesArray*)lParam;
 		SeriesCombo.ResetContent();
 		void *x; 
-		if((x=Series->GainAcsess(READ))!=0)
+		if((x=Series->GainAcsess(READ_EX))!=0)
 		{
 			SeriesProtector Protector(x); TSeriesArray& Series(Protector);			
 

@@ -146,7 +146,7 @@ LRESULT CMainFrame::OnUpdateConfig(WPARAM wParam, LPARAM lParam )
 
 LRESULT CMainFrame::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
 {
-	Chart1.Panel.PostMessage(UM_SERIES_UPDATE,wParam,lParam);	
+	//Chart1.Panel.PostMessage(UM_SERIES_UPDATE,wParam,lParam);	
 	return 0;
 }
 
