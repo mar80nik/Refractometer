@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
-    <Filter Include="Source Files\ok">
-      <UniqueIdentifier>{3ecdd378-162c-46bb-9338-504443910528}</UniqueIdentifier>
-    </Filter>
     <Filter Include="my_lib">
       <UniqueIdentifier>{aae60ec9-4c02-4d63-a613-8d8ddd4b741e}</UniqueIdentifier>
     </Filter>
@@ -32,66 +29,6 @@
   <ItemGroup>
     <ClCompile Include="src\DialogBarTab1.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\devices.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MyListBox.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SystemConfig.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\metricon.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\calibratorDialog.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CalcTEDialog.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\captureWnd.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\camera.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BarTemplate.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\cameraChooser.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MyToolBar.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ModifyValueDialog.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TConfigDialog.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MainFrm.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\KSVU3Doc.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\KSVU3View.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MyTabCtrl.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\KSVU3.cpp">
-      <Filter>Source Files\ok</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ImageWnd.cpp">
-      <Filter>Source Files\ok</Filter>
     </ClCompile>
     <ClCompile Include="src\EventLogDialog.cpp">
       <Filter>Source Files</Filter>
@@ -155,6 +92,66 @@
     </ClCompile>
     <ClCompile Include="..\..\TChart\src\TChartSeries.cpp">
       <Filter>tchart</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BarTemplate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CalcTEDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\calibratorDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cameraChooser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\captureWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\devices.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ImageWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\KSVU3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\KSVU3Doc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\KSVU3View.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MainFrm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\metricon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ModifyValueDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyListBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyTabCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyToolBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SystemConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TConfigDialog.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -886,6 +883,48 @@
     </ClInclude>
     <ClInclude Include="..\..\my_gsl\header\gsl\gsl_wavelet2d.h">
       <Filter>my_gsl\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\metricon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GlobalHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\MouseTrackerWnd.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\OwnerDrawBtn.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\SeriesListCtrl.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\SeriesListDlg.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\SeriesStyleDlg.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\SeriesValuesDlg.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\SetAxisRangeDlg.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\TChart.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\TChartElements.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\TChartGlobal.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\TChartPoints.h">
+      <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\TChart\src\TChartSeries.h">
+      <Filter>tchart</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

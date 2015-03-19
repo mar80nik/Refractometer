@@ -12,7 +12,8 @@ MainChartWnd::MainChartWnd(): TChart("Chart1")
 /////////////////////////////////////////////////////////////////////////////
 // DialogBarTab1 dialog
 BEGIN_MESSAGE_MAP(MainChartWnd, TChart)
-	//{{AFX_MSG_MAP(DialogBarTab1)
+	//{{AFX_MSG_MAP(TChart)
+	ON_MESSAGE(UM_SERIES_UPDATE,OnSeriesUpdate)	
 	//}}AFX_MSG_MAP	
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
@@ -28,6 +29,13 @@ int MainChartWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void MainChartWnd::Serialize(CArchive& ar)
 {		
 	Panel.Serialize(ar);
+}
+
+LRESULT MainChartWnd::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
+{	
+	TChart::OnSeriesUpdate(wParam, lParam);
+	Panel.PostMessage(UM_SERIES_UPDATE,wParam,lParam);
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -161,54 +169,28 @@ void DialogBarTab1::OnBnClicked_Fit()
 	else return;
 
 	DoubleArray init; ParabolaFitFunc fiting; 	SimplePoint pnt;	
-	init << 1 << 1e-1 << 1e-2;		
-	fiting.CalculateFrom(buf.x, buf.y, buf.dy, init);
-
+	init << 1 << 1e-1 << 1e-2; fiting.CalculateFrom(buf.x, buf.y, buf.dy, init);
 	log.T.Format("************ ParabolaFit ******************"); log << log.T;
-	log.T.Format("status = %s", gsl_strerror (fiting.status)); log << log.T;
-	log.T.Format("----------------------------------"); log << log.T;
-	if (fiting.status != GSL_SUCCESS)
-	{
-		log.SetPriority(lmprHIGH);
-		for(int i = 0; i < fiting.a.GetSize(); i++)
-		{
-			log.T.Format("x%d = %g", i, fiting.a[i]); log << log.T;
-		}
-	}
-	else
-	{
-		for(int i = 0; i < fiting.a.GetSize(); i++)
-		{
-			log.T.Format("x%d = %g +/- %g%%", i, fiting.a[i], 100*fiting.da[i]/fiting.a[i]); log << log.T;
-		}
-	}
-	pnt.y = fiting.GetTop(pnt.x); log.T.Format("xmin = %g ymin = %g", pnt.x, pnt.y); log << log.T;
-	log.T.Format("time = %g ms", fiting.dt.val()); log << log.T;
-	log.T.Format("func_cals = %d", fiting.cntr.func_call); log << log.T;
-	log.T.Format("iter_num = %d", fiting.cntr.iter); log << log.T;
+	fiting.GetReport(log);
+	log.Dispatch();		
 
-	if(fiting.status == GSL_SUCCESS && (x=chart->Series.GainAcsess(WRITE))!=NULL)
+	if(fiting.status == GSL_SUCCESS)
 	{
-		SeriesProtector guard(x); TSeriesArray& series(guard); CString str;
-		TSimplePointSeries* t1 = NULL; SimplePoint pnt;	
-		str.Format("PolyFit%d",PolinomOrder);
-		if((t1=new TSimplePointSeries(str))!=0)	
-		{
-			series.Add(t1); 
-			t1->_SymbolStyle::Set(NO_SYMBOL);
-			t1->AssignColors(ColorsStyle(clRED,series.GetRandomColor()));
-			t1->SetVisible(true); 
+		TSimplePointSeries *t1=NULL; SimplePoint val; 
+		CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
+		CString str; str.Format("PolyFit%d",PolinomOrder);
 
-			t1->ParentUpdate(UPD_OFF);
+		if((t1 = new TSimplePointSeries(str)) != 0)	
+		{
+			t1->SetParentUpdateStatus(UPD_OFF);
+			t1->_SymbolStyle::Set(NO_SYMBOL); t1->AssignColors(ColorsStyle(clRED, RANDOM_COLOR));
 			for(int i = 0; i < buf.x.GetSize(); i++) 
 			{
 				pnt.x = i; pnt.y = fiting.GetXrelY(pnt.x); t1->AddXY(pnt);
 			}
-			t1->ParentUpdate(UPD_ON);
+			t1->DispatchDataImportMsg(mf->Chart1); 			
 		}	
 	}
-	chart->PostMessage(UM_CHART_SHOWALL);		
-	log.Dispatch();		
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -232,24 +214,17 @@ FourierSmoothParams FourierSmoothFunc(SimplePointArray &data, int spec_wdth)
 
 void ShowFourierSmooth(ProtectedSeriesArray &Series, SimplePointArray &data)
 {
-	void *x=NULL; TSimplePointSeries *t1=NULL; SimplePoint val; val.type.Set(GenericPnt);
+	TSimplePointSeries *t1=NULL; SimplePoint val; 
+	CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
 
-	if((x=Series.GainAcsess(WRITE))!=NULL)
-	{
-		SeriesProtector guard(x); TSeriesArray& series(guard);
-
-		if((t1=new TSimplePointSeries(CString("Spectrum")))!=0)	
-		{
-			series.Add(t1); 
-			t1->AssignColors(ColorsStyle(clRED,clRED));
-			t1->_SymbolStyle::Set(NO_SYMBOL);
-
-			t1->ParentUpdate(UPD_OFF);
-			for(int i=0;i<data.GetSize();i++) t1->AddXY(data[i]);
-			t1->ParentUpdate(UPD_ON);
-		}	
-
-	}
+	if((t1=new TSimplePointSeries(CString("Spectrum")))!=0)	
+	{		
+		t1->SetParentUpdateStatus(UPD_OFF);
+		t1->AssignColors(ColorsStyle(clRED,clRED)); t1->_SymbolStyle::Set(NO_SYMBOL);
+		for(int i = 0; i < data.GetSize(); i++) 
+			t1->AddXY(data[i]);
+		t1->DispatchDataImportMsg(mf->Chart1); 
+	}	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -284,25 +259,19 @@ LocateMinimumsParams LocateMinimumsFunc(SimplePointArray &data)
     return ret;
 }
 //////////////////////////////////////////////////////////////////////////
-void ShowMinimums(ProtectedSeriesArray &Series, SimplePointArray &data)
+void ShowMinimums(SimplePointArray &data)
 {
-	void *x=NULL; TSimplePointSeries *t1=NULL; SimplePoint val; val.type.Set(GenericPnt);
+	TSimplePointSeries *t1 = NULL; SimplePoint val; 
+	CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
+	
 	CString str; int i;
-
-	if((x=Series.GainAcsess(WRITE))!=NULL)
+	if((t1=new TSimplePointSeries(CString("Minimums"))) != 0)	
 	{
-		SeriesProtector guard(x); TSeriesArray& series(guard);
-
-		if((t1=new TSimplePointSeries(CString("Minimums")))!=0)	
-		{
-			series.Add(t1); 
-			t1->AssignColors(ColorsStyle(clRED,series.GetRandomColor()));
-			t1->_LineStyle::Set(NO_LINE);
-
-			t1->ParentUpdate(UPD_OFF);
-			for(i=0;i<data.GetSize();i++) t1->AddXY(data[i]);
-			t1->ParentUpdate(UPD_ON);
-		}
+		t1->SetParentUpdateStatus(UPD_OFF); t1->SetVisible(false);
+		t1->AssignColors(ColorsStyle(clRED, RANDOM_COLOR)); t1->_LineStyle::Set(NO_LINE);
+		for(i = 0; i < data.GetSize(); i++) 
+			t1->AddXY(data[i]);
+		t1->DispatchDataImportMsg(mf->Chart1); 
 	}
 }
 //////////////////////////////////////////////////////////////////////////
@@ -408,9 +377,9 @@ MinimumsFitFilterParams* MinimumsFitFilterFunc(PointVsErrorArray &data,SimplePoi
 
 		buft.CopyFrom(data,2*dn+1,index-dn); 
 		fiting.CalculateFrom(buft.x, buft.y, buft.dy, init);
-		double a0 = fiting.a[ParabolaFitFunc::ind_c];
-		double a1 = fiting.a[ParabolaFitFunc::ind_b];
-		double a2 = fiting.a[ParabolaFitFunc::ind_a];
+		double a0 = fiting.a[ParabolaFuncParams::ind_c];
+		double a1 = fiting.a[ParabolaFuncParams::ind_b];
+		double a2 = fiting.a[ParabolaFuncParams::ind_a];
 		if(fiting.status != GSL_SUCCESS) 
 		{
 			FailedFiting ff(tt, FIT_GSL_FAIL); 
@@ -434,30 +403,22 @@ MinimumsFitFilterParams* MinimumsFitFilterFunc(PointVsErrorArray &data,SimplePoi
 	return ret;
 }
 
-void ShowFittings(ProtectedSeriesArray &Series, MinimumsFitFilterParams &data)
+void ShowFittings(MinimumsFitFilterParams &data)
 {
+	TSimplePointSeries *t1 = NULL; SimplePoint val; 
+	CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
 
-	void *x=NULL; TSimplePointSeries *t1=NULL, *t2; SimplePoint val; val.type.Set(GenericPnt);
-	CString str; size_t k=0; int i=0;
-
-	if((x=Series.GainAcsess(WRITE))!=NULL)
+	if((t1=new TSimplePointSeries(CString("FinalMins"))) != 0)	
 	{
-		SeriesProtector guard(x); TSeriesArray& series(guard);
-
-		str=L"FinalMins"; t2=new TSimplePointSeries(str); 
-		series.Add(t2); t2->AssignColors(ColorsStyle(clWHITE,clWHITE));
-		t2->_LineStyle::Set(NO_LINE); t2->_SymbolStyle::Set(VERT_LINE);
-		t2->_SymbolStyle::dy=10;
-		t2->SetVisible(true); 
-		
-		t2->ParentUpdate(UPD_OFF);
-		for(int i = 0; i < data.fitings.GetSize() && t2 != NULL; i++)
+		t1->SetParentUpdateStatus(UPD_OFF);
+		t1->AssignColors(ColorsStyle(clWHITE,clWHITE));
+		t1->_LineStyle::Set(NO_LINE); t1->_SymbolStyle::Set(VERT_LINE); t1->_SymbolStyle::dy=10;
+		for(int i = 0; i < data.fitings.GetSize(); i++)
 		{
-			val.y = data.fitings[i].GetTop(val.x); t2->AddXY(val);
+			val.y = data.fitings[i].GetTop(val.x); t1->AddXY(val);
 		}		
-		t2->ParentUpdate(UPD_ON);
-	}
-	
+		t1->DispatchDataImportMsg(mf->Chart1); 
+	}	
 }
 
 TPointVsErrorSeries* DialogBarTab1::GetSeries(TSeriesArray& series)
@@ -508,9 +469,9 @@ afx_msg void DialogBarTab1::OnBnClicked_Locate()
 	FourierSmoothParams FourierSmooth=FourierSmoothFunc(buf_smooth, spec_wdth);
 //	ShowFourierSmooth(chart->Series,buf_smooth);
 	LocateMinimumsParams LocateMinimums=LocateMinimumsFunc(buf_smooth);
-	ShowMinimums(chart->Series,buf_smooth);
+	ShowMinimums(buf_smooth);
 	MinimumsFitFilterParams *MinimumsFitFilter=MinimumsFitFilterFunc(BUF, buf_smooth, minimum_widht_2);
-	ShowFittings(chart->Series, *MinimumsFitFilter);
+	ShowFittings(*MinimumsFitFilter);
 	dt1=timer1.StopStart();
 
 	log.T.Format("********Fourier smooth*************"); log << log.T;
@@ -557,9 +518,9 @@ int AnalyzeString(CString &str, double *arr, int max_arr)
 
 void DialogBarTab1::OnBnClickedLoadCalibration()
 {
-	CString filter="Metricon output (*.txt)|*.txt||", logT, FullFileName, FileName; double vals[MAX_VALUES]; PointVsError pnte;
-	void *x; TPointVsErrorSeries *t2; MyTimer Timer1; sec time; int n,strs=0;
-	LogMessage *log=new LogMessage(); log->CreateEntry("Log","Metricon load Speed tests",LogMessage::low_pr);
+	CString filter="Metricon output (*.txt)|*.txt||", logT, FullFileName, FileName; double vals[MAX_VALUES]; 
+	MyTimer Timer1; sec time; int n,strs=0;
+	ControledLogMessage log; log.T.Format("Log: Metricon load Speed tests"); log << log.T;
 	
 	CFileDialog dlg1(true,NULL,NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter);
 	if(dlg1.DoModal()==IDOK)
@@ -574,49 +535,41 @@ void DialogBarTab1::OnBnClickedLoadCalibration()
 
 		FILE *file; fopen_s(&file,FullFileName,"r");
 		unsigned char buf[MAX_SYMBOLS]; 
-		TPointVsErrorSeries::DataImportMsg *ChartMsg;
-		CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); TChart& chrt=mf->Chart1; 
-		if((x=chrt.Series.GainAcsess(WRITE))!=0)
-		{
-			SeriesProtector Protector(x); TSeriesArray& Series(Protector);
-			if((t2=new TPointVsErrorSeries(FileName))!=0)	
-			{
-				Series.Add(t2); 
-				t2->_SymbolStyle::Set(NO_SYMBOL); 
-				ChartMsg=t2->CreateDataImportMsg(); 
-				t2->AssignColors(ColorsStyle(clRED,Series.GetRandomColor()));
-				t2->SetStatus(SER_ACTIVE); t2->SetVisible(true);
-			}		
-		}
 
-		while( (n=ReadString(file,buf,MAX_SYMBOLS))!=END_OF_FILE && n!=BUF_OVERLOAD )
-		{
-			if(strs++<3) continue;
-			CString str(buf);
-			if( AnalyzeString(str, vals, MAX_VALUES)==MAX_VALUES )
+		TPointVsErrorSeries *t1 = NULL; PointVsError pnte;	PointVsErrorArray pnts;	
+		CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
+		if((t1 = new TPointVsErrorSeries(FileName))!=0)	
+		{			
+			t1->SetParentUpdateStatus(UPD_OFF);
+			t1->_SymbolStyle::Set(NO_SYMBOL); t1->AssignColors(ColorsStyle(clRED, RANDOM_COLOR));
+
+			while( (n=ReadString(file,buf,MAX_SYMBOLS)) != END_OF_FILE && n!=BUF_OVERLOAD && t1 != NULL )
 			{
-				pnte.x=vals[2];
-				pnte.y=vals[5];
-				pnte.dy=1e-3;
-				if(pnte.x<0) break;
-				ChartMsg->Points.Add(pnte);	
-			}			
+				if(strs++<3) continue;
+				CString str(buf);
+				if( AnalyzeString(str, vals, MAX_VALUES)==MAX_VALUES )
+				{
+					pnte.x=vals[2]; pnte.y=vals[5]; pnte.dy=1e-3;
+					if(pnte.x<0) break;
+					t1->AddXY(pnte); pnts.Add(pnte);
+				}			
+			}	
+			t1->DispatchDataImportMsg(mf->Chart1); 
+
+			int N = t1->GetSize(); double tt;
+			double* X=pnts.GetX(),*lX,*rX; lX=X; rX=lX+N-1;
+			double* Y=pnts.GetY(),*lY,*rY; lY=Y; rY=lY+N-1;
+			double* DY=pnts.GetdY(),*lDY,*rDY; lDY=DY; rDY=lDY+N-1;
+			for(int i=0;i<N/2;i++)
+			{
+				tt=*lX; *lX=*rX; *rX=tt; lX++; rX--;
+				tt=*lY; *lY=*rY; *rY=tt; lY++; rY--;
+				tt=*lDY; *lDY=*rDY; *rDY=tt; lDY++; rDY--;
+			}
+			Timer1.Stop(); time=Timer1.GetValue();
+			log.T.Format("* Loaded %d points time=%s", N,ConvTimeToStr(time)); log << log.T;
+			log.Dispatch();
 		}		
-		int N=ChartMsg->Points.GetSize(); double tt;
-		double* X=ChartMsg->Points.GetX(),*lX,*rX; lX=X; rX=lX+N-1;
-		double* Y=ChartMsg->Points.GetY(),*lY,*rY; lY=Y; rY=lY+N-1;
-		double* DY=ChartMsg->Points.GetdY(),*lDY,*rDY; lDY=DY; rDY=lDY+N-1;
-		for(int i=0;i<N/2;i++)
-		{
-			tt=*lX; *lX=*rX; *rX=tt; lX++; rX--;
-			tt=*lY; *lY=*rY; *rY=tt; lY++; rY--;
-			tt=*lDY; *lDY=*rDY; *rDY=tt; lDY++; rDY--;
-		}
-		Timer1.Stop(); time=Timer1.GetValue();
-		logT.Format("Loaded %d points time=%s",ChartMsg->Points.GetSize(),ConvTimeToStr(time)); 
-		log->CreateEntry(CString('*'),logT);
-		ChartMsg->Dispatch();		 
-		log->Dispatch();
 	}
 }
 
@@ -628,7 +581,7 @@ LRESULT DialogBarTab1::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
 		Series=(ProtectedSeriesArray*)lParam;
 		SeriesCombo.ResetContent();
 		void *x; 
-		if((x=Series->GainAcsess(READ))!=0)
+		if((x=Series->GainAcsess(READ_EX))!=0)
 		{
 			SeriesProtector Protector(x); TSeriesArray& Series(Protector);			
 
@@ -640,7 +593,7 @@ LRESULT DialogBarTab1::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
 				for(int i=0;i<results.Series.GetSize();i++)
 				{
 					T.Format("%s (%d)",results.Series[i]->Name,results.Series[i]->GetSize());
-					n=SeriesCombo.AddString(T); pid=results.Series[i]->PID;
+					n=SeriesCombo.AddString(T); pid=results.Series[i]->GetPID();
 					SeriesCombo.SetItemData(n,pid);
 				}				
 			}
@@ -653,14 +606,12 @@ LRESULT DialogBarTab1::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
 
 void DialogBarTab1::OnBnClickedKneeTest()
 {
-	CString str; UpdateData(); TPointVsErrorSeries *graph; KneeFitFunc fiting;  DoubleArray init;
-	LogMessage *log=new LogMessage(); size_t i = 0; SimplePoint pnt;
-
-	PointVsErrorArray buf;		
-	void *x; TChart *chart=(TChart *)Parent;
+	UpdateData();  KneeFitFunc fiting;  DoubleArray init; ControledLogMessage log; 
+	PointVsErrorArray buf; void *x; TChart *chart=(TChart *)Parent;
 
 	if((x=chart->Series.GainAcsess(READ))!=NULL)
 	{
+		TPointVsErrorSeries *graph;
 		SeriesProtector guard(x); TSeriesArray& series(guard);
 		if(	(graph=GetSeries(series))!=NULL) 
 		{
@@ -668,69 +619,50 @@ void DialogBarTab1::OnBnClickedKneeTest()
 			int N=buf.GetSize(), n1=GetArrayIndex(buf.x,Xmin), n2=GetArrayIndex(buf.x,Xmax);
 			if(n1<0 || n2>=N)
 			{
-				str.Format("ERR: No valid points found %d+/-%d",X0,dX); *log << str;	
-				log->SetPriority(lmprHIGH); log->Dispatch(); return;
+				log.T.Format("ERR: No valid points found %d+/-%d",X0,dX); log << log.T;	
+				log.SetPriority(lmprHIGH); log.Dispatch(); return;
 			}				
 			buf.RemoveAll(); graph->GetValues(buf,n1,n2);					
 		}			
 		else
 		{
-			str.Format("ERR: No series matching criteria (ACTIVE) found"); *log << str;	
-			log->SetPriority(lmprHIGH); log->Dispatch(); return;
+			log.T.Format("ERR: No series matching criteria (ACTIVE) found"); log << log.T;	
+			log.SetPriority(lmprHIGH); log.Dispatch(); return;
 		}
 	}
 	else return;
 	
 	init << 1 << 0.1 << 0.1 << 0.1; fiting.CalculateFrom(buf.x, buf.y, buf.dy, init);
-	
-	str.Format("************ KneeFit **********************"); *log << str;
-	str.Format("status = %s", gsl_strerror (fiting.status)); *log << str;
-	if (fiting.status != GSL_SUCCESS) log->SetPriority(lmprHIGH);
-	str.Format("----------------------------------"); *log << str;
+	log.T.Format("************ KneeFit **********************"); log << log.T;
+	fiting.GetReport(log, level);
 	
 	if (fiting.status == GSL_SUCCESS)
 	{
-		for(int i = 0; i < fiting.a.GetSize(); i++)
+		TSimplePointSeries *t1=NULL; SimplePoint pnt; 
+		CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
+
+		if((t1 = new TSimplePointSeries("KneeInflection")) != 0)	
 		{
-			str.Format("x%d = %g +/- %g%%", i, fiting.a[i], 100*fiting.da[i]/fiting.a[i]); *log << str;
-		}
-		pnt.y = fiting.GetInflection(pnt.x, level);
-		str.Format("xmin = %g ymin = %g", pnt.x, pnt.y); *log << str;
-	}
-	str.Format("time = %g ms", fiting.dt.val()); *log << str;
-	str.Format("func_cals = %d", fiting.cntr.func_call); *log << str;
-	str.Format("iter_num = %d", fiting.cntr.iter); *log << str;
-		
-	if(fiting.status == GSL_SUCCESS && (x=chart->Series.GainAcsess(WRITE))!=NULL)
-	{
-		SeriesProtector guard(x); TSeriesArray& series(guard); str.Format("PolyFit%d",PolinomOrder);
-		TSimplePointSeries* t1=NULL; 
-		if( (t1=new TSimplePointSeries("FinalMins"))!=0)	
-		{
-			series.Add(t1); t1->AssignColors(ColorsStyle(clWHITE,clWHITE));
-			t1->_LineStyle::Set(NO_LINE); t1->_SymbolStyle::Set(VERT_LINE);
-			t1->_SymbolStyle::dy=10;
-			t1->SetVisible(true); 
+			t1->SetParentUpdateStatus(UPD_OFF);
+			t1->AssignColors(ColorsStyle(clWHITE, clWHITE));	
+			t1->_LineStyle::Set(NO_LINE); t1->_SymbolStyle::Set(VERT_LINE); t1->_SymbolStyle::dy=10;			
 			t1->AddXY(pnt);
 		}
-		if((t1=new TSimplePointSeries(str))!=0)	
+
+		if((t1=new TSimplePointSeries("KneeFit"))!=0)	
 		{
-			series.Add(t1); 
-			t1->_SymbolStyle::Set(NO_SYMBOL);
-			t1->AssignColors(ColorsStyle(clRED,series.GetRandomColor()));
-			t1->SetVisible(true); 
-
-			t1->ParentUpdate(UPD_OFF);
-
-			for(int i = 0; i < buf.x.GetSize(); i++) 
+			DoubleArray x, y;
+			t1->SetParentUpdateStatus(UPD_OFF);
+			t1->_SymbolStyle::Set(NO_SYMBOL); t1->AssignColors(ColorsStyle(clRED, RANDOM_COLOR));			
+			fiting.MakeGraph(x, y);
+			for(int i = 0; i < x.GetSize(); i++) 
 			{
-				pnt.x = i; pnt.y = fiting.GetXrelY(pnt.x); t1->AddXY(pnt);
+				pnt.x = x[i]; pnt.y = y[i]; t1->AddXY(pnt);
 			}
-			t1->ParentUpdate(UPD_ON);
+			t1->DispatchDataImportMsg(mf->Chart1);
 		}
 	}
-	chart->PostMessage(UM_CHART_SHOWALL);
-	log->Dispatch();
+	log.Dispatch();
 }
 
 void MyGSL_Tester_Helper(Polarization pol, DoubleArray &Nexp, DoubleArray &_n_exp, int shift)

@@ -94,10 +94,10 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(DialogBarTab1)
 	afx_msg LRESULT  OnStageUpdate(WPARAM wParam, LPARAM lParam );
+	LRESULT OnSeriesUpdate(WPARAM wParam, LPARAM lParam );
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-//    SeriesArray* GetSeries() {return Series;}
 };
