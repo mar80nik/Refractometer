@@ -153,6 +153,9 @@
     <ClCompile Include="src\TConfigDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\my_gsl\src\fittings.cpp">
+      <Filter>my_gsl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

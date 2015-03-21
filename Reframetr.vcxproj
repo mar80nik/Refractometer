@@ -106,6 +106,7 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\my_gsl\src\fittings.cpp" />
     <ClCompile Include="..\..\my_gsl\src\my_gsl.cpp" />
     <ClCompile Include="..\..\my_lib\src\BMPanvas.cpp" />
     <ClCompile Include="..\..\my_lib\src\MessageInspector.cpp" />
