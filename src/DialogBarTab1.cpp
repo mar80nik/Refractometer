@@ -3,6 +3,8 @@
 #include "MainFrm.h"
 #include "mytime.h"
 #include "metricon.h"
+#include "fittings.h"
+
 
 
 IMPLEMENT_DYNAMIC(MainChartWnd, TChart)
