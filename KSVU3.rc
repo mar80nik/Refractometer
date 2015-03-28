@@ -589,6 +589,7 @@ END
 STRINGTABLE
 BEGIN
     ID_CHART1               "id for chart"
+    IDS_CAMERA_SEPARATOR    ""
 END
 
 STRINGTABLE

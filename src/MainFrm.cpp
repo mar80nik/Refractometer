@@ -4,15 +4,8 @@
 #include "stdafx.h"
 #include "KSVU3.h"
 #include "MainFrm.h"
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 #include "ksvu3doc.h"
-#include ".\mainfrm.h"
+#include "resource.h"
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
 
@@ -58,6 +51,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
+	m_wndStatusBar.AddIndicator(ID_SEPARATOR);
+	m_wndStatusBar.AddIndicator(IDS_CAMERA_SEPARATOR, MyStatusBar::Refresh);
+	m_wndStatusBar.SetText(IDS_CAMERA_SEPARATOR,CString("No camera"));
+	
 	MainBar.Create(this,IDD_DIALOGBAR,CBRS_ALIGN_BOTTOM,IDD_DIALOGBAR);
 
 	Toolbar1.Create(this,WS_CHILD | WS_VISIBLE | CBRS_RIGHT); Toolbar1.LoadToolBar(IDR_TOOLBAR2);

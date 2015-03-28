@@ -144,6 +144,7 @@
     <ClCompile Include="src\metricon.cpp" />
     <ClCompile Include="src\ModifyValueDialog.cpp" />
     <ClCompile Include="src\MyListBox.cpp" />
+    <ClCompile Include="src\MyStatusBar.cpp" />
     <ClCompile Include="src\MyTabCtrl.cpp" />
     <ClCompile Include="src\MyToolBar.cpp" />
     <ClCompile Include="src\SystemConfig.cpp" />

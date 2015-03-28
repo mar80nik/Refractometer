@@ -156,6 +156,9 @@
     <ClCompile Include="..\..\my_gsl\src\fittings.cpp">
       <Filter>my_gsl</Filter>
     </ClCompile>
+    <ClCompile Include="src\MyStatusBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

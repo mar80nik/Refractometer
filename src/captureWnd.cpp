@@ -4,6 +4,7 @@
 #include "KSVU3.h"
 #include "ImageWnd.h"
 #include "compressor.h"
+#include "MyStatusBar.h"
 
 IMPLEMENT_DYNAMIC(CaptureWnd, CWnd)
 CaptureWnd::CaptureWnd(): thrd(444)
@@ -212,7 +213,12 @@ void CaptureWnd::SelectCaptureSrc(CString name)
 			T.Format(" %s - INIT ERROR",name); *log << T;
 			log->Dispatch();
 		}
-		else Src->Name=name;
+		else 
+		{
+			Src->Name=name;
+			StatusBarMessage *msg = new StatusBarMessage(IDS_CAMERA_SEPARATOR, name);
+			msg->Dispatch();
+		}
 	}	
 }
 

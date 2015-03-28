@@ -6,6 +6,7 @@
 #include "MainFrm.h"
 #include "KSVU3Doc.h"
 #include "KSVU3View.h"
+#include "MyStatusBar.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,11 +17,12 @@ static char THIS_FILE[] = __FILE__;
 ////////////////////////////////////////////////////////////////////////////
 //MainChartWnd GlobalChart;
 SystemConfig MainCfg;
-WindowAddress EventsLog, MainFrame;
+WindowAddress EventsLog, MainFrame, StatusBarWindow;
 MessagesInspector GlobalInspector;
 MessagesInspector* MessagesInspectorSubject::GlobalInspector=&::GlobalInspector;
 WindowAddress LogMessage::LogWindow;
 WindowAddress MyThread::ConfigParentWindow;
+WindowAddress StatusBarMessage::StatusBarWindow;
 
 CString SeriesListCtrl::GetSaveAsPath()
 {
@@ -101,11 +103,13 @@ BOOL CKSVU3App::InitInstance()
 	if (!ProcessShellCommand(cmdInfo))
 		return FALSE;
 	CMainFrame* MainWnd=(CMainFrame*)m_pMainWnd;
-	EventsLog.pThrd=AfxGetThread(); EventsLog.pWND=&MainWnd->EventLog1;
-	MainFrame.pThrd=AfxGetThread(); MainFrame.pWND=MainWnd;
+	EventsLog.pThrd = AfxGetThread(); EventsLog.pWND=&MainWnd->EventLog1;
+	MainFrame.pThrd = AfxGetThread(); MainFrame.pWND=MainWnd;
+	StatusBarWindow.pThrd = AfxGetThread(); StatusBarWindow.pWND = &MainWnd->m_wndStatusBar;
 
 	LogMessage::LogWindow = EventsLog;
 	MyThread::ConfigParentWindow = MainFrame;
+	StatusBarMessage::StatusBarWindow = StatusBarWindow;
 
 	MainCfg.LoadConfig(); 
 	MainWnd->InitChart(); 

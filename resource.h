@@ -6,6 +6,7 @@
 #define ID_CLEAR                        2
 #define ID_CHART1                       2
 #define ID_SERIES_UPD_COMMAND           3
+#define IDS_CAMERA_SEPARATOR            3
 #define STEP_MOTOR_ICON                 4
 #define PHEM1_ICON                      5
 #define PHEM2_ICON                      6
