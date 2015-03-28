@@ -184,11 +184,13 @@ void DialogBarTab1::OnBnClicked_Fit()
 
 		if((t1 = new TSimplePointSeries(str)) != 0)	
 		{
+			DoubleArray x, y; 
 			t1->SetParentUpdateStatus(UPD_OFF);
 			t1->_SymbolStyle::Set(NO_SYMBOL); t1->AssignColors(ColorsStyle(clRED, RANDOM_COLOR));
-			for(int i = 0; i < buf.x.GetSize(); i++) 
+			fiting.MakeGraph(x, y, buf.x[0], buf.x[buf.x.GetUpperBound()], buf.x.GetSize()*3 );
+			for(int i = 0; i < x.GetSize(); i++) 
 			{
-				pnt.x = i; pnt.y = fiting.GetXrelY(pnt.x); t1->AddXY(pnt);
+				t1->AddXY(SimplePoint(x[i], y[i]));
 			}
 			t1->DispatchDataImportMsg(mf->Chart1); 			
 		}	
@@ -396,7 +398,7 @@ MinimumsFitFilterParams* MinimumsFitFilterFunc(PointVsErrorArray &data,SimplePoi
 		}
 
 		SimplePoint top; top.y = fiting.GetTop(top.x);
-		if( top.x < fiting.leftmostX || top.x > fiting.rightmostX ) continue;
+		if( top.x < buft.x[0] || top.x > buft.x[buft.GetUpperBound()] ) continue;
 
 		ret->fitings << fiting;
 	}
@@ -656,7 +658,7 @@ void DialogBarTab1::OnBnClickedKneeTest()
 			DoubleArray x, y;
 			t1->SetParentUpdateStatus(UPD_OFF);
 			t1->_SymbolStyle::Set(NO_SYMBOL); t1->AssignColors(ColorsStyle(clRED, RANDOM_COLOR));			
-			fiting.MakeGraph(x, y);
+			fiting.MakeGraph(x, y, buf.x[0], buf.x[buf.x.GetUpperBound()], buf.x.GetSize()*3 );
 			for(int i = 0; i < x.GetSize(); i++) 
 			{
 				pnt.x = x[i]; pnt.y = y[i]; t1->AddXY(pnt);
