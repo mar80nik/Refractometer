@@ -6,6 +6,7 @@
 #include "MessageInspector.h"
 #include "MyThread.h"
 #include "GlobalHeader.h"
+//#include "captureWnd.h"
 
 #define SAFE_RELEASE_(a) if(a!=NULL) { a->Release(); a=NULL; }
 class MyDSFilter;
@@ -21,9 +22,14 @@ struct SAM_MEDIA_TYPE: public AM_MEDIA_TYPE
 	}
 };
 
-struct CaptureThreadParams 
+enum ColorTransformModes;
+class CaptureRequestStack;
+
+struct CaptureParams 
 {
-	ProtectedBMPanvas *Pbuf, *LevelScanBuf;	
+	ColorTransformModes *ColorTransformSelector;
+	CaptureRequestStack *Stack;
+	ProtectedBMPanvas *Pbuf;
 	CStringW SourceName;
 	DSCaptureSource* Src;
 	WindowAddress Parent;
@@ -33,14 +39,14 @@ struct CaptureThreadParams
 	eDcm800Size size;
 	void* thrd;
 
-	CaptureThreadParams(): StopCapture(true,true),PauseCapture(true,true),ResumeCapture(true,true),
+	CaptureParams(): StopCapture(true,true),PauseCapture(true,true),ResumeCapture(true,true),
         ShowFilterParams(true,true)
 	{
 			thrd=NULL; Src=NULL;
 	}
 };
 
-typedef WorkThread<CaptureThreadParams> CaptureThread;
+typedef WorkThread<CaptureParams> CaptureThread;
 
 
 struct BMPanvasTAGSmk1
@@ -63,7 +69,7 @@ public:
 	VIDEOINFOHEADER header;
 	long framenum;
 	CString strPath;
-	void* pthrd;
+	void *capture_params;
 	MyTimer t1,t2;
 	CFont font;
 

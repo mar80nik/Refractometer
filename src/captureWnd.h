@@ -51,9 +51,9 @@ struct AccumInfo
 	size_t GetCompressorBufferSize() const;
 };
 
+enum ColorTransformModes {TrueColor, NativeGDI, HSL, HSV};
 
-
-class CaptureWnd : public CWnd, public PerfomanceStaff
+class CaptureWnd : public CWnd, public PerfomanceStaff, public WindowAddress
 {
 	DECLARE_DYNAMIC(CaptureWnd)
 
@@ -62,8 +62,7 @@ class CaptureWnd : public CWnd, public PerfomanceStaff
 	protected:	
 		CString Name;	
 	public:
-		CWnd* Parent;
-		enum ColorTransformModes {TrueColor, NativeGDI, HSL, HSV};
+		CWnd* Parent;		
 		CameraChooser Chooser;
 
 		CtrlsTab(CWnd* pParent = NULL) : IsProgramBW(TRUE)
@@ -136,7 +135,7 @@ public:
 	LRESULT OnCaptureRequest( WPARAM wParam, LPARAM lParam );
 	void SelectCaptureSrc(CString name);
 	afx_msg void OnDestroy();
-	void ScanLevels(BMPanvas *src, BMPanvas &levels, const CtrlsTab::ColorTransformModes mode);
+	void ScanLevels(BMPanvas *src, BMPanvas &levels, const ColorTransformModes mode);
 };
 
-void ColorTransform(BMPanvas *color, BMPanvas *grayscale, CaptureWnd::CtrlsTab::ColorTransformModes mode);
+void ColorTransform(BMPanvas *color, BMPanvas *grayscale, ColorTransformModes mode);

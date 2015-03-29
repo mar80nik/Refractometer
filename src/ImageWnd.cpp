@@ -338,11 +338,10 @@ HRESULT ImageWnd::PicWnd::TryLoadBitmap(CString T, BMPanvas &bmp)
 	if (SUCCEEDED(ret = bmp.LoadImage(T)))
 	{
 		Parent->CameraWnd.Ctrls.UpdateData();	
-		CaptureWnd::CtrlsTab::ColorTransformModes ColorTransformModes = 
-														Parent->CameraWnd.Ctrls.ColorTransformSelector;
+		const ColorTransformModes &colorTransformModes = Parent->CameraWnd.Ctrls.ColorTransformSelector;
 		if (bmp.ColorType != BMPanvas::GRAY_PAL)
 		{
-			if (ColorTransformModes == CaptureWnd::CtrlsTab::ColorTransformModes::TrueColor)
+			if (colorTransformModes == TrueColor)
 			{
 				ControledLogMessage log(lmprHIGH);
 				log.T.Format("Error: Image you are trying to load which is no GRAYSCALE."); log << log.T;
@@ -355,7 +354,7 @@ HRESULT ImageWnd::PicWnd::TryLoadBitmap(CString T, BMPanvas &bmp)
 			temp_replica.Create(&bmp, bmp.Rgn); bmp.CopyTo(&temp_replica, TOP_LEFT);
 			bmp.Destroy(); bmp.Create(this,temp_replica.w,temp_replica.h,8);
 			bmp.CreateGrayPallete(); 
-			ColorTransform(&temp_replica, &bmp, ColorTransformModes);
+			ColorTransform(&temp_replica, &bmp, colorTransformModes);
 		}
 	}
 	return ret;
