@@ -92,7 +92,7 @@ STDMETHODIMP FrameGrabCallback::SampleCB( double n,IMediaSample *pms )
 		tags->timel=t2.StopStart();
 
 		MessageForWindow* msg=new MessageForWindow(UM_DATA_UPDATE,Params.Parent);
-		thrd->PostParentMessage(UM_GENERIC_MESSAGE,msg);
+		msg->Dispatch();
 	}
 	//else ASSERT(0);	
 	return 0;	

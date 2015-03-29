@@ -35,7 +35,6 @@ BEGIN_MESSAGE_MAP(CKSVU3App, CWinApp)
 	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
 	ON_THREAD_MESSAGE(UM_BACKUP_SAVE,OnBackupSave)	
 	ON_THREAD_MESSAGE(UM_UPDATE_CONFIG,OnUpdateConfig)	
-	ON_THREAD_MESSAGE(UM_DATA_UPDATE,OnDataUpdate)	
 	ON_THREAD_MESSAGE(UM_GENERIC_MESSAGE,OnGenericMessage)	
 	ON_COMMAND(ID_FILE_NEW, CWinApp::OnFileNew)
 	ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
@@ -208,8 +207,6 @@ void CKSVU3App::OnUpdateConfig(WPARAM wParam, LPARAM lParam )
 	{if(myThread.Config.GetTerminate()==None) 
 	MainFrame.pWND->PostMessage(UM_UPDATE_CONFIG,wParam,lParam);
 	}
-void CKSVU3App::OnDataUpdate(WPARAM wParam, LPARAM lParam )
-	{if(myThread.Config.GetTerminate()==None) m_pMainWnd->PostMessage(UM_DATA_UPDATE,wParam,lParam);}
 
 void CKSVU3App::OnGenericMessage( WPARAM wParam, LPARAM lParam )
 {

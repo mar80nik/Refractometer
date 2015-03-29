@@ -691,56 +691,6 @@ HRESULT ImageWnd::PicWnd::ConvertOrgToAva( CRect& rgn ) const
 	return E_FAIL;
 }
 
-//ImageWnd::OrgPicRgn ImageWnd::PicWnd::Convert( AvaPicRgn& rgn )
-//{
-//	OrgPicRgn ret; 
-//	if (accum.bmp != NULL)
-//	{
-//		BMPanvas &org = *accum.bmp;
-//		if ( ava.HasImage() )
-//		{
-//			CSize s2 = org.Rgn.Size(), s1 = ava.Rgn.Size();
-//			if (rgn.Check(s2, s1) == TRUE)
-//			{
-//				ret = rgn.storedOrgRslt;
-//			}
-//			else
-//			{				
-//				ret.left = rgn.left*s2.cx/s1.cx; ret.right = rgn.right*s2.cx/s1.cx; 
-//				ret.top = rgn.top*s2.cy/s1.cy; ret.bottom = rgn.bottom*s2.cy/s1.cy;
-//				rgn.org = s2; rgn.ava = s1; rgn.storedOrgRslt = ret;				
-//			}
-//			ret.org = s2; ret.ava = s1; ret.storedAvaRslt = rgn;
-//		}
-//	}	
-//	return ret;
-//}
-//
-//ImageWnd::AvaPicRgn ImageWnd::PicWnd::Convert(  OrgPicRgn& rgn )
-//{
-//	AvaPicRgn ret; 
-//	if (accum.bmp != NULL)
-//	{
-//		BMPanvas &org = *accum.bmp;
-//		if ( org.HasImage() )
-//		{
-//			CSize s2 = ava.Rgn.Size(), s1 = org.Rgn.Size();
-//			if (rgn.Check(s1, s2) == TRUE)
-//			{
-//				ret = rgn.storedAvaRslt;				
-//			}
-//			else
-//			{
-//				ret.left = rgn.left*s2.cx/s1.cx; ret.right = rgn.right*s2.cx/s1.cx; 
-//				ret.top = rgn.top*s2.cy/s1.cy; ret.bottom = rgn.bottom*s2.cy/s1.cy;
-//				rgn.org = s1; rgn.ava = s2; rgn.storedAvaRslt = ret;				
-//			}
-//			ret.org = s1; ret.ava = s2; ret.storedOrgRslt = rgn;
-//		}
-//	}
-//	return ret;
-//}
-
 void ImageWnd::PicWnd::UpdateHelpers( const HelperEvent &event )
 {
 	BaseForHelper * accumCapture = NULL; POSITION pos;
@@ -849,6 +799,11 @@ HelperEvent AccumHelper::Update( const HelperEvent &event )
 				HGDIOBJ tfont = parent->ava.SelectObject(parent->font1);
 				parent->ava.SetBkMode(TRANSPARENT); COLORREF old_color = parent->ava.SetTextColor(clRED);
 				T.Format("Camera capture %d of %d", accum.n, n_max); parent->ava.TextOut(0,0,T);
+
+				CString T1, T2; parent->GetWindowText(T1); T2.Format("%s: %s", T1, T);
+				StatusBarMessage *msg = new StatusBarMessage(0, T2);
+				msg->Dispatch();
+
 				T.Format("%dx%d", accum.w, accum.h); parent->ava.TextOut(0,10,T);
 				parent->ava.SelectObject(tfont); parent->ava.SetTextColor(old_color);
 				parent->UpdateNow();				
