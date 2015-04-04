@@ -28,51 +28,36 @@ class CaptureWnd : public CWnd, public PerfomanceStaff, public WindowAddress
 	{		
 	protected:	
 		CString Name;	
+		CButton BtnCapture, BtnStop, BtnPause, BtnResume, BtnChooseCam;
+
 	public:
+		enum { IDD = IDD_DIALOGBARTAB4 };
+
 		CWnd* Parent;		
 		CameraChooser Chooser;
+		CComboBox PreviewSize;
+		CButton BtnFilterParams;
+		BOOL IsProgramBW;
+		ColorTransformModes ColorTransformSelector;
 
-		CtrlsTab(CWnd* pParent = NULL) : IsProgramBW(TRUE)
-			, ColorTransformSelector(NativeGDI)
-		{};   // standard constructor	
-		// Dialog Data
-		//{{AFX_DATA(DialogBarTab1)
-		enum { IDD = IDD_DIALOGBARTAB4 };
-		//}}AFX_DATA
+		CtrlsTab(CWnd* pParent = NULL) : IsProgramBW(TRUE), ColorTransformSelector(NativeGDI) {};
+		eDcm800Size GetPreviewSize();
+		static void OnStopCaptureCB(CaptureRequestStack& Stack, void *params);
 
-		// Overrides
-		// ClassWizard generated virtual function overrides
-		//{{AFX_VIRTUAL(DialogBarTab1)
-	public:
 	protected:
-		//}}AFX_VIRTUAL
-		// Implementation
-	protected:
-		CButton BtnCapture, BtnStop, BtnPause, BtnResume, BtnChooseCam;
-		// Generated message map functions
-		//{{AFX_MSG(DialogBarTab1)
 		virtual BOOL OnInitDialog();	
 		virtual void OnOK() {};
 		virtual void OnCancel() {};
+		virtual void DoDataExchange(CDataExchange* pDX);
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnBnClicked_Live();
 		afx_msg void OnBnClicked_StopCapture();
 		afx_msg void OnBnClicked_PauseCapture();
 		afx_msg void OnBnClicked_ResumeCapture();
 		afx_msg void OnBnClicked_FilterParams();
-	protected:
-		virtual void DoDataExchange(CDataExchange* pDX);
-	public:
 		afx_msg void OnBnClickedChooseCam();
-		CComboBox PreviewSize;
-		eDcm800Size GetPreviewSize();
-		CButton BtnFilterParams;
-	public:
-		BOOL IsProgramBW;
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-public:
-	ColorTransformModes ColorTransformSelector;
+
+		DECLARE_MESSAGE_MAP()
 	};
 
 protected:
@@ -92,6 +77,7 @@ public:
 
 	CaptureWnd();
 	virtual ~CaptureWnd();
+	static void OnCaptureRequestCB(CaptureRequestStack& Stack, void *params);
 
 protected:
 	DECLARE_MESSAGE_MAP()

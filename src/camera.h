@@ -36,7 +36,7 @@ protected:
 	CArray<Item> stack;
 public:
 	CaptureRequestStack() {};
-	~CaptureRequestStack() {};
+	~CaptureRequestStack() {RemoveAll();};
 	CaptureRequestStack& operator << (const Item &item)
 	{
 		stack.Add(item);
@@ -106,7 +106,7 @@ public:
 	long framenum;
 	CString strPath;
 	void *capture_params;
-	MyTimer t1,t2;
+	MyTimer t1;
 	CFont font;
 
 	STDMETHODIMP SampleCB(double n,IMediaSample *pms);

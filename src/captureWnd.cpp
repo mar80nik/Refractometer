@@ -145,6 +145,11 @@ void CaptureWnd::CtrlsTab::OnBnClicked_Live()
 	return;
 }
 
+struct CaptureRequestStackCBparams_StopCapture
+{	
+	void GainAcsessCB(CaptureRequestStack& Stack);
+};
+
 void CaptureWnd::CtrlsTab::OnBnClicked_StopCapture()
 {
 	CaptureWnd *pParent=(CaptureWnd*)Parent;
@@ -156,18 +161,19 @@ void CaptureWnd::CtrlsTab::OnBnClicked_StopCapture()
 	BtnChooseCam.EnableWindow(TRUE);
 	BtnFilterParams.EnableWindow(FALSE);
 
+	CaptureRequestStackCBparams_StopCapture paramsCB;
+	pParent->Stack.ModifyWith(paramsCB);
 
-	void *x;
-	if((x=pParent->Stack.GainAcsess(WRITE))!=0)
+}
+void CaptureRequestStackCBparams_StopCapture::GainAcsessCB( CaptureRequestStack& Stack)
+{
+	CaptureRequestStack::Item request;
+	while(Stack >> request)
 	{
-		CaptureRequestStackGuard Protector(x); CaptureRequestStack& Stack(Protector);
-		CaptureRequestStack::Item request;
-		while(Stack >> request)
-		{
-			request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureStop,0);
-		}
+		request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureStop,0);
 	}
 }
+
 
 void CaptureWnd::CtrlsTab::OnBnClicked_PauseCapture()
 {
@@ -407,17 +413,20 @@ void CaptureWnd::OnPaint()
 	//else ASSERT(0);
 }
 
+struct CaptureRequestStackCBparams_OnRequest 
+{
+	CaptureRequestStack::Item item; 
+	void GainAcsessCB(CaptureRequestStack& Stack) { Stack << item; }
+};
+
 LRESULT CaptureWnd::OnCaptureRequest( WPARAM wParam, LPARAM lParam )
 {
-	void *x;
-	if((x=Stack.GainAcsess(WRITE))!=0)
-	{
-		CaptureRequestStackGuard Protector(x); CaptureRequestStack& Stack(Protector);
-		Stack << CaptureRequestStack::Item((CWnd*)wParam,(BMPanvas*)lParam);
-	}
-
+	CaptureRequestStackCBparams_OnRequest paramsCB;
+	paramsCB.item = CaptureRequestStack::Item((CWnd*)wParam,(BMPanvas*)lParam);
+	Stack.ModifyWith(paramsCB);
 	return 0;
 }
+
 void CaptureWnd::CtrlsTab::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);

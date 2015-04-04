@@ -67,46 +67,64 @@ UINT CaptureThread::proc(void* p)
 	return ret;
 }
 
-STDMETHODIMP FrameGrabCallback::SampleCB( double n,IMediaSample *pms )
+struct CaptureRequestStackCBparams 
 {
-	CaptureParams& params = *((CaptureParams*)capture_params);
-	sec dt1; ms dt2,dt3; CString T; void *x; int ret;
-	dt1=t1.StopStart();
-	BYTE *pbuf; HRESULT hr;
-	hr=pms->GetPointer(&pbuf);
-	long size=pms->GetSize();
-
-	if((x=params.Pbuf->GainAcsess(WRITE))!=NULL)
-	{			
-		BMPanvasGuard guard1(x); BMPanvas &buf(guard1); t2.Start();		
-		ret=buf.SetBitmapArray(BMPanvas::MIN_SCANLINE,BMPanvas::MAX_SCANLINE,pbuf);
-		ASSERT(ret==header.bmiHeader.biHeight);
-		BMPanvasTAGSmk1* tags=(BMPanvasTAGSmk1*)buf.tags;
-		tags->d1=n; tags->i1=header.bmiHeader.biWidth; tags->i2=header.bmiHeader.biHeight; tags->i3=header.bmiHeader.biBitCount;
-		tags->d2=(1./dt1.val()); 
-		tags->timel=t2.StopStart();
-		
-		void *x;
-		if((x=params.Stack->GainAcsess(WRITE))!=0)
+	BMPanvas *buf; 
+	ColorTransformModes *ColorTransformSelector;
+	void GainAcsessCB(CaptureRequestStack& Stack)
+	{
+		CaptureRequestStack::Item request;
+		if (*ColorTransformSelector != TrueColor)
 		{
-			CaptureRequestStackGuard Protector(x); CaptureRequestStack& Stack(Protector);
-			CaptureRequestStack::Item request;
 			while(Stack >> request)
 			{
-				if((*request.buf)!=buf)
+				if((*request.buf) != (*buf))
 				{
-					request.buf->Create(buf.GetDC(),buf.w,buf.h,8);
+					request.buf->Create(buf->GetDC(), buf->w, buf->h, 8);
 					request.buf->CreateGrayPallete();
 				}
-				ColorTransform(&buf, request.buf, *params.ColorTransformSelector);
+				ColorTransform(buf, request.buf, *ColorTransformSelector);
 				request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureReady,0);
 			}			
 		}
+	}
+};
 
-		MessageForWindow* msg=new MessageForWindow(UM_DATA_UPDATE,params.Parent);
+struct BMPanvasCBparams
+{
+	BYTE *pbuf; double n; sec dt1;
+	VIDEOINFOHEADER *header;	
+	CaptureParams *capture_params;
+	void GainAcsessCB(BMPanvas& buf)
+	{
+		MyTimer t2;	t2.Start();		
+		int ret=buf.SetBitmapArray(BMPanvas::MIN_SCANLINE,BMPanvas::MAX_SCANLINE, pbuf);
+		BMPanvasTAGSmk1* tags=(BMPanvasTAGSmk1*)buf.tags;
+		tags->d1 = n; 
+		tags->i1 = header->bmiHeader.biWidth; 
+		tags->i2 = header->bmiHeader.biHeight; 
+		tags->i3 = header->bmiHeader.biBitCount;
+		tags->d2=(1./dt1.val()); 
+		tags->timel=t2.StopStart();
+
+		CaptureRequestStackCBparams paramsCB = {&buf, capture_params->ColorTransformSelector};
+		capture_params->Stack->ModifyWith(paramsCB);
+
+		MessageForWindow* msg=new MessageForWindow(UM_DATA_UPDATE, capture_params->Parent);
 		msg->Dispatch();
 	}
-	//else ASSERT(0);	
+};
+
+STDMETHODIMP FrameGrabCallback::SampleCB( double n, IMediaSample *pms )
+{
+	BMPanvasCBparams paramsCB;
+
+	paramsCB.header = &header; paramsCB.capture_params = (CaptureParams*)capture_params;
+	paramsCB.dt1 = t1.StopStart(); paramsCB.n = n;
+	HRESULT hr = pms->GetPointer(&paramsCB.pbuf);
+	long size = pms->GetSize();
+
+	paramsCB.capture_params->Pbuf->ModifyWith(paramsCB);	
 	return 0;	
 }
 
