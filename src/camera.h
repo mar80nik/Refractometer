@@ -22,13 +22,49 @@ struct SAM_MEDIA_TYPE: public AM_MEDIA_TYPE
 	}
 };
 
-enum ColorTransformModes;
-class CaptureRequestStack;
+enum ColorTransformModes {TrueColor, NativeGDI, HSL, HSV};
+
+class CaptureRequestStack
+{
+public:
+	struct Item 
+	{
+		CWnd* sender; BMPanvas *buf;
+		Item(CWnd* _sender=NULL, BMPanvas* _buf=NULL) {sender=_sender; buf=_buf;}
+	};
+protected:
+	CArray<Item> stack;
+public:
+	CaptureRequestStack() {};
+	~CaptureRequestStack() {};
+	CaptureRequestStack& operator << (const Item &item)
+	{
+		stack.Add(item);
+		return *this;
+	}
+	BOOL operator >> (Item& item)
+	{
+		int size; BOOL ret=FALSE;
+		if((size=stack.GetSize())!=0)
+		{
+			item=stack[size-1]; ret=TRUE;
+			stack.RemoveAt(size-1);
+		}		
+		return ret;
+	}
+	void RemoveAll()
+	{
+		stack.RemoveAll();
+	}
+};
+
+typedef ProtectedObjectX<CaptureRequestStack> ProtectedCaptureRequestStack;
+typedef ProtectorX<CaptureRequestStack> CaptureRequestStackGuard;
 
 struct CaptureParams 
 {
 	ColorTransformModes *ColorTransformSelector;
-	CaptureRequestStack *Stack;
+	ProtectedCaptureRequestStack *Stack;
 	ProtectedBMPanvas *Pbuf;
 	CStringW SourceName;
 	DSCaptureSource* Src;

@@ -85,17 +85,22 @@ STDMETHODIMP FrameGrabCallback::SampleCB( double n,IMediaSample *pms )
 		tags->d1=n; tags->i1=header.bmiHeader.biWidth; tags->i2=header.bmiHeader.biHeight; tags->i3=header.bmiHeader.biBitCount;
 		tags->d2=(1./dt1.val()); 
 		tags->timel=t2.StopStart();
-
-		CaptureRequestStack::Item request;
-		while(*params.Stack >> request)
+		
+		void *x;
+		if((x=params.Stack->GainAcsess(WRITE))!=0)
 		{
-			if((*request.buf)!=buf)
+			CaptureRequestStackGuard Protector(x); CaptureRequestStack& Stack(Protector);
+			CaptureRequestStack::Item request;
+			while(Stack >> request)
 			{
-				request.buf->Create(buf.GetDC(),buf.w,buf.h,8);
-				request.buf->CreateGrayPallete();
-			}
-			ColorTransform(&buf, request.buf, *params.ColorTransformSelector);
-			request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureReady,0);
+				if((*request.buf)!=buf)
+				{
+					request.buf->Create(buf.GetDC(),buf.w,buf.h,8);
+					request.buf->CreateGrayPallete();
+				}
+				ColorTransform(&buf, request.buf, *params.ColorTransformSelector);
+				request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureReady,0);
+			}			
 		}
 
 		MessageForWindow* msg=new MessageForWindow(UM_DATA_UPDATE,params.Parent);

@@ -8,39 +8,7 @@
 
 #define SET_RGBQUAD(a,r,g,b) {a.rgbBlue=b; a.rgbGreen=g; a.rgbRed=r;}
 
-class CaptureRequestStack
-{
-public:
-	struct Item 
-	{
-		CWnd* sender; BMPanvas *buf;
-		Item(CWnd* _sender=NULL, BMPanvas* _buf=NULL) {sender=_sender; buf=_buf;}
-	};
-protected:
-	CArray<Item> stack;
-public:
-	CaptureRequestStack() {};
-	~CaptureRequestStack() {};
-	CaptureRequestStack& operator << (const Item &item)
-	{
-		stack.Add(item);
-		return *this;
-	}
-	BOOL operator >> (Item& item)
-	{
-		int size; BOOL ret=FALSE;
-		if((size=stack.GetSize())!=0)
-		{
-			item=stack[size-1]; ret=TRUE;
-			stack.RemoveAt(size-1);
-		}		
-		return ret;
-	}
-	void RemoveAll()
-	{
-		stack.RemoveAll();
-	}
-};
+
 
 struct AccumInfo
 {		
@@ -51,7 +19,6 @@ struct AccumInfo
 	size_t GetCompressorBufferSize() const;
 };
 
-enum ColorTransformModes {TrueColor, NativeGDI, HSL, HSV};
 
 class CaptureWnd : public CWnd, public PerfomanceStaff, public WindowAddress
 {
@@ -116,7 +83,7 @@ protected:
 	ProtectedBMPanvas Pbuf,LevelsScanBuf;
 	BMPanvas grayscaleBuf, truecolorBuf;
 	RGBQUAD pal[256], palLevelsScan[256];
-	CaptureRequestStack Stack;
+	ProtectedCaptureRequestStack Stack;
 public:
 	CtrlsTab Ctrls;
 	CFont font1;

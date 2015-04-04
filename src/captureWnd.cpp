@@ -156,10 +156,16 @@ void CaptureWnd::CtrlsTab::OnBnClicked_StopCapture()
 	BtnChooseCam.EnableWindow(TRUE);
 	BtnFilterParams.EnableWindow(FALSE);
 
-	CaptureRequestStack::Item request;
-	while(pParent->Stack >> request)
+
+	void *x;
+	if((x=pParent->Stack.GainAcsess(WRITE))!=0)
 	{
-		request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureStop,0);
+		CaptureRequestStackGuard Protector(x); CaptureRequestStack& Stack(Protector);
+		CaptureRequestStack::Item request;
+		while(Stack >> request)
+		{
+			request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureStop,0);
+		}
 	}
 }
 
@@ -403,7 +409,13 @@ void CaptureWnd::OnPaint()
 
 LRESULT CaptureWnd::OnCaptureRequest( WPARAM wParam, LPARAM lParam )
 {
-	Stack << CaptureRequestStack::Item((CWnd*)wParam,(BMPanvas*)lParam);
+	void *x;
+	if((x=Stack.GainAcsess(WRITE))!=0)
+	{
+		CaptureRequestStackGuard Protector(x); CaptureRequestStack& Stack(Protector);
+		Stack << CaptureRequestStack::Item((CWnd*)wParam,(BMPanvas*)lParam);
+	}
+
 	return 0;
 }
 void CaptureWnd::CtrlsTab::DoDataExchange(CDataExchange* pDX)
