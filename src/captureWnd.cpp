@@ -107,7 +107,7 @@ void CaptureWnd::CtrlsTab::OnBnClicked_Live()
 		pParent->Timer1.Start(); 
 		pParent->cntr=0;
 
-		CaptureParams &thread_params = pParent->thrd.params;
+		CaptureParams &thread_params = pParent->thrd;
 		thread_params.Parent = *pParent;
 		thread_params.Pbuf=&pParent->Pbuf;
 		thread_params.ColorTransformSelector = &ColorTransformSelector;
@@ -153,7 +153,7 @@ struct CaptureRequestStackCBparams_StopCapture
 void CaptureWnd::CtrlsTab::OnBnClicked_StopCapture()
 {
 	CaptureWnd *pParent=(CaptureWnd*)Parent;
-	pParent->thrd.params.StopCapture.SetEvent();  
+	pParent->thrd.StopCapture.SetEvent();  
 	BtnCapture.EnableWindow(TRUE);
 	BtnStop.EnableWindow(FALSE);
 	BtnPause.EnableWindow(FALSE);
@@ -178,7 +178,7 @@ void CaptureRequestStackCBparams_StopCapture::GainAcsessCB( CaptureRequestStack&
 void CaptureWnd::CtrlsTab::OnBnClicked_PauseCapture()
 {
 	CaptureWnd *pParent=(CaptureWnd*)Parent;
-	pParent->thrd.params.PauseCapture.SetEvent();  
+	pParent->thrd.PauseCapture.SetEvent();  
 	BtnCapture.EnableWindow(FALSE);
 	BtnStop.EnableWindow(TRUE);
 	BtnPause.EnableWindow(FALSE);
@@ -188,7 +188,7 @@ void CaptureWnd::CtrlsTab::OnBnClicked_PauseCapture()
 void CaptureWnd::CtrlsTab::OnBnClicked_ResumeCapture()
 {
 	CaptureWnd *pParent=(CaptureWnd*)Parent;
-	pParent->thrd.params.ResumeCapture.SetEvent();    
+	pParent->thrd.ResumeCapture.SetEvent();    
 	BtnCapture.EnableWindow(FALSE);
 	BtnStop.EnableWindow(TRUE);
 	BtnPause.EnableWindow(TRUE);
@@ -198,7 +198,7 @@ void CaptureWnd::CtrlsTab::OnBnClicked_ResumeCapture()
 void CaptureWnd::CtrlsTab::OnBnClicked_FilterParams()
 {
 	CaptureWnd *pParent=(CaptureWnd*)Parent;
-	pParent->thrd.params.ShowFilterParams.SetEvent();    
+	pParent->thrd.ShowFilterParams.SetEvent();    
 }
 
 void CaptureWnd::SelectCaptureSrc(CString name)

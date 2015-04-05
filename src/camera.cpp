@@ -19,22 +19,21 @@ void GetWH(eDcm800Size& size, int& w, int &h)
 // This is callback for the thread which runs Grabber. 
 // It makes setup then runs it and wait for control signals from user via CEvents. 
 // All the grabbing makes in callback
-UINT CaptureThread::proc(void* p)
+UINT CaptureParams::workthread_main()
 {
 	UINT ret=444; HRESULT hr; DWORD n=0; BOOL bDone=FALSE;
 	GrabberStream Grabber; ControledLogMessage log;
-	CaptureParams& params = ((CaptureThread*)p)->params; 	
 
 	CoInitialize(NULL);
-	hr = Grabber.Create(params.Src);
+	hr = Grabber.Create(Src);
 	if (SUCCEEDED(hr)) 
 	{
-		hr = params.Src->Setup(&params.Src); 		
-		hr = Grabber.Render(params.Src);	
-		hr = Grabber.Setup(&params);		
+		hr = Src->Setup(&Src); 		
+		hr = Grabber.Render(Src);	
+		hr = Grabber.Setup(this);		
 		if (SUCCEEDED(Grabber.status))
 		{
-			params.StopCapture.ResetEvent();	
+			StopCapture.ResetEvent();	
 			hr=Grabber.Run();
 			while(!bDone) 
 			{		
@@ -47,10 +46,10 @@ UINT CaptureThread::proc(void* p)
 								bDone=true; 
 							}
 							break;
-					case 1: bDone = true; params.StopCapture.ResetEvent(); break;
-					case 2: Grabber.Pause(); params.PauseCapture.ResetEvent(); break;
-					case 3: Grabber.Run(); params.ResumeCapture.ResetEvent(); break;
-					case 4: hr = params.Src->ShowFilterProperties(); params.ShowFilterParams.ResetEvent(); break;
+					case 1: bDone = true; StopCapture.ResetEvent(); break;
+					case 2: Grabber.Pause(); PauseCapture.ResetEvent(); break;
+					case 3: Grabber.Run(); ResumeCapture.ResetEvent(); break;
+					case 4: hr = Src->ShowFilterProperties(); ShowFilterParams.ResetEvent(); break;
 					}	
 				}
 				if (FAILED(hr)) bDone=TRUE;

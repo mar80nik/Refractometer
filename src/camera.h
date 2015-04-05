@@ -80,6 +80,7 @@ struct CaptureParams
 	{
 			thrd=NULL; Src=NULL;
 	}
+	UINT workthread_main();
 };
 
 typedef WorkThread<CaptureParams> CaptureThread;
