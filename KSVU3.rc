@@ -397,6 +397,18 @@ BEGIN
     CONTROL         "QuickSearch",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,318,85,55,10
 END
 
+IDD_CHOOSE_CWD DIALOGEX 0, 0, 331, 44
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Set",IDOK,223,23,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,274,23,50,14
+    EDITTEXT        IDC_EDIT1,7,7,317,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Choose dir...",IDC_BUTTON1,7,23,49,14
+    CONTROL         "Add date",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,60,25,45,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -481,6 +493,14 @@ BEGIN
         RIGHTMARGIN, 372
         TOPMARGIN, 7
         BOTTOMMARGIN, 95
+    END
+
+    IDD_CHOOSE_CWD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 324
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 37
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -589,7 +609,7 @@ END
 STRINGTABLE
 BEGIN
     ID_CHART1               "id for chart"
-    IDS_CAMERA_SEPARATOR    ""
+    IDS_STRING3             "IDS_CAMERA_SEPARATOR"
 END
 
 STRINGTABLE
@@ -683,6 +703,12 @@ BEGIN
     IDS_ERRORS_VALUES       "+++ Описания ошибок +++"
 END
 
+STRINGTABLE
+BEGIN
+    IDS_CAMERA_SEPARATOR    "No camera"
+    IDS_CWD_SEPARATOR       "This is curent working directory"
+END
+
 #endif    // Russian (Russia) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -743,6 +769,7 @@ BEGIN
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM "Choose CWD...",               ID_FILE_CHOOSECWD
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR

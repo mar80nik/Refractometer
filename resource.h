@@ -6,7 +6,7 @@
 #define ID_CLEAR                        2
 #define ID_CHART1                       2
 #define ID_SERIES_UPD_COMMAND           3
-#define IDS_CAMERA_SEPARATOR            3
+#define IDS_STRING3                     3
 #define STEP_MOTOR_ICON                 4
 #define PHEM1_ICON                      5
 #define PHEM2_ICON                      6
@@ -69,6 +69,8 @@
 #define IDD_DIALOG18                    234
 #define IDD_DIALOG19                    235
 #define IDB_BITMAP2                     237
+#define IDD_DIALOG9                     240
+#define IDD_CHOOSE_CWD                  240
 #define IDC_EDIT1                       1000
 #define IDC_BUTTON1                     1001
 #define IDC_EDIT10                      1001
@@ -153,6 +155,8 @@
 #define IDC_CHECK2                      1058
 #define IDC_CHECK1                      1059
 #define IDC_RADIO7                      1060
+#define IDS_CAMERA_SEPARATOR            10000
+#define IDS_CWD_SEPARATOR               10002
 #define VOLTMETER1                      32771
 #define ID_CONFIG                       32772
 #define ID_VIEW                         32773
@@ -208,6 +212,7 @@
 #define ID_MAIN_TAB                     32817
 #define ID_IMAGE_TAB                    32820
 #define ID_PICWNDMENU_SCANLINE          32823
+#define ID_FILE_CHOOSECWD               32826
 #define ID_volt_out_ctrl                33000
 #define ID_volt_out_ctrl2               33001
 #define ID_volt_out_ctrl3               33002
@@ -284,8 +289,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        239
-#define _APS_NEXT_COMMAND_VALUE         32824
+#define _APS_NEXT_RESOURCE_VALUE        241
+#define _APS_NEXT_COMMAND_VALUE         32827
 #define _APS_NEXT_CONTROL_VALUE         1060
 #define _APS_NEXT_SYMED_VALUE           105
 #endif

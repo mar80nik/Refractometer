@@ -19,6 +19,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(IDB_LOG_BUTTON, OnEventlog)
 	ON_COMMAND(ID_EVENT_LOG, OnEventlog)	
 	ON_COMMAND(ID_VIEW_CONFIG, OnConfig)	
+	ON_COMMAND(ID_FILE_CHOOSECWD, OnChooseCWD)	
 	ON_NOTIFY(TCN_SELCHANGE,IDC_TAB1,OnTabChange)
 	ON_WM_SHOWWINDOW()
 	ON_WM_CLOSE()
@@ -150,5 +151,20 @@ LRESULT CMainFrame::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
 void CMainFrame::OnSize(UINT nType, int cx, int cy)
 {
 	CFrameWnd::OnSize(nType, cx, cy);
+}
+
+void CMainFrame::OnChooseCWD()
+{
+	ChooseCWDDialog dlg;
+	dlg.CWD = GetCWD();
+	if (dlg.DoModal() == IDOK)
+	{
+
+	}
+	else
+	{
+
+	}
+		
 }
 

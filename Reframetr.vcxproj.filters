@@ -159,6 +159,9 @@
     <ClCompile Include="src\MyStatusBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ChooseCWDDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -931,6 +934,9 @@
     </ClInclude>
     <ClInclude Include="..\..\TChart\src\TChartSeries.h">
       <Filter>tchart</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ChooseCWDDialog.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

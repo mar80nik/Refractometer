@@ -43,6 +43,7 @@ public:
 	void InitChart();
 	virtual ~CMainFrame();
 	virtual void Serialize(CArchive& ar);
+	CString GetCWD();
 protected: 
 	bool SearchForMsgRequest(DWORD msg,WPARAM wParam, LPARAM lParam );	
 
@@ -53,6 +54,7 @@ protected:
 	afx_msg void OnMainTabAccel();
 	afx_msg void OnImageTabAccel();
 	afx_msg void OnConfig();
+	afx_msg void OnChooseCWD();
 	afx_msg void OnPGAControl();
 	afx_msg void OnTerminalButton();
 	afx_msg void OnTabChange( NMHDR * pNotifyStruct, LRESULT * result );
