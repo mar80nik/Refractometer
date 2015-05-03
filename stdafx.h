@@ -72,4 +72,7 @@
 #endif
 #endif
 
+#define IS ==
+#define IS_NOT !=
+
 

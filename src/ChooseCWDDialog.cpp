@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "ChooseCWDDialog.h"
 #include "afxdialogex.h"
+#include <direct.h>
 
-#define IS ==
+
 
 // ChooseCWDDialog dialog
 
@@ -31,6 +32,7 @@ void ChooseCWDDialog::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(ChooseCWDDialog, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &ChooseCWDDialog::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_CHECK1, &ChooseCWDDialog::OnBnClickedCheck1)
+	ON_BN_CLICKED(IDOK, &ChooseCWDDialog::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -97,4 +99,37 @@ void ChooseCWDDialog::InsertDate()
 		cwd += LastDateInserted;
 		SetCWD(cwd);
 	}	
+}
+
+
+void ChooseCWDDialog::OnBnClickedOk()
+{	
+	CDialogEx::OnOK();
+	int last = 0, cur;
+	CStringArray arr; CString t;
+	while ((cur = CWD.Find('\\', last)) != -1)
+	{
+		t = CWD.Left(cur);
+		arr.Add(t);
+		last = cur + 1;		
+	}
+	for (int i = 0; i < arr.GetSize(); i++)
+	{
+		t = arr[i];
+		if (_mkdir(arr[i]) == -1)
+		{
+			switch (errno)
+			{
+			case EEXIST:
+				cur = 0;
+				break;
+			case ENOENT:
+				cur = 0;
+				break;
+			default:
+				cur = 0;
+				break;
+			}
+		}
+	}
 }

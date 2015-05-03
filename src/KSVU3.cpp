@@ -27,7 +27,7 @@ WindowAddress StatusBarMessage::StatusBarWindow;
 CString SeriesListCtrl::GetSaveAsPath()
 {
 	CMainFrame* MW=(CMainFrame*)AfxGetMainWnd();
-	return MW->GetActiveDocument()->GetPathName();
+	return MW->GetCWD();
 }
 
 BEGIN_MESSAGE_MAP(CKSVU3App, CWinApp)
@@ -115,7 +115,6 @@ BOOL CKSVU3App::InitInstance()
 
 	if(cmdInfo.m_strFileName=="") MainWnd->TabCtrl1.ChangeTab(1);	
 	else MainWnd->TabCtrl1.ChangeTab(0);	
-	CString ProgPortName;
 
 	StatusBarMessage *msg = new StatusBarMessage(IDS_CWD_SEPARATOR, MainWnd->GetCWD()); msg->Dispatch();
 

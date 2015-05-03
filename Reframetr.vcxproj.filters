@@ -938,6 +938,9 @@
     <ClInclude Include="src\ChooseCWDDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\KSVU3Doc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\my_lib\src\my_lib_resources.rc">

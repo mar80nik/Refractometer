@@ -406,6 +406,7 @@
     <ClInclude Include="src\GlobalHeader.h" />
     <ClInclude Include="src\ImageWnd.h" />
     <ClInclude Include="src\KSVU3.h" />
+    <ClInclude Include="src\KSVU3Doc.h" />
     <ClInclude Include="src\MainFrm.h" />
     <ClInclude Include="src\metricon.h" />
     <ClInclude Include="src\SystemConfig.h" />
