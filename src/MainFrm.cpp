@@ -6,6 +6,7 @@
 #include "MainFrm.h"
 #include "ksvu3doc.h"
 #include "resource.h"
+#include "ChooseCWDDialog.h"
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
 
@@ -39,7 +40,6 @@ CMainFrame::CMainFrame(): TabCtrl1(&MainBar,IDC_TAB1)
 CMainFrame::~CMainFrame()
 {
 	Chart1.DestroyWindow();
-	//SeriesList.DestroyWindow();	
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -52,9 +52,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
-	m_wndStatusBar.AddIndicator(ID_SEPARATOR);
-	m_wndStatusBar.AddIndicator(IDS_CAMERA_SEPARATOR, MyStatusBar::Refresh);
-	m_wndStatusBar.SetText(IDS_CAMERA_SEPARATOR,CString("No camera"));
+	m_wndStatusBar.AddIndicator(ID_SEPARATOR);	
+	m_wndStatusBar.AddIndicator(IDS_CWD_SEPARATOR); 
+	m_wndStatusBar.AddIndicator(IDS_CAMERA_SEPARATOR, MyStatusBar::Refresh);	
+	m_wndStatusBar.SetText(IDS_CWD_SEPARATOR, GetCWD());
 	
 	MainBar.Create(this,IDD_DIALOGBAR,CBRS_ALIGN_BOTTOM,IDD_DIALOGBAR);
 
@@ -107,7 +108,6 @@ void CMainFrame::InitChart()
 
 	Img.Create(0, "ImageWnd", WS_CHILD, r, pFirstView, ID_MV_WND+1, 0);
 	Chart1.Create(pFirstView,r); Chart1.SetVisible(true); 
-	//Chart1.SeriesDataWnd=&SeriesList;
 
 #ifdef DEBUG
 	Img.CameraWnd.SelectCaptureSrc(CString("Logitech HD Webcam C270"));
@@ -126,13 +126,10 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 	ShowWindow(SW_SHOWMAXIMIZED);
 	CFrameWnd::OnShowWindow(bShow, nStatus);
 
-//	ModifyStyle(0,WS_MAXIMIZE,SWP_FRAMECHANGED);
-	
 	if(bShow)
 	{		
 		EventLog1.Create(IDD_DIALOG5,this);
 		Config.Create(IDD_CONFIG,this);
-		//SeriesList.Create(IDD_DIALOGBARTAB2,this);	
 	}
 }
 
@@ -144,7 +141,6 @@ LRESULT CMainFrame::OnUpdateConfig(WPARAM wParam, LPARAM lParam )
 
 LRESULT CMainFrame::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
 {
-	//Chart1.Panel.PostMessage(UM_SERIES_UPDATE,wParam,lParam);	
 	return 0;
 }
 
@@ -153,13 +149,23 @@ void CMainFrame::OnSize(UINT nType, int cx, int cy)
 	CFrameWnd::OnSize(nType, cx, cy);
 }
 
+CString CMainFrame::GetCWD()
+{
+	CDocument *doc = GetActiveDocument();
+	if (doc != NULL)
+	{
+		return doc->GetPathName();
+	}
+	return _T("No CWD");	
+}
+
 void CMainFrame::OnChooseCWD()
 {
 	ChooseCWDDialog dlg;
 	dlg.CWD = GetCWD();
 	if (dlg.DoModal() == IDOK)
 	{
-
+		
 	}
 	else
 	{

@@ -12,8 +12,15 @@ public:
 	int Id;
 	CString Text;
 
+	StatusBarMessage();;
 	StatusBarMessage(int id, const CString& text);
+	StatusBarMessage& operator= (const StatusBarMessage& msg)
+	{
+		Id = msg.Id; Text = msg.Text; return *this;
+	}
 };
+
+typedef ControledMessage<StatusBarMessage> ControledStatusBarMessage;
 
 class MyStatusBar : public CStatusBar
 {

@@ -52,14 +52,14 @@ void MyStatusBar::Show(UINT id)
 void MyStatusBar::SetText(UINT id, CString &str)
 {
 	int n;
-	if((n=CommandToIndex(id))>=0) 
+	if((n=CommandToIndex(id))>0) 
 	{
 		int len = str.GetLength();
 		CSize size = GetDC()->GetOutputTextExtent(str);
-		SetWidth(id, size.cx*85/100);
+		SetWidth(id, size.cx*85/100);		
 		SetPaneText(n,str);
 	}		
-	else 
+	else if (n == 0)
 	{
 		SetWindowText(str);	
 	}
@@ -92,6 +92,12 @@ LRESULT MyStatusBar::OnStatusBarMessage(WPARAM wParam, LPARAM lParam )
 
 StatusBarMessage::StatusBarMessage( int id, const CString& text )
 {
-	Msg = UM_STATUS_BAR; Id = id; Text = text;
-	Reciver = StatusBarWindow;
+	Msg = UM_STATUS_BAR; Reciver = StatusBarWindow;
+	Id = id; Text = text;
+}
+
+StatusBarMessage::StatusBarMessage()
+{
+	Msg = UM_STATUS_BAR; Reciver = StatusBarWindow; 
+	Id = -1; Text = "Error";
 }

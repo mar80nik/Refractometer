@@ -117,6 +117,8 @@ BOOL CKSVU3App::InitInstance()
 	else MainWnd->TabCtrl1.ChangeTab(0);	
 	CString ProgPortName;
 
+	StatusBarMessage *msg = new StatusBarMessage(IDS_CWD_SEPARATOR, MainWnd->GetCWD()); msg->Dispatch();
+
 	gsl_error_handler_t * old_handler = gsl_set_error_handler (&my_handler);
 
 	return TRUE;

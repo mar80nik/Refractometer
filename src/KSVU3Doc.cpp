@@ -110,3 +110,35 @@ void CKSVU3Doc::OnCloseDocument()
 {
 	CDocument::OnCloseDocument();
 }
+
+void CKSVU3Doc::OnDocumentEvent( DocumentEvent deEvent )
+{
+	ControledStatusBarMessage msg;
+	CFolderPickerDialog fd; 
+
+	if (GetPathName() == "")
+	{		
+		SetPathName("a", false);
+		const CString &name = GetPathName();
+		SetPathName(name.Mid(0, name.GetLength() - 1), false);
+	}
+
+	switch (deEvent)
+	{
+	case onAfterNewDocument:		
+		//fd.DoModal();
+		msg << StatusBarMessage(IDS_CWD_SEPARATOR, GetPathName());
+		msg.Dispatch();	
+		break;
+	case onAfterOpenDocument:
+		msg << StatusBarMessage(IDS_CWD_SEPARATOR, GetPathName());
+		msg.Dispatch();	
+		break;
+	case onAfterSaveDocument:
+		msg << StatusBarMessage(IDS_CWD_SEPARATOR, GetPathName());
+		msg.Dispatch();	
+		break;
+	case onAfterCloseDocument:
+		break;
+	}
+}
