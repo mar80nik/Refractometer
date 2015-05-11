@@ -2,7 +2,7 @@
 #include "ChooseCWDDialog.h"
 #include "afxdialogex.h"
 #include <direct.h>
-
+#include "MessageInspector.h"
 
 
 // ChooseCWDDialog dialog
@@ -105,7 +105,7 @@ void ChooseCWDDialog::InsertDate()
 void ChooseCWDDialog::OnBnClickedOk()
 {	
 	CDialogEx::OnOK();
-	int last = 0, cur;
+	int last = 0, cur, i;
 	CStringArray arr; CString t;
 	while ((cur = CWD.Find('\\', last)) != -1)
 	{
@@ -113,7 +113,7 @@ void ChooseCWDDialog::OnBnClickedOk()
 		arr.Add(t);
 		last = cur + 1;		
 	}
-	for (int i = 0; i < arr.GetSize(); i++)
+	for (i = 0; i < arr.GetSize(); i++)
 	{
 		t = arr[i];
 		if (_mkdir(arr[i]) == -1)
@@ -132,4 +132,10 @@ void ChooseCWDDialog::OnBnClickedOk()
 			}
 		}
 	}
+#ifdef DEBUG	
+	if (i == arr.GetSize()) i--;
+	ControledLogMessage msg;
+	msg.T.Format("Created dir %s", arr[i]); msg << msg.T;
+	msg.Dispatch();
+#endif
 }

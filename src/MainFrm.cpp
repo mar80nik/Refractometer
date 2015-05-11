@@ -151,10 +151,10 @@ void CMainFrame::OnSize(UINT nType, int cx, int cy)
 
 CString CMainFrame::GetCWD()
 {
-	CDocument *doc = GetActiveDocument();
+	CKSVU3Doc *doc = (CKSVU3Doc*)GetActiveDocument();
 	if (doc != NULL)
 	{
-		return doc->GetPathName();
+		return doc->GetPath();
 	}
 	return _T("No CWD");	
 }
@@ -165,7 +165,8 @@ void CMainFrame::OnChooseCWD()
 	dlg.CWD = GetCWD();
 	if (dlg.DoModal() == IDOK)
 	{
-		
+		CKSVU3Doc *doc = (CKSVU3Doc*)GetActiveDocument();
+		doc->SetPathName(dlg.CWD);
 	}
 	else
 	{

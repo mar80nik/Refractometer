@@ -25,4 +25,5 @@ public:
 	CString CWD, LastDateInserted;
 	BOOL AddDate;
 	afx_msg void OnBnClickedCheck1();
+	afx_msg void OnBnClickedOk();
 };
