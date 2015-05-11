@@ -227,21 +227,9 @@ void ImageWnd::CtrlsTab::OnBnClickedScan()
 			if (result.GetSize() != 0)
 			{
 				CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
-				TPointVsErrorSeries *t1 = NULL;
-				
-				if((t1 = new TPointVsErrorSeries(T)) != NULL)	
-				{
-					t1->SetParentUpdateStatus(UPD_OFF);
-					t1->_SymbolStyle::Set(NO_SYMBOL); t1->_ErrorBarStyle::Set(POINTvsERROR_BAR);				
-					t1->AssignColors(ColorsStyle(clRED,RANDOM_COLOR));
-
-					for (int i = 0; i < result.GetSize(); i++) 
-					{
-						t1->AddXY(result[i]);
-					}
-					t1->DispatchDataImportMsg(mf->Chart1);
-					mf->TabCtrl1.ChangeTab(mf->TabCtrl1.FindTab("Main control"));	
-				}				
+				TChartSeriesStyleHelper style; style << POINTvsERROR_BAR << ColorsStyle(clRED,RANDOM_COLOR);
+				mf->Chart1.Visualize(T, result.x, result.y, result.dy, style);
+				mf->TabCtrl1.ChangeTab(mf->TabCtrl1.FindTab("Main control"));	
 			}
 			Timer1.Stop(); 
 			log.T.Format("Scan took %s", ConvTimeToStr( Timer1.GetValue()));

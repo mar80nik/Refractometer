@@ -141,9 +141,8 @@ void DialogBarTab1::Serialize(CArchive& ar)
 
 void DialogBarTab1::OnBnClicked_Fit()
 {		
-	UpdateData();  	
-	PointVsErrorArray buf; ControledLogMessage log;		
-	void *x; TChart *chart=(TChart *)Parent;
+	UpdateData(); ControledLogMessage log;		  	
+	PointVsErrorArray buf; void *x; TChart *chart=(TChart *)Parent;
 
 	if((x=chart->Series.GainAcsess(READ))!=NULL)
 	{
@@ -173,27 +172,64 @@ void DialogBarTab1::OnBnClicked_Fit()
 	DoubleArray init; ParabolaFitFunc fiting; 	SimplePoint pnt;	
 	init << 1 << 1e-1 << 1e-2; fiting.CalculateFrom(buf.x, buf.y, buf.dy, init);
 	log.T.Format("************ ParabolaFit ******************"); log << log.T;
-	fiting.GetReport(log);
-	log.Dispatch();		
+	fiting.GetReport(log); log.Dispatch();		
 
-	if(fiting.status == GSL_SUCCESS)
+	DoubleArray X, Y;
+	if(fiting.PrepareGraph(X, Y, buf.x[0], buf.x[buf.x.GetUpperBound()], buf.x.GetSize()*3 ) IS GSL_SUCCESS)
 	{
-		TSimplePointSeries *t1=NULL; SimplePoint val; 
+		CString name; name.Format("PolyFit%d",PolinomOrder);
 		CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
-		CString str; str.Format("PolyFit%d",PolinomOrder);
+		mf->Chart1.Visualize(name, X, Y);
+	}
+}
 
-		if((t1 = new TSimplePointSeries(str)) != 0)	
+void DialogBarTab1::OnBnClickedKneeTest()
+{
+	UpdateData(); ControledLogMessage log; 
+	PointVsErrorArray buf; void *x; TChart *chart=(TChart *)Parent;
+
+	if((x=chart->Series.GainAcsess(READ))!=NULL)
+	{
+		TPointVsErrorSeries *graph;
+		SeriesProtector guard(x); TSeriesArray& series(guard);
+		if(	(graph=GetSeries(series))!=NULL) 
 		{
-			DoubleArray x, y; 
-			t1->SetParentUpdateStatus(UPD_OFF);
-			t1->_SymbolStyle::Set(NO_SYMBOL); t1->AssignColors(ColorsStyle(clRED, RANDOM_COLOR));
-			fiting.MakeGraph(x, y, buf.x[0], buf.x[buf.x.GetUpperBound()], buf.x.GetSize()*3 );
-			for(int i = 0; i < x.GetSize(); i++) 
+			graph->GetValues(buf);
+			int N=buf.GetSize(), n1=GetArrayIndex(buf.x,Xmin), n2=GetArrayIndex(buf.x,Xmax);
+			if(n1<0 || n2>=N)
 			{
-				t1->AddXY(SimplePoint(x[i], y[i]));
-			}
-			t1->DispatchDataImportMsg(mf->Chart1); 			
-		}	
+				log.T.Format("ERR: No valid points found %d+/-%d",X0,dX); log << log.T;	
+				log.SetPriority(lmprHIGH); log.Dispatch(); return;
+			}				
+			buf.RemoveAll(); graph->GetValues(buf,n1,n2);					
+		}			
+		else
+		{
+			log.T.Format("ERR: No series matching criteria (ACTIVE) found"); log << log.T;	
+			log.SetPriority(lmprHIGH); log.Dispatch(); return;
+		}
+	}
+	else return;
+
+	DoubleArray init;  KneeFitFunc fiting;  
+	double x_min = buf.x[0], x_max = buf.x[buf.x.GetUpperBound()];
+	init << 1 << (x_min + x_max)/2 << 0.1 << 0.1; 
+	fiting.CalculateFrom(buf.x, buf.y, buf.dy, init);
+	log.T.Format("************ KneeFit **********************"); log << log.T;
+	fiting.GetReport(log, level); log.Dispatch();
+
+	DoubleArray X, Y;
+	if(fiting.PrepareGraph(X, Y, x_min, x_max, buf.x.GetSize()*3 ) IS GSL_SUCCESS)
+	{
+		CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
+
+		mf->Chart1.Visualize("KneeFit", X, Y);
+
+		X.RemoveAll(); Y.RemoveAll();		
+		SimplePoint pnt; pnt.y =  fiting.GetInflection(pnt.x, level); X << pnt.x; Y << pnt.y;
+		TChartSeriesStyleHelper style; 
+		style << NO_LINE << VERT_LINE << ColorsStyle(clWHITE, clWHITE) << SYMBOL_DY(10);
+		mf->Chart1.Visualize("KneeInflection", X, Y, style);
 	}
 }
 
@@ -606,67 +642,6 @@ LRESULT DialogBarTab1::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
 		CalcTEDlg.PostMessage(UM_SERIES_UPDATE,wParam,lParam);	
 	}
 	return 0;
-}
-
-void DialogBarTab1::OnBnClickedKneeTest()
-{
-	UpdateData();  KneeFitFunc fiting;  DoubleArray init; ControledLogMessage log; 
-	PointVsErrorArray buf; void *x; TChart *chart=(TChart *)Parent;
-
-	if((x=chart->Series.GainAcsess(READ))!=NULL)
-	{
-		TPointVsErrorSeries *graph;
-		SeriesProtector guard(x); TSeriesArray& series(guard);
-		if(	(graph=GetSeries(series))!=NULL) 
-		{
-			graph->GetValues(buf);
-			int N=buf.GetSize(), n1=GetArrayIndex(buf.x,Xmin), n2=GetArrayIndex(buf.x,Xmax);
-			if(n1<0 || n2>=N)
-			{
-				log.T.Format("ERR: No valid points found %d+/-%d",X0,dX); log << log.T;	
-				log.SetPriority(lmprHIGH); log.Dispatch(); return;
-			}				
-			buf.RemoveAll(); graph->GetValues(buf,n1,n2);					
-		}			
-		else
-		{
-			log.T.Format("ERR: No series matching criteria (ACTIVE) found"); log << log.T;	
-			log.SetPriority(lmprHIGH); log.Dispatch(); return;
-		}
-	}
-	else return;
-	
-	init << 1 << 0.1 << 0.1 << 0.1; fiting.CalculateFrom(buf.x, buf.y, buf.dy, init);
-	log.T.Format("************ KneeFit **********************"); log << log.T;
-	fiting.GetReport(log, level);
-	
-	if (fiting.status == GSL_SUCCESS)
-	{
-		TSimplePointSeries *t1=NULL; SimplePoint pnt; 
-		CMainFrame* mf=(CMainFrame*)AfxGetMainWnd(); 
-
-		if((t1 = new TSimplePointSeries("KneeInflection")) != 0)	
-		{
-			t1->SetParentUpdateStatus(UPD_OFF);
-			t1->AssignColors(ColorsStyle(clWHITE, clWHITE));	
-			t1->_LineStyle::Set(NO_LINE); t1->_SymbolStyle::Set(VERT_LINE); t1->_SymbolStyle::dy=10;			
-			t1->AddXY(pnt);
-		}
-
-		if((t1=new TSimplePointSeries("KneeFit"))!=0)	
-		{
-			DoubleArray x, y;
-			t1->SetParentUpdateStatus(UPD_OFF);
-			t1->_SymbolStyle::Set(NO_SYMBOL); t1->AssignColors(ColorsStyle(clRED, RANDOM_COLOR));			
-			fiting.MakeGraph(x, y, buf.x[0], buf.x[buf.x.GetUpperBound()], buf.x.GetSize()*3 );
-			for(int i = 0; i < x.GetSize(); i++) 
-			{
-				pnt.x = x[i]; pnt.y = y[i]; t1->AddXY(pnt);
-			}
-			t1->DispatchDataImportMsg(mf->Chart1);
-		}
-	}
-	log.Dispatch();
 }
 
 void MyGSL_Tester_Helper(Polarization pol, DoubleArray &Nexp, DoubleArray &_n_exp, int shift)
