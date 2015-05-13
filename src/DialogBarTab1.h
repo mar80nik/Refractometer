@@ -73,6 +73,7 @@ public:
 
 	CComboBox SeriesCombo;
 	afx_msg void OnBnClickedKneeTest();
+	int GetActiveSeriesData(ControledLogMessage& log, PointVsErrorArray& buf, const double x_min, const double x_max);
 	double Xmin;
 	double Xmax;
 	double level;
