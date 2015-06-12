@@ -6,6 +6,7 @@
 #include "MainFrm.h"
 #include "KSVU3Doc.h"
 #include "KSVU3View.h"
+#include "MyStatusBar.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,16 +17,17 @@ static char THIS_FILE[] = __FILE__;
 ////////////////////////////////////////////////////////////////////////////
 //MainChartWnd GlobalChart;
 SystemConfig MainCfg;
-WindowAddress EventsLog, MainFrame;
+WindowAddress EventsLog, MainFrame, StatusBarWindow;
 MessagesInspector GlobalInspector;
 MessagesInspector* MessagesInspectorSubject::GlobalInspector=&::GlobalInspector;
 WindowAddress LogMessage::LogWindow;
 WindowAddress MyThread::ConfigParentWindow;
+WindowAddress StatusBarMessage::StatusBarWindow;
 
 CString SeriesListCtrl::GetSaveAsPath()
 {
 	CMainFrame* MW=(CMainFrame*)AfxGetMainWnd();
-	return MW->GetActiveDocument()->GetPathName();
+	return MW->GetCWD();
 }
 
 BEGIN_MESSAGE_MAP(CKSVU3App, CWinApp)
@@ -33,7 +35,6 @@ BEGIN_MESSAGE_MAP(CKSVU3App, CWinApp)
 	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
 	ON_THREAD_MESSAGE(UM_BACKUP_SAVE,OnBackupSave)	
 	ON_THREAD_MESSAGE(UM_UPDATE_CONFIG,OnUpdateConfig)	
-	ON_THREAD_MESSAGE(UM_DATA_UPDATE,OnDataUpdate)	
 	ON_THREAD_MESSAGE(UM_GENERIC_MESSAGE,OnGenericMessage)	
 	ON_COMMAND(ID_FILE_NEW, CWinApp::OnFileNew)
 	ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
@@ -101,18 +102,21 @@ BOOL CKSVU3App::InitInstance()
 	if (!ProcessShellCommand(cmdInfo))
 		return FALSE;
 	CMainFrame* MainWnd=(CMainFrame*)m_pMainWnd;
-	EventsLog.pThrd=AfxGetThread(); EventsLog.pWND=&MainWnd->EventLog1;
-	MainFrame.pThrd=AfxGetThread(); MainFrame.pWND=MainWnd;
+	EventsLog.pThrd = AfxGetThread(); EventsLog.pWND=&MainWnd->EventLog1;
+	MainFrame.pThrd = AfxGetThread(); MainFrame.pWND=MainWnd;
+	StatusBarWindow.pThrd = AfxGetThread(); StatusBarWindow.pWND = &MainWnd->m_wndStatusBar;
 
 	LogMessage::LogWindow = EventsLog;
 	MyThread::ConfigParentWindow = MainFrame;
+	StatusBarMessage::StatusBarWindow = StatusBarWindow;
 
 	MainCfg.LoadConfig(); 
 	MainWnd->InitChart(); 
 
 	if(cmdInfo.m_strFileName=="") MainWnd->TabCtrl1.ChangeTab(1);	
 	else MainWnd->TabCtrl1.ChangeTab(0);	
-	CString ProgPortName;
+
+	StatusBarMessage *msg = new StatusBarMessage(IDS_CWD_SEPARATOR, MainWnd->GetCWD()); msg->Dispatch();
 
 	gsl_error_handler_t * old_handler = gsl_set_error_handler (&my_handler);
 
@@ -204,8 +208,6 @@ void CKSVU3App::OnUpdateConfig(WPARAM wParam, LPARAM lParam )
 	{if(myThread.Config.GetTerminate()==None) 
 	MainFrame.pWND->PostMessage(UM_UPDATE_CONFIG,wParam,lParam);
 	}
-void CKSVU3App::OnDataUpdate(WPARAM wParam, LPARAM lParam )
-	{if(myThread.Config.GetTerminate()==None) m_pMainWnd->PostMessage(UM_DATA_UPDATE,wParam,lParam);}
 
 void CKSVU3App::OnGenericMessage( WPARAM wParam, LPARAM lParam )
 {

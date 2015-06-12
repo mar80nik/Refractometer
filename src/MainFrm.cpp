@@ -4,15 +4,9 @@
 #include "stdafx.h"
 #include "KSVU3.h"
 #include "MainFrm.h"
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
 #include "ksvu3doc.h"
-#include ".\mainfrm.h"
+#include "resource.h"
+#include "ChooseCWDDialog.h"
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
 
@@ -26,6 +20,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(IDB_LOG_BUTTON, OnEventlog)
 	ON_COMMAND(ID_EVENT_LOG, OnEventlog)	
 	ON_COMMAND(ID_VIEW_CONFIG, OnConfig)	
+	ON_COMMAND(ID_FILE_CHOOSECWD, OnChooseCWD)	
 	ON_NOTIFY(TCN_SELCHANGE,IDC_TAB1,OnTabChange)
 	ON_WM_SHOWWINDOW()
 	ON_WM_CLOSE()
@@ -45,7 +40,6 @@ CMainFrame::CMainFrame(): TabCtrl1(&MainBar,IDC_TAB1)
 CMainFrame::~CMainFrame()
 {
 	Chart1.DestroyWindow();
-	//SeriesList.DestroyWindow();	
 }
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -58,6 +52,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;      // fail to create
 	}
 
+	m_wndStatusBar.AddIndicator(ID_SEPARATOR);	
+	m_wndStatusBar.AddIndicator(IDS_CWD_SEPARATOR); 
+	m_wndStatusBar.AddIndicator(IDS_CAMERA_SEPARATOR, MyStatusBar::Refresh);	
+	m_wndStatusBar.SetText(IDS_CWD_SEPARATOR, GetCWD());
+	
 	MainBar.Create(this,IDD_DIALOGBAR,CBRS_ALIGN_BOTTOM,IDD_DIALOGBAR);
 
 	Toolbar1.Create(this,WS_CHILD | WS_VISIBLE | CBRS_RIGHT); Toolbar1.LoadToolBar(IDR_TOOLBAR2);
@@ -109,7 +108,6 @@ void CMainFrame::InitChart()
 
 	Img.Create(0, "ImageWnd", WS_CHILD, r, pFirstView, ID_MV_WND+1, 0);
 	Chart1.Create(pFirstView,r); Chart1.SetVisible(true); 
-	//Chart1.SeriesDataWnd=&SeriesList;
 
 #ifdef DEBUG
 	Img.CameraWnd.SelectCaptureSrc(CString("Logitech HD Webcam C270"));
@@ -128,13 +126,10 @@ void CMainFrame::OnShowWindow(BOOL bShow, UINT nStatus)
 	ShowWindow(SW_SHOWMAXIMIZED);
 	CFrameWnd::OnShowWindow(bShow, nStatus);
 
-//	ModifyStyle(0,WS_MAXIMIZE,SWP_FRAMECHANGED);
-	
 	if(bShow)
 	{		
 		EventLog1.Create(IDD_DIALOG5,this);
 		Config.Create(IDD_CONFIG,this);
-		//SeriesList.Create(IDD_DIALOGBARTAB2,this);	
 	}
 }
 
@@ -146,12 +141,37 @@ LRESULT CMainFrame::OnUpdateConfig(WPARAM wParam, LPARAM lParam )
 
 LRESULT CMainFrame::OnSeriesUpdate(WPARAM wParam, LPARAM lParam )
 {
-	//Chart1.Panel.PostMessage(UM_SERIES_UPDATE,wParam,lParam);	
 	return 0;
 }
 
 void CMainFrame::OnSize(UINT nType, int cx, int cy)
 {
 	CFrameWnd::OnSize(nType, cx, cy);
+}
+
+CString CMainFrame::GetCWD()
+{
+	CKSVU3Doc *doc = (CKSVU3Doc*)GetActiveDocument();
+	if (doc != NULL)
+	{
+		return doc->GetPath();
+	}
+	return _T("No CWD");	
+}
+
+void CMainFrame::OnChooseCWD()
+{
+	ChooseCWDDialog dlg;
+	dlg.CWD = GetCWD();
+	if (dlg.DoModal() == IDOK)
+	{
+		CKSVU3Doc *doc = (CKSVU3Doc*)GetActiveDocument();
+		doc->SetPathName(dlg.CWD);
+	}
+	else
+	{
+
+	}
+		
 }
 

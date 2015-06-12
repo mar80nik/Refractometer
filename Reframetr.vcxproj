@@ -233,6 +233,7 @@
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\cameraChooser.cpp" />
     <ClCompile Include="src\captureWnd.cpp" />
+    <ClCompile Include="src\ChooseCWDDialog.cpp" />
     <ClCompile Include="src\compressor.cpp" />
     <ClCompile Include="src\devices.cpp" />
     <ClCompile Include="src\DialogBarTab1.cpp" />
@@ -245,6 +246,7 @@
     <ClCompile Include="src\metricon.cpp" />
     <ClCompile Include="src\ModifyValueDialog.cpp" />
     <ClCompile Include="src\MyListBox.cpp" />
+    <ClCompile Include="src\MyStatusBar.cpp" />
     <ClCompile Include="src\MyTabCtrl.cpp" />
     <ClCompile Include="src\MyToolBar.cpp" />
     <ClCompile Include="src\SystemConfig.cpp" />
@@ -499,11 +501,13 @@
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\cameraChooser.h" />
     <ClInclude Include="src\captureWnd.h" />
+    <ClInclude Include="src\ChooseCWDDialog.h" />
     <ClInclude Include="src\compressor.h" />
     <ClInclude Include="src\externals.h" />
     <ClInclude Include="src\GlobalHeader.h" />
     <ClInclude Include="src\ImageWnd.h" />
     <ClInclude Include="src\KSVU3.h" />
+    <ClInclude Include="src\KSVU3Doc.h" />
     <ClInclude Include="src\MainFrm.h" />
     <ClInclude Include="src\metricon.h" />
     <ClInclude Include="src\SystemConfig.h" />

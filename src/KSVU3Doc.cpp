@@ -19,7 +19,6 @@ IMPLEMENT_DYNCREATE(CKSVU3Doc, CDocument)
 
 BEGIN_MESSAGE_MAP(CKSVU3Doc, CDocument)
 	//{{AFX_MSG_MAP(CKSVU3Doc)
-//	ON_COMMAND(ID_SERIES_UPD_COMMAND,OnSeriesUpdate)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -109,4 +108,63 @@ BOOL CKSVU3Doc::OnSaveDocument(LPCTSTR lpszPathName)
 void CKSVU3Doc::OnCloseDocument() 
 {
 	CDocument::OnCloseDocument();
+}
+
+void CKSVU3Doc::OnDocumentEvent( DocumentEvent deEvent )
+{
+	ControledStatusBarMessage msg;
+	CFolderPickerDialog fd; 
+
+	if (GetPathName() == "")
+	{		
+		CDocument::SetPathName(m_strTitle, false);
+		SetPathName(GetPath());
+	}
+
+	CString path = GetPath();
+
+	switch (deEvent)
+	{
+	case onAfterNewDocument:		
+	case onAfterOpenDocument:
+	case onAfterSaveDocument:
+		msg << StatusBarMessage(IDS_CWD_SEPARATOR, path);
+		msg.Dispatch();	
+		break;
+	case onAfterCloseDocument:
+		break;
+	}
+}
+
+
+void CKSVU3Doc::SetPathName(const CString& path)
+{
+	CDocTemplate* pTemplate = GetDocTemplate();
+	if (pTemplate IS_NOT NULL)
+	{
+		CString name = m_strTitle, ext, path_name;
+		if (pTemplate->GetDocString(ext, CDocTemplate::filterExt) && !ext.IsEmpty())
+		{
+			CString t; int iStart = 0;
+			t = ext.Tokenize(_T(";"), iStart); 
+			ext = t;
+		}
+		path_name = path; 
+		path_name += name; 
+		CDocument::SetPathName(path_name, false);
+		OnDocumentEvent(onAfterSaveDocument);		
+	}	
+}
+
+
+CString CKSVU3Doc::GetPath(void) const
+{
+	CString path, path_name = GetPathName();
+	int iStart = 0, last_pos = -1, pos;
+	while ((pos = path_name.Find('\\', iStart)) IS_NOT -1)
+	{
+		last_pos = pos; iStart = pos + 1;
+	}
+	path = path_name.Left(last_pos + 1);
+	return path;
 }

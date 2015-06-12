@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "camera.h"
+#include "captureWnd.h"
+#include "ImageWnd.h"
 
 static const GUID IID_IDcm800 = { 0x7a3cfafd, 0x3168, 0x4fa1, { 0x99, 0x3a, 0x11, 0xc0, 0x24, 0xf2, 0xb0, 0xb } };
 
@@ -17,27 +19,21 @@ void GetWH(eDcm800Size& size, int& w, int &h)
 // This is callback for the thread which runs Grabber. 
 // It makes setup then runs it and wait for control signals from user via CEvents. 
 // All the grabbing makes in callback
-UINT CaptureThread::proc(void* p)
+UINT CaptureParams::workthread_main()
 {
-	UINT ret=444; CString T;
-	CaptureThread* thrd=(CaptureThread*)p;
-	CaptureThreadParams& Params=thrd->params; 
-	HRESULT hr; DWORD n=0; BOOL bDone=FALSE;
-	
-	DSCaptureSource* Src=(DSCaptureSource*)Params.Src;
-	GrabberStream Grabber;
-	LogMessage *log=new LogMessage(); 
+	UINT ret=444; HRESULT hr; DWORD n=0; BOOL bDone=FALSE;
+	GrabberStream Grabber; ControledLogMessage log;
 
 	CoInitialize(NULL);
 	hr = Grabber.Create(Src);
 	if (SUCCEEDED(hr)) 
 	{
-		hr = Src->Setup(&(thrd->params)); 		
+		hr = Src->Setup(&Src); 		
 		hr = Grabber.Render(Src);	
-		hr = Grabber.Setup(&(thrd->params));		
+		hr = Grabber.Setup(this);		
 		if (SUCCEEDED(Grabber.status))
 		{
-			Params.StopCapture.ResetEvent();	
+			StopCapture.ResetEvent();	
 			hr=Grabber.Run();
 			while(!bDone) 
 			{		
@@ -50,51 +46,84 @@ UINT CaptureThread::proc(void* p)
 								bDone=true; 
 							}
 							break;
-					case 1: bDone = true; Params.StopCapture.ResetEvent(); break;
-					case 2: Grabber.Pause(); Params.PauseCapture.ResetEvent(); break;
-					case 3: Grabber.Run(); Params.ResumeCapture.ResetEvent(); break;
-					case 4: hr = Src->ShowFilterProperties(); Params.ShowFilterParams.ResetEvent(); break;
+					case 1: bDone = true; StopCapture.ResetEvent(); break;
+					case 2: Grabber.Pause(); PauseCapture.ResetEvent(); break;
+					case 3: Grabber.Run(); ResumeCapture.ResetEvent(); break;
+					case 4: hr = Src->ShowFilterProperties(); ShowFilterParams.ResetEvent(); break;
 					}	
 				}
 				if (FAILED(hr)) bDone=TRUE;
 			}
 			hr=Grabber.Stop();
-			if (FAILED(hr)) { T="GRAPH RUN error"; log->CreateEntry("Err",T); }
+			if (FAILED(hr)) { log.T = "GRAPH RUN error"; log << log.T; log.SetPriority(lmprHIGH); }
 		}
-		else { T="GRAPH SETUP error"; log->CreateEntry("Err",T); }
+		else { log.T = "GRAPH SETUP error"; log << log.T; log.SetPriority(lmprHIGH); }
 	}
-	else { T="GRAPH INIT error"; log->CreateEntry("Err",T); }
+	else { log.T = "GRAPH INIT error"; log << log.T; log.SetPriority(lmprHIGH); }
 	
 	CoUninitialize();
-	if(log->HasMessages()) { log->Dispatch(); }
-	else delete log;
+	log.Dispatch();
 	return ret;
 }
 
-STDMETHODIMP FrameGrabCallback::SampleCB( double n,IMediaSample *pms )
+struct CaptureRequestStackCBparams 
 {
-	CaptureThread* thrd=(CaptureThread*)pthrd;
-	CaptureThreadParams& Params=thrd->params;
-	sec dt1; ms dt2,dt3; CString T; void *x; int ret;
-	dt1=t1.StopStart();
-	BYTE *pbuf; HRESULT hr;
-	hr=pms->GetPointer(&pbuf);
-	long size=pms->GetSize();
+	BMPanvas *buf; 
+	ColorTransformModes *ColorTransformSelector;
+	void GainAcsessCB(CaptureRequestStack& Stack)
+	{
+		CaptureRequestStack::Item request;
+		if (*ColorTransformSelector != TrueColor)
+		{
+			while(Stack >> request)
+			{
+				if((*request.buf) != (*buf))
+				{
+					request.buf->Create(buf->GetDC(), buf->w, buf->h, 8);
+					request.buf->CreateGrayPallete();
+				}
+				ColorTransform(buf, request.buf, *ColorTransformSelector);
+				request.sender->PostMessage(UM_CAPTURE_EVENT,EvntOnCaptureReady,0);
+			}			
+		}
+	}
+};
 
-	if((x=Params.Pbuf->GainAcsess(WRITE))!=NULL)
-	{			
-		BMPanvasGuard guard1(x); BMPanvas &buf(guard1); t2.Start();		
-		ret=buf.SetBitmapArray(BMPanvas::MIN_SCANLINE,BMPanvas::MAX_SCANLINE,pbuf);
-		ASSERT(ret==header.bmiHeader.biHeight);
+struct BMPanvasCBparams
+{
+	BYTE *pbuf; double n; sec dt1;
+	VIDEOINFOHEADER *header;	
+	CaptureParams *capture_params;
+	void GainAcsessCB(BMPanvas& buf)
+	{
+		MyTimer t2;	t2.Start();		
+		int ret=buf.SetBitmapArray(BMPanvas::MIN_SCANLINE,BMPanvas::MAX_SCANLINE, pbuf);
 		BMPanvasTAGSmk1* tags=(BMPanvasTAGSmk1*)buf.tags;
-		tags->d1=n; tags->i1=header.bmiHeader.biWidth; tags->i2=header.bmiHeader.biHeight; tags->i3=header.bmiHeader.biBitCount;
+		tags->d1 = n; 
+		tags->i1 = header->bmiHeader.biWidth; 
+		tags->i2 = header->bmiHeader.biHeight; 
+		tags->i3 = header->bmiHeader.biBitCount;
 		tags->d2=(1./dt1.val()); 
 		tags->timel=t2.StopStart();
 
-		MessageForWindow* msg=new MessageForWindow(UM_DATA_UPDATE,Params.Parent);
-		thrd->PostParentMessage(UM_GENERIC_MESSAGE,msg);
+		CaptureRequestStackCBparams paramsCB = {&buf, capture_params->ColorTransformSelector};
+		capture_params->Stack->ModifyWith(paramsCB);
+
+		MessageForWindow* msg=new MessageForWindow(UM_DATA_UPDATE, capture_params->Parent);
+		msg->Dispatch();
 	}
-	//else ASSERT(0);	
+};
+
+STDMETHODIMP FrameGrabCallback::SampleCB( double n, IMediaSample *pms )
+{
+	BMPanvasCBparams paramsCB;
+
+	paramsCB.header = &header; paramsCB.capture_params = (CaptureParams*)capture_params;
+	paramsCB.dt1 = t1.StopStart(); paramsCB.n = n;
+	HRESULT hr = pms->GetPointer(&paramsCB.pbuf);
+	long size = pms->GetSize();
+
+	paramsCB.capture_params->Pbuf->ModifyWith(paramsCB);	
 	return 0;	
 }
 
@@ -224,26 +253,26 @@ HRESULT GrabberStream::Render( MyDSFilter* Src )
     return status;
 }
 
-HRESULT GrabberStream::Setup( void* params )
+HRESULT GrabberStream::Setup( void* _params )
 {
-	CaptureThreadParams& Params=*((CaptureThreadParams*)params); void *x;
+	CaptureParams &params = *((CaptureParams*)_params); void *x;
 	if(SUCCEEDED(Grabber.status))
 	{
 		if (SUCCEEDED(Grabber.GetPinsInfo()))
 		{
 			VIDEOINFOHEADER hdr=Grabber.Pins[0].header;
 			Grabber.m_FrameGrabCallback.header=hdr;
-			Grabber.m_FrameGrabCallback.pthrd=Params.thrd;
+			Grabber.m_FrameGrabCallback.capture_params = &params;
 			Grabber.m_FrameGrabCallback.framenum=1;		
 			//		Grabber.m_FrameGrabCallback.CreateTempBuf();
 			Grabber.m_FrameGrabCallback.t1.Start();
 
-			Handles.Add(Params.StopCapture);
-			Handles.Add(Params.PauseCapture);
-			Handles.Add(Params.ResumeCapture);
-			Handles.Add(Params.ShowFilterParams);	
+			Handles.Add(params.StopCapture);
+			Handles.Add(params.PauseCapture);
+			Handles.Add(params.ResumeCapture);
+			Handles.Add(params.ShowFilterParams);	
 
-			if((x=Params.Pbuf->GainAcsess(WRITE))!=NULL)
+			if((x=params.Pbuf->GainAcsess(WRITE))!=NULL)
 			{
 				BMPanvasGuard guard1(x); BMPanvas &buf(guard1);
 				buf.Create((HDC)NULL,hdr.bmiHeader.biWidth, hdr.bmiHeader.biHeight, hdr.bmiHeader.biBitCount);
@@ -311,7 +340,7 @@ HRESULT MyDSFilter::ShowFilterProperties()
 
 HRESULT ScopeTek_DCM800::Setup( void* params )
 {
-	CaptureThreadParams& Params=*((CaptureThreadParams*)params); 
+	CaptureParams& Params=*((CaptureParams*)params); 
 	if (FAILED(status)) return status;	
 	if(params==NULL) return (status=S_FALSE);
 	

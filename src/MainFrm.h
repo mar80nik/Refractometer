@@ -2,9 +2,8 @@
 
 #include "MyToolBar.h"	// Added by ClassView
 #include "DialogBarTab1.h"	// Added by ClassView
-//#include "DialogBarTab2.h"	// Added by ClassView
 #include "MyTabCtrl.h"	// Added by ClassView
-//#include "mystatusbar.h"
+#include "mystatusbar.h"
 
 #include "EventLogDialog.h"	// Added by ClassView
 #include "tconfigdialog.h"
@@ -28,31 +27,23 @@ protected: // create from serialization only
 protected:
 	EventLogDialog EventLog1; 
 	TConfigDialog Config;
-//	CArray<RequestForAcsess> ReqArr;
 // Implementation
 public:
 	MyToolBar Toolbar1;
 	MyTabCtrl TabCtrl1;
 	CDialog * CurTabDialog;
-	//DialogBarTab2 SeriesList;
-//	TerminalDialog Tab4;
-    
-//	MessagesInspector Inspector1;
 	ImageWnd	Img;
 	MainChartWnd Chart1;
-//	Oscilloscope Scope1;
-//	ControllerWnd CntrlerWnd;
 
 	CDialogBar MainBar;
 	CToolTipCtrl ToolTip1;
-	CStatusBar  m_wndStatusBar;	
-//	MVThread* WorkThread;
-	
+	MyStatusBar  m_wndStatusBar;	
 	
 	int ShowWarning();	
 	void InitChart();
 	virtual ~CMainFrame();
 	virtual void Serialize(CArchive& ar);
+	CString GetCWD();
 protected: 
 	bool SearchForMsgRequest(DWORD msg,WPARAM wParam, LPARAM lParam );	
 
@@ -63,6 +54,7 @@ protected:
 	afx_msg void OnMainTabAccel();
 	afx_msg void OnImageTabAccel();
 	afx_msg void OnConfig();
+	afx_msg void OnChooseCWD();
 	afx_msg void OnPGAControl();
 	afx_msg void OnTerminalButton();
 	afx_msg void OnTabChange( NMHDR * pNotifyStruct, LRESULT * result );

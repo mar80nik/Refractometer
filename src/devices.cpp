@@ -60,7 +60,7 @@ void AbstractDevice::ParamUpdate( CfgParamTypeBase* t )
 
 
 CalibrationData::CalibrationData( void ):
-	fi("fi","град",0), d("d","отн.ед",0), L("L","отн.ед",0), N("N","отн.ед",0), Q("Q", "град", 0), n_p("n_p", "", 0),
+	fi("fiс","град",0), d("dс","отн.ед",0), L("Lс","отн.ед",0), N("Nс","отн.ед",0), Q("Q", "град", 0), n_p("n_p", "", 0),
 	n_i("n_i", "", 1), n_s("n_s", "", 1.5)
 {
 	Name="Calibration";
@@ -72,7 +72,7 @@ CalibrationData::CalibrationData( void ):
 	CString T;
 	for(int i=0;i<CALIBRATION_MODES_NUM; i++) 
 	{ 
-		T.Format("Nexp[%d]",i); N_exp[i] = new DblCfgParam(T,"пикс",0); RegisterParam(N_exp[i]);
+		T.Format("N[%d]",i); N_exp[i] = new DblCfgParam(T,"пикс",0); RegisterParam(N_exp[i]);
 		T.Format("n[%d]",i); n[i] = new DblCfgParam(T,"",0); RegisterParam(n[i]);
 	}
 }

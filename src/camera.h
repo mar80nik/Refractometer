@@ -6,6 +6,7 @@
 #include "MessageInspector.h"
 #include "MyThread.h"
 #include "GlobalHeader.h"
+//#include "captureWnd.h"
 
 #define SAFE_RELEASE_(a) if(a!=NULL) { a->Release(); a=NULL; }
 class MyDSFilter;
@@ -21,9 +22,50 @@ struct SAM_MEDIA_TYPE: public AM_MEDIA_TYPE
 	}
 };
 
-struct CaptureThreadParams 
+enum ColorTransformModes {TrueColor, NativeGDI, HSL, HSV};
+
+class CaptureRequestStack
 {
-	ProtectedBMPanvas *Pbuf, *LevelScanBuf;	
+public:
+	struct Item 
+	{
+		CWnd* sender; BMPanvas *buf;
+		Item(CWnd* _sender=NULL, BMPanvas* _buf=NULL) {sender=_sender; buf=_buf;}
+	};
+protected:
+	CArray<Item> stack;
+public:
+	CaptureRequestStack() {};
+	~CaptureRequestStack() {RemoveAll();};
+	CaptureRequestStack& operator << (const Item &item)
+	{
+		stack.Add(item);
+		return *this;
+	}
+	BOOL operator >> (Item& item)
+	{
+		int size; BOOL ret=FALSE;
+		if((size=stack.GetSize())!=0)
+		{
+			item=stack[size-1]; ret=TRUE;
+			stack.RemoveAt(size-1);
+		}		
+		return ret;
+	}
+	void RemoveAll()
+	{
+		stack.RemoveAll();
+	}
+};
+
+typedef ProtectedObjectX<CaptureRequestStack> ProtectedCaptureRequestStack;
+typedef ProtectorX<CaptureRequestStack> CaptureRequestStackGuard;
+
+struct CaptureParams 
+{
+	ColorTransformModes *ColorTransformSelector;
+	ProtectedCaptureRequestStack *Stack;
+	ProtectedBMPanvas *Pbuf;
 	CStringW SourceName;
 	DSCaptureSource* Src;
 	WindowAddress Parent;
@@ -33,14 +75,15 @@ struct CaptureThreadParams
 	eDcm800Size size;
 	void* thrd;
 
-	CaptureThreadParams(): StopCapture(true,true),PauseCapture(true,true),ResumeCapture(true,true),
+	CaptureParams(): StopCapture(true,true),PauseCapture(true,true),ResumeCapture(true,true),
         ShowFilterParams(true,true)
 	{
 			thrd=NULL; Src=NULL;
 	}
+	UINT workthread_main();
 };
 
-typedef WorkThread<CaptureThreadParams> CaptureThread;
+typedef WorkThread<CaptureParams> CaptureThread;
 
 
 struct BMPanvasTAGSmk1
@@ -63,8 +106,8 @@ public:
 	VIDEOINFOHEADER header;
 	long framenum;
 	CString strPath;
-	void* pthrd;
-	MyTimer t1,t2;
+	void *capture_params;
+	MyTimer t1;
 	CFont font;
 
 	STDMETHODIMP SampleCB(double n,IMediaSample *pms);
