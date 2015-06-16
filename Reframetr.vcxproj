@@ -149,7 +149,7 @@
       <AdditionalOptions>/ignore:4248 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PreBuildEvent>
-      <Command>perl d:\REPO\Refractometer\Sources\Makefile.pl</Command>
+      <Command>perl $(SourceDir)Makefile.pl</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -203,7 +203,7 @@
       </Path>
     </BuildLog>
     <PreBuildEvent>
-      <Command>perl d:\REPO\Refractometer\Sources\Makefile.pl</Command>
+      <Command>perl $(SourceDir)Makefile.pl</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

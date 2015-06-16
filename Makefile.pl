@@ -1,15 +1,13 @@
 use Cwd;
 
-$repo_path = 'd:\REPO';
+$repo_path = 'd:/REPO';
+$gitTags_file = cwd.'/gitTags';
 
-$reps = [   {name => 'TChart', tag_mask => '101001_CHART[\w\d]+'},
-            {name => 'my_lib', tag_mask => '102001_MY_LIB[\w\d]+'},
-            {name => 'my_gsl', tag_mask => '103001_MY_GSL[\w\d]+'}  ];
+$reps = [   {path => $repo_path.'/TChart', tag_mask => '101001_CHART[\w\d]+'},
+            {path => $repo_path.'/my_lib', tag_mask => '102001_MY_LIB[\w\d]+'},
+            {path => $repo_path.'/my_gsl', tag_mask => '103001_MY_GSL[\w\d]+'}  ];
 
-$refractometr_path = $repo_path.'/Refractometer';
-
-open(LABELS,"$refractometr_path/Sources/gitTags");
-
+open(LABELS,"$gitTags_file");
 @strs = <LABELS>;
 foreach (@strs)
 {
@@ -20,7 +18,7 @@ foreach (@strs)
         {
             if (exists($$rep{tag}) && !($$rep{tag} eq $1))
             {
-                print "ERROR: diplicate tag found for $$rep{name} $$rep{tag} -> $1";
+                print "ERROR: diplicate tag found for $$rep{path} $$rep{tag} -> $1";
                 close(LABELS); exit;
             }
             else
@@ -28,7 +26,7 @@ foreach (@strs)
                 if (!($$rep{tag} eq $1))
                 {
                     $$rep{tag} = $1;
-                    print "Found label for $$rep{name}: $$rep{tag}\n";                            
+                    print "Found label for $$rep{path}: $$rep{tag}\n";                            
                 }
             }
         }
@@ -40,15 +38,15 @@ foreach $rep (@$reps)
 {
     if (!exists($$rep{tag}))
     {
-        print "ERROR: no tag found for $$rep{name}";
+        print "ERROR: no tag found for $$rep{path}";
         exit;
     }
 }
 print "Applying tags...\n";
 foreach $rep (@$reps)
 {
-    chdir("$repo_path/$$rep{name}");
+    chdir("$$rep{path}");
     $cmd = "git checkout $$rep{tag}";    
-    print "$$rep{name}:\n";
+    print "$$rep{path} -> \n";
     system($cmd); 
 }
