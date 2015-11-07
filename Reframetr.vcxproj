@@ -88,8 +88,8 @@
     <IncludePath>$(SolutionDir)\zlib;$(IncludePath);D:\DXSDK\include;$(SolutionDir)\gsl-1.16;$(SolutionDir)\my_cpp;$(SolutionDir);$(SolutionDir)\mythread;$(SolutionDir)\TChart;$(SolutionDir)\src;d:\REPO\my_lib\src\;d:\REPO\my_gsl\src\;d:\REPO\my_gsl\header;d:\REPO\TChart\src;d:\REPO\zlib\header</IncludePath>
     <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath);d:\REPO\my_gsl\lib\;d:\REPO\zlib\lib</LibraryPath>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
-    <OutDir>$(SolutionDir)\..\exe\</OutDir>
-    <IntDir>..\$(Configuration)\</IntDir>
+    <OutDir>exe</OutDir>
+    <IntDir>temp\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

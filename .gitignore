@@ -25,3 +25,4 @@ exe/
 *.dat
 gsl-1.16/lib/
 *.grf
+temp/
