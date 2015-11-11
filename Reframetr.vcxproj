@@ -77,35 +77,35 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\zlib;$(IncludePath);D:\DXSDK\include;$(SolutionDir)\gsl-1.16;$(SolutionDir)\my_cpp;$(SolutionDir);$(SolutionDir)\mythread;$(SolutionDir)\TChart;$(SolutionDir)\src;d:\REPO\my_lib\src\;d:\REPO\my_gsl\src\;d:\REPO\my_gsl\header;d:\REPO\TChart\src;d:\REPO\zlib\header</IncludePath>
+    <IncludePath>$(IncludePath);D:\DXSDK\include;$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\TChart\src</IncludePath>
     <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath);d:\REPO\my_gsl\lib\;d:\REPO\zlib\lib</LibraryPath>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
-    <OutDir>$(SolutionDir)\..\exe\</OutDir>
-    <IntDir>..\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)exe\</OutDir>
+    <IntDir>$(SolutionDir)temp\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='gitDebug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\zlib;$(IncludePath);D:\DXSDK\include;$(SolutionDir)\gsl-1.16;$(SolutionDir)\my_cpp;$(SolutionDir);$(SolutionDir)\mythread;$(SolutionDir)\TChart;$(SolutionDir)\src;d:\REPO\my_lib\src\;d:\REPO\my_gsl\src\;d:\REPO\my_gsl\header;d:\REPO\TChart\src;d:\REPO\zlib\header</IncludePath>
+    <IncludePath>$(IncludePath);D:\DXSDK\include;$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\TChart\src</IncludePath>
     <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath);d:\REPO\my_gsl\lib\;d:\REPO\zlib\lib</LibraryPath>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
-    <OutDir>exe</OutDir>
-    <IntDir>temp\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)exe\</OutDir>
+    <IntDir>$(SolutionDir)temp\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\zlib;$(IncludePath);D:\DXSDK\include;$(SolutionDir)\gsl-1.16;$(SolutionDir)\my_cpp;$(SolutionDir);$(SolutionDir)\mythread;$(SolutionDir)\TChart;$(SolutionDir)\src;d:\REPO\my_lib\src\;d:\REPO\my_gsl\src\;d:\REPO\my_gsl\header;d:\REPO\TChart\src;d:\REPO\zlib\header</IncludePath>
+    <IncludePath>$(IncludePath);D:\DXSDK\include;$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\TChart\src</IncludePath>
     <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath);d:\REPO\my_gsl\lib\;d:\REPO\zlib\lib</LibraryPath>
-    <OutDir>$(SolutionDir)\..\exe\</OutDir>
+    <OutDir>$(SolutionDir)exe\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
-    <IntDir>..\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)temp\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='gitRelease|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\zlib;$(IncludePath);D:\DXSDK\include;$(SolutionDir)\gsl-1.16;$(SolutionDir)\my_cpp;$(SolutionDir);$(SolutionDir)\mythread;$(SolutionDir)\TChart;$(SolutionDir)\src;d:\REPO\my_lib\src\;d:\REPO\my_gsl\src\;d:\REPO\my_gsl\header;d:\REPO\TChart\src;d:\REPO\zlib\header</IncludePath>
+    <IncludePath>$(IncludePath);D:\DXSDK\include;$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\TChart\src</IncludePath>
     <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath);d:\REPO\my_gsl\lib\;d:\REPO\zlib\lib</LibraryPath>
-    <OutDir>$(SolutionDir)\..\exe\</OutDir>
+    <OutDir>$(SolutionDir)exe\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
-    <IntDir>..\$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)temp\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -207,26 +207,26 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\my_gsl\src\fittings.cpp" />
-    <ClCompile Include="..\..\my_gsl\src\my_gsl.cpp" />
-    <ClCompile Include="..\..\my_lib\src\BMPanvas.cpp" />
-    <ClCompile Include="..\..\my_lib\src\MessageInspector.cpp" />
-    <ClCompile Include="..\..\my_lib\src\MyThread.cpp" />
-    <ClCompile Include="..\..\my_lib\src\MyTime.cpp" />
-    <ClCompile Include="..\..\my_lib\src\my_color.cpp" />
-    <ClCompile Include="..\..\my_lib\src\ProtectedObject.cpp" />
-    <ClCompile Include="..\..\my_lib\src\type_array.cpp" />
-    <ClCompile Include="..\..\TChart\src\MouseTrackerWnd.cpp" />
-    <ClCompile Include="..\..\TChart\src\OwnerDrawBtn.cpp" />
-    <ClCompile Include="..\..\TChart\src\SeriesListCtrl.cpp" />
-    <ClCompile Include="..\..\TChart\src\SeriesListDlg.cpp" />
-    <ClCompile Include="..\..\TChart\src\SeriesStyleDlg.cpp" />
-    <ClCompile Include="..\..\TChart\src\SeriesValuesDlg.cpp" />
-    <ClCompile Include="..\..\TChart\src\SetAxisRangeDlg.cpp" />
-    <ClCompile Include="..\..\TChart\src\TChart.cpp" />
-    <ClCompile Include="..\..\TChart\src\TChartElements.cpp" />
-    <ClCompile Include="..\..\TChart\src\TChartPoints.cpp" />
-    <ClCompile Include="..\..\TChart\src\TChartSeries.cpp" />
+    <ClCompile Include="..\my_gsl\src\fittings.cpp" />
+    <ClCompile Include="..\my_gsl\src\my_gsl.cpp" />
+    <ClCompile Include="..\my_lib\src\BMPanvas.cpp" />
+    <ClCompile Include="..\my_lib\src\MessageInspector.cpp" />
+    <ClCompile Include="..\my_lib\src\MyThread.cpp" />
+    <ClCompile Include="..\my_lib\src\MyTime.cpp" />
+    <ClCompile Include="..\my_lib\src\my_color.cpp" />
+    <ClCompile Include="..\my_lib\src\ProtectedObject.cpp" />
+    <ClCompile Include="..\my_lib\src\type_array.cpp" />
+    <ClCompile Include="..\TChart\src\MouseTrackerWnd.cpp" />
+    <ClCompile Include="..\TChart\src\OwnerDrawBtn.cpp" />
+    <ClCompile Include="..\TChart\src\SeriesListCtrl.cpp" />
+    <ClCompile Include="..\TChart\src\SeriesListDlg.cpp" />
+    <ClCompile Include="..\TChart\src\SeriesStyleDlg.cpp" />
+    <ClCompile Include="..\TChart\src\SeriesValuesDlg.cpp" />
+    <ClCompile Include="..\TChart\src\SetAxisRangeDlg.cpp" />
+    <ClCompile Include="..\TChart\src\TChart.cpp" />
+    <ClCompile Include="..\TChart\src\TChartElements.cpp" />
+    <ClCompile Include="..\TChart\src\TChartPoints.cpp" />
+    <ClCompile Include="..\TChart\src\TChartSeries.cpp" />
     <ClCompile Include="src\BarTemplate.cpp" />
     <ClCompile Include="src\CalcTEDialog.cpp" />
     <ClCompile Include="src\calibratorDialog.cpp" />
@@ -254,246 +254,246 @@
     <ClCompile Include="StdAfx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_blas.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_blas_types.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_char.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_complex_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_complex_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_complex_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_long.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_short.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_uchar.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_uint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_ulong.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_block_ushort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_bspline.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_cblas.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_cdf.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_chebyshev.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_check_range.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_combination.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_complex.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_complex_math.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_const.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_const_cgs.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_const_cgsm.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_const_mks.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_const_mksa.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_const_num.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_deriv.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_dft_complex.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_dft_complex_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_dht.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_diff.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_eigen.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_errno.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_fft.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_fft_complex.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_fft_complex_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_fft_halfcomplex.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_fft_halfcomplex_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_fft_real.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_fft_real_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_fit.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_heapsort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_histogram.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_histogram2d.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_ieee_utils.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_inline.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_integration.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_interp.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_linalg.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_machine.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_math.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_char.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_complex_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_complex_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_complex_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_long.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_short.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_uchar.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_uint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_ulong.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_matrix_ushort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_message.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_min.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_minmax.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_mode.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_monte.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_monte_miser.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_monte_plain.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_monte_vegas.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_multifit.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_multifit_nlin.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_multimin.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_multiroots.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_multiset.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_nan.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_ntuple.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_odeiv.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_odeiv2.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permutation.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_char.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_complex_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_complex_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_complex_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_long.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_short.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_uchar.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_uint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_ulong.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_ushort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_char.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_complex_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_complex_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_complex_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_long.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_short.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_uchar.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_uint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_ulong.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_permute_vector_ushort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_poly.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_pow_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_precision.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_qrng.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_randist.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_rng.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_roots.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_airy.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_bessel.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_clausen.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_coulomb.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_coupling.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_dawson.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_debye.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_dilog.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_elementary.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_ellint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_elljac.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_erf.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_exp.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_expint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_fermi_dirac.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_gamma.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_gegenbauer.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_hyperg.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_laguerre.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_lambert.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_legendre.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_log.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_mathieu.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_pow_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_psi.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_result.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_synchrotron.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_transport.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_trig.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sf_zeta.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_siman.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_char.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_long.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_short.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_uchar.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_uint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_ulong.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_ushort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_char.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_long.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_short.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_uchar.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_uint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_ulong.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sort_vector_ushort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_specfunc.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_spline.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_char.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_long.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_short.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_uchar.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_uint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_ulong.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_statistics_ushort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sum.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_sys.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_test.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_types.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_char.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_complex.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_complex_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_complex_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_complex_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_float.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_int.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_long.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_long_double.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_short.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_uchar.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_uint.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_ulong.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_vector_ushort.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_version.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_wavelet.h" />
-    <ClInclude Include="..\..\my_gsl\header\gsl\gsl_wavelet2d.h" />
-    <ClInclude Include="..\..\my_gsl\src\my_gsl.h" />
-    <ClInclude Include="..\..\my_lib\src\BMPanvas.h" />
-    <ClInclude Include="..\..\my_lib\src\globals.h" />
-    <ClInclude Include="..\..\my_lib\src\MessageInspector.h" />
-    <ClInclude Include="..\..\my_lib\src\MyThread.h" />
-    <ClInclude Include="..\..\my_lib\src\MyTime.h" />
-    <ClInclude Include="..\..\my_lib\src\my_color.h" />
-    <ClInclude Include="..\..\my_lib\src\my_lib_resources.h" />
-    <ClInclude Include="..\..\my_lib\src\ProtectedObject.h" />
-    <ClInclude Include="..\..\TChart\src\MouseTrackerWnd.h" />
-    <ClInclude Include="..\..\TChart\src\OwnerDrawBtn.h" />
-    <ClInclude Include="..\..\TChart\src\SeriesListCtrl.h" />
-    <ClInclude Include="..\..\TChart\src\SeriesListDlg.h" />
-    <ClInclude Include="..\..\TChart\src\SeriesStyleDlg.h" />
-    <ClInclude Include="..\..\TChart\src\SeriesValuesDlg.h" />
-    <ClInclude Include="..\..\TChart\src\SetAxisRangeDlg.h" />
-    <ClInclude Include="..\..\TChart\src\TChart.h" />
-    <ClInclude Include="..\..\TChart\src\TChartElements.h" />
-    <ClInclude Include="..\..\TChart\src\TChartGlobal.h" />
-    <ClInclude Include="..\..\TChart\src\TChartPoints.h" />
-    <ClInclude Include="..\..\TChart\src\TChartSeries.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_blas.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_blas_types.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_char.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_complex_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_complex_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_complex_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_long.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_short.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_uchar.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_uint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_ulong.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_block_ushort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_bspline.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_cblas.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_cdf.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_chebyshev.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_check_range.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_combination.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_complex.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_complex_math.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_const.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_const_cgs.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_const_cgsm.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_const_mks.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_const_mksa.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_const_num.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_deriv.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_dft_complex.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_dft_complex_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_dht.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_diff.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_eigen.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_errno.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_fft.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_fft_complex.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_fft_complex_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_fft_halfcomplex.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_fft_halfcomplex_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_fft_real.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_fft_real_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_fit.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_heapsort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_histogram.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_histogram2d.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_ieee_utils.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_inline.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_integration.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_interp.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_linalg.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_machine.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_math.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_char.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_complex_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_complex_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_complex_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_long.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_short.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_uchar.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_uint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_ulong.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_matrix_ushort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_message.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_min.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_minmax.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_mode.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_monte.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_monte_miser.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_monte_plain.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_monte_vegas.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_multifit.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_multifit_nlin.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_multimin.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_multiroots.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_multiset.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_nan.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_ntuple.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_odeiv.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_odeiv2.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permutation.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_char.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_complex_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_complex_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_complex_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_long.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_short.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_uchar.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_uint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_ulong.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_ushort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_char.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_complex_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_complex_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_complex_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_long.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_short.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_uchar.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_uint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_ulong.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_permute_vector_ushort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_poly.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_pow_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_precision.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_qrng.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_randist.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_rng.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_roots.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_airy.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_bessel.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_clausen.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_coulomb.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_coupling.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_dawson.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_debye.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_dilog.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_elementary.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_ellint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_elljac.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_erf.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_exp.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_expint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_fermi_dirac.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_gamma.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_gegenbauer.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_hyperg.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_laguerre.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_lambert.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_legendre.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_log.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_mathieu.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_pow_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_psi.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_result.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_synchrotron.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_transport.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_trig.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sf_zeta.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_siman.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_char.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_long.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_short.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_uchar.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_uint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_ulong.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_ushort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_char.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_long.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_short.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_uchar.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_uint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_ulong.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sort_vector_ushort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_specfunc.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_spline.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_char.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_long.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_short.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_uchar.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_uint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_ulong.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_statistics_ushort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sum.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_sys.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_test.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_types.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_char.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_complex.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_complex_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_complex_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_complex_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_float.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_int.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_long.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_long_double.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_short.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_uchar.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_uint.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_ulong.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_vector_ushort.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_version.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_wavelet.h" />
+    <ClInclude Include="..\my_gsl\header\gsl\gsl_wavelet2d.h" />
+    <ClInclude Include="..\my_gsl\src\my_gsl.h" />
+    <ClInclude Include="..\my_lib\src\BMPanvas.h" />
+    <ClInclude Include="..\my_lib\src\globals.h" />
+    <ClInclude Include="..\my_lib\src\MessageInspector.h" />
+    <ClInclude Include="..\my_lib\src\MyThread.h" />
+    <ClInclude Include="..\my_lib\src\MyTime.h" />
+    <ClInclude Include="..\my_lib\src\my_color.h" />
+    <ClInclude Include="..\my_lib\src\my_lib_resources.h" />
+    <ClInclude Include="..\my_lib\src\ProtectedObject.h" />
+    <ClInclude Include="..\TChart\src\MouseTrackerWnd.h" />
+    <ClInclude Include="..\TChart\src\OwnerDrawBtn.h" />
+    <ClInclude Include="..\TChart\src\SeriesListCtrl.h" />
+    <ClInclude Include="..\TChart\src\SeriesListDlg.h" />
+    <ClInclude Include="..\TChart\src\SeriesStyleDlg.h" />
+    <ClInclude Include="..\TChart\src\SeriesValuesDlg.h" />
+    <ClInclude Include="..\TChart\src\SetAxisRangeDlg.h" />
+    <ClInclude Include="..\TChart\src\TChart.h" />
+    <ClInclude Include="..\TChart\src\TChartElements.h" />
+    <ClInclude Include="..\TChart\src\TChartGlobal.h" />
+    <ClInclude Include="..\TChart\src\TChartPoints.h" />
+    <ClInclude Include="..\TChart\src\TChartSeries.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\BarTemplate.h" />
     <ClInclude Include="src\CalcTEDialog.h" />
@@ -515,8 +515,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\..\my_lib\src\my_lib_resources.rc" />
-    <ResourceCompile Include="..\..\TChart\src\tchart_resources.rc" />
+    <ResourceCompile Include="..\my_lib\src\my_lib_resources.rc" />
+    <ResourceCompile Include="..\TChart\src\tchart_resources.rc" />
     <ResourceCompile Include="KSVU3.rc" />
   </ItemGroup>
   <ItemGroup>
