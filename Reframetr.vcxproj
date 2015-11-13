@@ -21,6 +21,7 @@
   <PropertyGroup Label="Globals">
     <Keyword>ManagedCProj</Keyword>
     <ProjectGuid>{AD8AD6F2-9F98-11A2-D71E-A29125711EF2}</ProjectGuid>
+    <ProjectName>Refractometer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -77,35 +78,39 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(IncludePath);D:\DXSDK\include;$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\TChart\src</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath);d:\REPO\my_gsl\lib\;d:\REPO\zlib\lib</LibraryPath>
+    <IncludePath>$(IncludePath);$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\my_lib\directx\include;$(SolutionDir)\..\TChart\src</IncludePath>
+    <LibraryPath>$(LibraryPath);$(SolutionDir)\..\my_gsl\lib\;$(SolutionDir)\..\my_lib\zlib\lib</LibraryPath>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)exe\</OutDir>
     <IntDir>$(SolutionDir)temp\</IntDir>
+    <ExtensionsToDeleteOnClean>*.exe;*.metagen;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='gitDebug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(IncludePath);D:\DXSDK\include;$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\TChart\src</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath);d:\REPO\my_gsl\lib\;d:\REPO\zlib\lib</LibraryPath>
+    <IncludePath>$(IncludePath);$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\my_lib\directx\include;$(SolutionDir)\..\TChart\src</IncludePath>
+    <LibraryPath>$(LibraryPath);$(SolutionDir)\..\my_gsl\lib\;$(SolutionDir)\..\my_lib\zlib\lib</LibraryPath>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)exe\</OutDir>
     <IntDir>$(SolutionDir)temp\</IntDir>
+    <ExtensionsToDeleteOnClean>*.exe;*.metagen;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);D:\DXSDK\include;$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\TChart\src</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath);d:\REPO\my_gsl\lib\;d:\REPO\zlib\lib</LibraryPath>
+    <IncludePath>$(IncludePath);$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\my_lib\directx\include;$(SolutionDir)\..\TChart\src</IncludePath>
+    <LibraryPath>$(LibraryPath);$(SolutionDir)\..\my_gsl\lib\;$(SolutionDir)\..\my_lib\zlib\lib</LibraryPath>
     <OutDir>$(SolutionDir)exe\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
     <IntDir>$(SolutionDir)temp\</IntDir>
+    <ExtensionsToDeleteOnClean>*.exe;*.metagen;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='gitRelease|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(IncludePath);D:\DXSDK\include;$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\TChart\src</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\lib;$(LibraryPath);d:\REPO\my_gsl\lib\;d:\REPO\zlib\lib</LibraryPath>
+    <IncludePath>$(IncludePath);$(SolutionDir);$(SolutionDir)\src;$(SolutionDir)\..\my_lib\src\;$(SolutionDir)\..\my_gsl\src;$(SolutionDir)\..\my_gsl\header;$(SolutionDir)\..\my_lib\zlib\header;$(SolutionDir)\..\my_lib\directx\include;$(SolutionDir)\..\TChart\src</IncludePath>
+    <LibraryPath>$(LibraryPath);$(SolutionDir)\..\my_gsl\lib\;$(SolutionDir)\..\my_lib\zlib\lib</LibraryPath>
     <OutDir>$(SolutionDir)exe\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
     <IntDir>$(SolutionDir)temp\</IntDir>
+    <ExtensionsToDeleteOnClean>*.exe;*.metagen;$(ExtensionsToDeleteOnClean)</ExtensionsToDeleteOnClean>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -137,6 +142,9 @@
       <Optimization>Disabled</Optimization>
       <DisableSpecificWarnings>4065;4482;4793</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <EnableParallelCodeGeneration>
+      </EnableParallelCodeGeneration>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
